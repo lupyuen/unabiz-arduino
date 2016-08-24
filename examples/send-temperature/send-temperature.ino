@@ -28,6 +28,9 @@ DHT dht(DHTPIN, DHTTYPE);
 //  End Sensor Declaration
 ////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////
+//  Begin SIGFOX Module Declaration
+
 #include <Akeru.h>
 
 // TD1208 Sigfox module IO definition
@@ -40,6 +43,9 @@ DHT dht(DHTPIN, DHTTYPE);
 
 // Sigfox instance management 
 Akeru akeru(RX, TX);
+
+//  End SIGFOX Module Declaration
+////////////////////////////////////////////////////////////
 
 void setup()
 {
