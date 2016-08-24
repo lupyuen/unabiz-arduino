@@ -81,7 +81,8 @@ bool Akeru::sendAT()
 // Payload must be a String formatted in hexadecimal, 12 bytes max, use toHex()
 bool Akeru::sendPayload(const String payload)
 {
-	if (!isReady()) return false; // prevent user from sending to many messages
+	//  UnaBiz TODO: Temporarily disabled limits on sending messages.  Should not send more than 140 messages per day.
+	//if (!isReady()) return false; // prevent user from sending to many messages
 	
 	String message = (String) ATSIGFOXTX + payload;
 
@@ -619,6 +620,21 @@ bool Akeru::reboot(String *result)
 		return false;
 	}
 }
+
+// For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
+bool Akeru::sendString(const String str)
+{
+	//  TODO: If string is over 12 characters, split into multiple messages.
+	//  Convert each character into 2 bytes.
+	String payload = "";
+	for (int i = 0; i < str.length(); i++) {
+		char ch = str.charAt(i);
+		payload += toHex(ch);
+	}
+	//  Send the encoded payload.
+	return sendPayload(payload);
+}
+
 
 /*
 Demo sketch for Akeru library :)

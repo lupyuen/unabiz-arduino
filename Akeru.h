@@ -128,6 +128,9 @@ class Akeru
 		//  Reboot the SIGFOX module.
 		bool reboot(String *result);
 
+		// For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
+		bool sendString(const String str);
+
 		//  End UnaBiz
 
 	private:
