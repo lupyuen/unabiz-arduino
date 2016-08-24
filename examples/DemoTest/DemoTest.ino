@@ -20,8 +20,8 @@
                Akeru | D4 | D5
                Akene | D5 | D4
             Breakout | your pick */
-#define TX 4
-#define RX 5
+#define TX 5  //  For UnaBiz / Akene
+#define RX 4  //  For UnaBiz / Akene
 
 // Sigfox instance management 
 Akeru akeru(RX, TX);
@@ -44,6 +44,49 @@ void setup()
 
 void loop()
 {
+  //  Begin UnaBiz
+
+  //  Get and display the frequency used by the SIGFOX module, before setting it.
+  String frequency = "";
+  akeru.getFrequency(&frequency);
+  Serial.print("Before setting frequency to Singapore: Frequency = ");
+  Serial.println(frequency);
+
+  //  Set the SIGFOX module frequency to Singapore frequency.
+  String result = "";
+  akeru.setFrequencySG(&result);
+  Serial.print("Set frequency to Singapore: Result = ");
+  Serial.println(result);
+
+  //  Get and display the frequency used by the SIGFOX module, after setting it.
+  frequency = "";
+  akeru.getFrequency(&frequency);
+  Serial.print("After setting frequency to Singapore: Frequency = ");
+  Serial.println(frequency);
+
+  //  Write the frequency to the flash memory of the SIGFOX module.
+  result = "";
+  akeru.writeSettings(&result);
+  Serial.print("Write frequency to flash memory: Result = ");
+  Serial.println(result);
+
+  //  Reboot the SIGFOX module.
+  //  TODO: REBOOT ONLY ONCE AFTER WRITING TO FLASH MEMORY
+  /*
+  result = "";
+  akeru.reboot(&result);
+  Serial.print("Reboot: Result = ");
+  Serial.println(result);
+  
+  //  Get and display the frequency used by the SIGFOX module, after rebooting.
+  frequency = "";
+  akeru.getFrequency(&frequency);
+  Serial.print("After reboot: Frequency = ");
+  Serial.println(frequency);
+  */
+
+  //  End UnaBiz
+  
   // Read module temperature
   int temperature = 0;
   if (akeru.getTemperature(&temperature))
@@ -137,4 +180,3 @@ void loop()
   // End of tests
   while (1);
 }
-
