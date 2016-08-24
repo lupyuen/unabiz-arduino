@@ -1,5 +1,4 @@
 # unabiz-arduino
-================
 
 Sample Arduino code for connecting UnaBiz / SIGFOX Module to UnaBiz SIGFOX network
 
