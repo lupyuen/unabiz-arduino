@@ -1,3 +1,17 @@
+# unabiz-arduino
+================
+
+Sample Arduino code for connecting UnaBiz / SIGFOX Module to UnaBiz SIGFOX network
+
+Library Documentation:
+http://forum.snootlab.com/viewtopic.php?f=51&t=1509
+
+Source code:
+https://github.com/UnaBiz/unabiz-arduino
+
+Based on:
+https://github.com/Snootlab/Akeru
+
 Akeru - TD1208 library for Arduino
 =========
 
