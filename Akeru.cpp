@@ -515,3 +515,328 @@ bool Akeru::sendATCommand(const String command, const int timeout, String *dataO
 		return false;
 	}
 }
+
+//  Begin UnaBiz
+
+/*
+Singapore and Taiwan: 920.8 MHz Uplink, 922.3 MHz Downlink
+
+AT$IF=920800000,200,20
+Means: Set IF frequency to 920.8 MHz, 
+  max channel is 200, 
+  min channel is 20 
+
+ETSI (Europe): 868.2 MHz
+
+AT$IF=868200000,200,20
+Means: Set IF frequency to 868.2 MHz, 
+  max channel is 200, 
+  min channel is 20 
+
+*/
+
+bool Akeru::getFrequency(String *result)
+{
+	//  Get the frequency used for the SIGFOX module, e.g.
+	//  868130000
+	String data = "";
+	if (sendATCommand(ATGET_FREQUENCY, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::setFrequencySG(String *result)
+{
+	//  Set the frequency for the SIGFOX module to Singapore frequency.
+	//  Must be followed by writeSettings and reboot commands.
+	String data = "";
+	if (sendATCommand(ATSET_FREQUENCY_SG, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::setFrequencyTW(String *result)
+{
+	//  Set the frequency for the SIGFOX module to Taiwan frequency, which is same as Singapore frequency.
+	//  Must be followed by writeSettings and reboot commands.
+	return setFrequencySG(result);
+}
+
+bool Akeru::setFrequencyETSI(String *result)
+{
+	//  Set the frequency for the SIGFOX module to ETSI frequency for Europe or demo for 868 MHz base station.
+	//  Must be followed by writeSettings and reboot commands.
+	String data = "";
+	if (sendATCommand(ATSET_FREQUENCY_ETSI, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::writeSettings(String *result)
+{
+	//  Write frequency and other settings to flash memory of the SIGFOX module.  Must be followed by reboot command.
+	String data = "";
+	if (sendATCommand(ATWRITE_SETTINGS, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::reboot(String *result)
+{
+	//  Reboot the SIGFOX module.
+	String data = "";
+	if (sendATCommand(ATREBOOT, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+/*
+Demo sketch for Akeru library :)
+
+>> AT$IF?
+<< 
+920800000
+
+OK
+Before setting frequency to Singapore: Frequency = 920800000
+
+>> AT$IF=920800000
+<< 
+OK
+Set frequency to Singapore: Result = 
+
+>> AT$IF?
+<< 
+920800000
+
+OK
+After setting frequency to Singapore: Frequency = 920800000
+
+>> AT&W
+<< 
+OK
+Write frequency to flash memory: Result = 
+
+>> ATZ
+<< 
+OK
+Reboot: Result = 
+
+>> AT$IF?
+<< 
+After reboot: Frequency = 
+
+>> ATI26
+<< 
+24
+
+OK
+Temperature = 24 C
+
+>> ATI27
+<< 
+3.29
+
+OK
+Supply voltage = 3.29 V
+
+>> ATI7
+<< 
+1AE65E
+TDID: 130257003339
+
+OK
+ID = 1AE65E
+
+>> ATI11
+<< 
+0F
+
+OK
+Hardware version = 0F
+
+>> ATI13
+<< 
+SOFT2069
+
+OK
+Firmware version = SOFT2069
+
+>> ATS302?
+<< 
+14
+
+OK
+Power level = 14 dB
+
+>> AT$SS=18005c8f5240
+<< 
+OK
+
+Message sent !
+*/
+
+/*
+Demo sketch for Akeru library :)
+
+>> AT$IF?
+<< 
+868130000
+
+OK
+Frequency = 868130000
+
+>> ATI26
+<< 
+24
+
+OK
+Temperature = 24 C
+
+>> ATI27
+<< 
+3.29
+
+OK
+Supply voltage = 3.29 V
+
+>> ATI7
+<< 
+1AE65E
+TDID: 130257003339
+
+OK
+ID = 1AE65E
+
+>> ATI11
+<< 
+0F
+
+OK
+Hardware version = 0F
+
+>> ATI13
+<< 
+SOFT2069
+
+OK
+Firmware version = SOFT2069
+
+>> ATS302?
+<< 
+14
+
+OK
+Power level = 14 dB
+
+>> AT$SS=18005c8f5240
+<< 
+OK
+
+Message sent !
+*/
+
+
+/*
+Demo sketch for Akeru library :)
+
+>> AT$IF?
+<< 
+868130000
+
+OK
+Before setting frequency to Singapore: Frequency = 868130000
+
+>> AT$IF=920800000
+<< 
+OK
+Set frequency to Singapore: Result = 
+
+>> AT$IF?
+<< 
+920800000
+
+OK
+After setting frequency to Singapore: Frequency = 920800000
+
+>> ATI26
+<< 
+24
+
+OK
+Temperature = 24 C
+
+>> ATI27
+<< 
+3.29
+
+OK
+Supply voltage = 3.29 V
+
+>> ATI7
+<< 
+1AE65E
+TDID: 130257003339
+
+OK
+ID = 1AE65E
+
+>> ATI11
+<< 
+0F
+
+OK
+Hardware version = 0F
+
+>> ATI13
+<< 
+SOFT2069
+
+OK
+Firmware version = SOFT2069
+
+>> ATS302?
+<< 
+14
+
+OK
+Power level = 14 dB
+
+>> AT$SS=18005c8f5240
+<< 
+OK
+
+Message sent !
+*/
+
+//  End UnaBiz
