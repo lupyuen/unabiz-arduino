@@ -46,44 +46,11 @@ void loop()
 {
   //  Begin UnaBiz
 
-  //  Get and display the frequency used by the SIGFOX module, before setting it.
+  //  Get and display the frequency used by the SIGFOX module.
   String frequency = "";
   akeru.getFrequency(&frequency);
-  Serial.print("Before setting frequency to Singapore: Frequency = ");
+  Serial.print("Frequency = ");
   Serial.println(frequency);
-
-  //  Set the SIGFOX module frequency to Singapore frequency.
-  String result = "";
-  akeru.setFrequencySG(&result);
-  Serial.print("Set frequency to Singapore: Result = ");
-  Serial.println(result);
-
-  //  Get and display the frequency used by the SIGFOX module, after setting it.
-  frequency = "";
-  akeru.getFrequency(&frequency);
-  Serial.print("After setting frequency to Singapore: Frequency = ");
-  Serial.println(frequency);
-
-  //  Write the frequency to the flash memory of the SIGFOX module.
-  result = "";
-  akeru.writeSettings(&result);
-  Serial.print("Write frequency to flash memory: Result = ");
-  Serial.println(result);
-
-  //  Reboot the SIGFOX module.
-  //  TODO: REBOOT ONLY ONCE AFTER WRITING TO FLASH MEMORY
-  /*
-  result = "";
-  akeru.reboot(&result);
-  Serial.print("Reboot: Result = ");
-  Serial.println(result);
-  
-  //  Get and display the frequency used by the SIGFOX module, after rebooting.
-  frequency = "";
-  akeru.getFrequency(&frequency);
-  Serial.print("After reboot: Frequency = ");
-  Serial.println(frequency);
-  */
 
   //  End UnaBiz
   
@@ -180,3 +147,66 @@ void loop()
   // End of tests
   while (1);
 }
+
+/*
+Expected output:
+
+Demo sketch for Akeru library :)
+
+>> AT$IF?
+<< 
+920800000
+
+OK
+Frequency = 920800000
+
+>> ATI26
+<< 
+25
+
+OK
+Temperature = 25 C
+
+>> ATI27
+<< 
+3.28
+
+OK
+Supply voltage = 3.28 V
+
+>> ATI7
+<< 
+1AE65E
+TDID: 130257003339
+
+OK
+ID = 1AE65E
+
+>> ATI11
+<< 
+0F
+
+OK
+Hardware version = 0F
+
+>> ATI13
+<< 
+SOFT2069
+
+OK
+Firmware version = SOFT2069
+
+>> ATS302?
+<< 
+14
+
+OK
+Power level = 14 dB
+
+>> AT$SS=190085eb5140
+<< 
+OK
+
+Message sent !
+
+*/
