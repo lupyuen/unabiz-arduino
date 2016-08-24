@@ -43,6 +43,33 @@
 #define ATDISPLAY "AT&V"
 #define DOWNLINKEND "+RX END"
 
+//  Begin UnaBiz
+
+//  Set frequency of the SIGFOX module to Singapore and Taiwan (same frequency): 
+//  Set IF frequency to 920.8 MHz, 
+//  max channel is 200, 
+//  min channel is 20 
+//#define ATSET_FREQUENCY_SG "AT$IF=920800000,200,20"  
+#define ATSET_FREQUENCY_SG "AT$IF=920800000"  
+
+//  Set frequency of the SIGFOX module to ETSI (Europe): 
+//  Set IF frequency to 868.2 MHz, 
+//  max channel is 200, 
+//  min channel is 20 
+//#define ATSET_FREQUENCY_ETSI "AT$IF=868200000,200,20"  
+#define ATSET_FREQUENCY_ETSI "AT$IF=868200000"  
+
+//  Get frequency used by the SIGFOX module.
+#define ATGET_FREQUENCY "AT$IF?"
+
+//  Write settings to Flash memory of the SIGFOX module.
+#define ATWRITE_SETTINGS "AT&W"
+
+//  Reboot the SIGFOX module.
+#define ATREBOOT "ATZ"
+
+//  End UnaBiz
+
 #define ATCOMMAND_TIMEOUT (3000)
 #define ATSIGFOXTX_TIMEOUT (30000)
 #define ATDOWNLINK_TIMEOUT (45000)
@@ -77,6 +104,31 @@ class Akeru
 		String toHex(double d);
 		String toHex(char c);
 		String toHex(char *c, int length);
+
+		//  Begin UnaBiz
+
+		//  Get the frequency used for the SIGFOX module, e.g. 868130000
+		bool getFrequency(String *result);
+
+		//  Set the frequency for the SIGFOX module to Singapore frequency.
+		//  Must be followed by writeSettings and reboot commands.
+		bool setFrequencySG(String *result);
+
+		//  Set the frequency for the SIGFOX module to Taiwan frequency, which is same as Singapore frequency.
+		//  Must be followed by writeSettings and reboot commands.
+		bool setFrequencyTW(String *result);
+
+		//  Set the frequency for the SIGFOX module to ETSI frequency for Europe or demo for 868 MHz base station.
+		//  Must be followed by writeSettings and reboot commands.
+		bool setFrequencyETSI(String *result);
+
+		//  Write frequency and other settings to flash memory of the SIGFOX module.  Must be followed by reboot command.
+		bool writeSettings(String *result);
+
+		//  Reboot the SIGFOX module.
+		bool reboot(String *result);
+
+		//  End UnaBiz
 
 	private:
 		bool sendATCommand(const String command, const int timeout, String *dataOut);
