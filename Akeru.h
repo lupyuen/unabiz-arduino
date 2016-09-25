@@ -68,6 +68,20 @@
 //  Reboot the SIGFOX module.
 #define ATREBOOT "ATZ"
 
+//  Enable emulator mode.
+#define ATENABLE_EMULATOR "ATPID=1"
+
+//  Disable emulator mode.
+#define ATDISABLE_EMULATOR "ATPID=0"
+
+#define ATMODEL "ATI0"  //  Get manufacturer and model.
+#define ATRELEASE "ATI5"  //  Get firmware release date.
+#define ATBASEBAND "ATI10"  //  Get baseband unique ID.
+#define ATRF_PART "ATI21"  //  Get RF chip part number.
+#define ATRF_REVISION "ATI25"  //  Get RF chip revision number.
+#define ATPOWER_ACTIVE "ATI28"  //  Get module RF active power supply voltage
+#define ATLIBRARY "ATI30"  //  Get RF library version.
+
 //  End UnaBiz
 
 #define ATCOMMAND_TIMEOUT (3000)
@@ -127,6 +141,20 @@ class Akeru
 
 		//  Reboot the SIGFOX module.
 		bool reboot(String *result);
+
+		//  Enable emulator mode.
+		bool enableEmulator(String *result);
+
+		//  Disable emulator mode.
+		bool disableEmulator(String *result);
+
+		bool getModel(String *model);  //  Get manufacturer and model.
+		bool getRelease(String *release);  //  Get firmware release date.
+		bool getBaseband(String *baseband);  //  Get baseband unique ID.
+		bool getRFPart(String *part);  //  Get RF chip part number.
+		bool getRFRevision(String *revision);  //  Get RF chip revision number.
+		bool getPowerActive(String *power);  //  Get module RF active power supply voltage
+		bool getLibraryVersion(String *version); //  Get RF library version.
 
 		// For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
 		bool sendString(const String str);
