@@ -621,6 +621,141 @@ bool Akeru::reboot(String *result)
 	}
 }
 
+bool Akeru::enableEmulator(String *result)
+{
+	//  Enable emulator mode.
+	String data = "";
+	if (sendATCommand(ATENABLE_EMULATOR, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::disableEmulator(String *result)
+{
+	//  Disable emulator mode.
+	String data = "";
+	if (sendATCommand(ATDISABLE_EMULATOR, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::getModel(String *result)
+{
+	//  Get manufacturer and model.
+	String data = "";
+	if (sendATCommand(ATMODEL, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::getRelease(String *result)
+{
+	//  Get firmware release date.
+	String data = "";
+	if (sendATCommand(ATRELEASE, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::getBaseband(String *result)
+{
+	//  Get baseband unique ID.
+	String data = "";
+	if (sendATCommand(ATBASEBAND, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::getRFPart(String *result)
+{
+	///  Get RF chip part number.
+	String data = "";
+	if (sendATCommand(ATRF_PART, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::getRFRevision(String *result)
+{
+	//  Get RF chip revision number.
+	String data = "";
+	if (sendATCommand(ATRF_REVISION, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::getPowerActive(String *result)
+{
+	//  Get module RF active power supply voltage
+	String data = "";
+	if (sendATCommand(ATPOWER_ACTIVE, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Akeru::getLibraryVersion(String *result)
+{
+	//  Get RF library version.
+	String data = "";
+	if (sendATCommand(ATLIBRARY, ATCOMMAND_TIMEOUT, &data))
+	{
+		*result = data;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 // For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
 bool Akeru::sendString(const String str)
 {
