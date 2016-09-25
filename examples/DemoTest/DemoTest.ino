@@ -129,6 +129,90 @@ void loop()
     Serial.println("Power level KO");
   }
 
+  //  Get manufacturer and model.
+  String result = "";
+  if (akeru.getModel(&result))
+  {
+    Serial.print("Manufacturer and model = ");
+    Serial.println(result);
+  }
+  else
+  {
+    Serial.println("Manufacturer and model KO");
+  }
+
+  //  Get firmware release date.
+  result = "";
+  if (akeru.getRelease(&result))
+  {
+    Serial.print("Firmware release date = ");
+    Serial.println(result);
+  }
+  else
+  {
+    Serial.println("Firmware release date KO");
+  }
+
+  //  Get baseband unique ID.
+  result = "";
+  if (akeru.getBaseband(&result))
+  {
+    Serial.print("Baseband unique ID = ");
+    Serial.println(result);
+  }
+  else
+  {
+    Serial.println("Baseband unique ID KO");
+  }
+
+  //  Get RF chip part number.
+  result = "";
+  if (akeru.getRFPart(&result))
+  {
+    Serial.print("RF chip part number = ");
+    Serial.println(result);
+  }
+  else
+  {
+    Serial.println("RF chip part number KO");
+  }
+
+  //  Get RF chip revision number.
+  result = "";
+  if (akeru.getRFRevision(&result))
+  {
+    Serial.print("RF chip revision number = ");
+    Serial.println(result);
+  }
+  else
+  {
+    Serial.println("RF chip revision number");
+  }
+
+  //  Get module RF active power supply voltage.
+  result = "";
+  if (akeru.getPowerActive(&result))
+  {
+    Serial.print("Module RF active power supply voltage = ");
+    Serial.println(result);
+  }
+  else
+  {
+    Serial.println("Module RF active power supply voltage KO");
+  }
+
+  //  Get RF library version.
+  result = "";
+  if (akeru.getLibraryVersion(&result))
+  {
+    Serial.print("RF library version = ");
+    Serial.println(result);
+  }
+  else
+  {
+    Serial.println("RF library version KO");
+  }
+
   // Convert to hexadecimal before sending
   String temp = akeru.toHex(temperature);
   String volt = akeru.toHex(voltage);
