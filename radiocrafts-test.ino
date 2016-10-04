@@ -905,8 +905,14 @@ void setup()
 void loop()
 {
   String result = "";
+  //  Enter command mode.
+  Radiocrafts.sendCommand(ZERO_BYTE, &result);
+
+  //  Get public key for transmission.  TODO: Confirm public key = 0 for production key.
   Radiocrafts.sendCommand("Y\x28", &result);
+  //  Get network mode for transmission.  TODO: Confirm network mode = 0 for uplink only, no downlink.
   Radiocrafts.sendCommand("Y\x3b", &result);
+  //  Get baud rate.  TODO: Confirm baud rate = 5 for 1920 0bps.
   Radiocrafts.sendCommand("Y\x30", &result);
   
   //  Set the frequency of SIGFOX module to SG/TW.
@@ -915,7 +921,7 @@ void loop()
   Serial.print("Set frequency result = ");
   Serial.println(result);
 
-  //  Get and display the frequency used by the SIGFOX module.
+  //  Get and display the frequency used by the SIGFOX module.  TODO: Confirm that it returns 3 for RCZ4 (SG/TW).
   String frequency = "";
   Radiocrafts.getFrequency(&frequency);
   Serial.print("Frequency = ");
@@ -996,6 +1002,9 @@ void loop()
     Serial.println("Power level KO");
   }
 
+  //  Exit command mode.
+  Radiocrafts.sendCommand("X", &result);
+
   // Convert to hexadecimal before sending
   String temp = Radiocrafts.toHex(temperature);
   String volt = Radiocrafts.toHex(voltage);
@@ -1020,6 +1029,11 @@ void loop()
 
 /*
 Demo sketch for Radiocrafts library :)
+
+}} 
+}} [00]
+{{ >
+{{ [3e]
 
 }} Y(
 }} [59 28]
@@ -1056,7 +1070,7 @@ Frequency = 00
 }} U
 }} [55]
 {{ �>
-{{ [a2 3e]
+{{ [9d 3e]
 Temperature = 0 C
 
 }} V
@@ -1078,95 +1092,90 @@ Firmware version = TODO
 {{  >
 {{ [00 3e]
 Power level = 0 dB
+
+}} X
+}} [58]
+{{ 
+{{ []
+sendPayload: 000000000000
+sendPayload2: [ 0 0 0 0 0 0]
+
+}}  0 00 
+}} [06 00 00 00 00 33 20]
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 sendPayload: 000000000000
 sendPayload2: [ 0 0 0 0 0 0]
 
 }}   00 0
 }} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
-sendPayload: 000000000000
-sendPayload2: [ 0 0 0 0 0 0]
-
-}}   00 0
-}} [06 00 00 00 00 33 20]
-{{ >
-{{ [3e]
-
-Message sent !
+{{ 
+{{ []
+Message not sent !
 
 */
