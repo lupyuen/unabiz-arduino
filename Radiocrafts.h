@@ -7,69 +7,21 @@
 #include <WProgram.h>
 #endif
 
-#include <SoftwareSerial.h>
+#ifdef CLION
+  #include <src/SoftwareSerial.h>
+#else
+  #include <SoftwareSerial.h>
+#endif  //  CLION
 
-#define ATOK "OK"
-#define ATCOMMAND "AT"
-#define ATID "ATI7"
-#define ATHARDWARE "ATI11"
-#define ATFIRMWARE "ATI13"
-#define ATTEMPERATURE "ATI26"
-#define ATVOLTAGE "ATI27"
-#define ATKEEP "ATS300"
-#define ATPOWER "ATS302"
-#define ATDOWNLINK "AT$SB=1,2,1"
-#define ATSIGFOXTX "AT$SS="
-#define ATDISPLAY "AT&V"
-#define DOWNLINKEND "+RX END"
+//  According to regulations, messages should be sent only every 10 minutes.
+const unsigned long SEND_DELAY = 10 * 60 * 1000;
 
-#define MODEM_BITS_PER_SECOND 19200
-#define END_OF_RESPONSE ">"
-#define ZERO_BYTE "\x7f"  //  To send \x00 without being treated as end of string, send ZERO_BYTE instead.
+const int MODEM_BITS_PER_SECOND = 19200;
+const int END_OF_RESPONSE = '>';  //  Character '>' marks the end of response.
+const char *CMD_ENTER_CONFIG = "4d";  //  'M' to enter config mode.
+const char *CMD_EXIT_CONFIG = "ff";  //  Exit config mode.
 
-//  Begin UnaBiz
-
-//  Set frequency of the SIGFOX module to Singapore and Taiwan (same frequency):
-//  Set IF frequency to 920.8 MHz,
-//  max channel is 200,
-//  min channel is 20
-//#define ATSET_FREQUENCY_SG "AT$IF=920800000,200,20"
-#define ATSET_FREQUENCY_SG "AT$IF=920800000"
-
-//  Set frequency of the SIGFOX module to ETSI (Europe):
-//  Set IF frequency to 868.2 MHz,
-//  max channel is 200,
-//  min channel is 20
-//#define ATSET_FREQUENCY_ETSI "AT$IF=868200000,200,20"
-#define ATSET_FREQUENCY_ETSI "AT$IF=868200000"
-
-//  Get frequency used by the SIGFOX module.
-#define ATGET_FREQUENCY "AT$IF?"
-
-//  Write settings to Flash memory of the SIGFOX module.
-#define ATWRITE_SETTINGS "AT&W"
-
-//  Reboot the SIGFOX module.
-#define ATREBOOT "ATZ"
-
-//  Get the SIGFOX region.
-#define ATGET_REGION "ATS304?"
-//  Set the SIGFOX region to ETSI.
-#define ATSET_REGION_ETSI "ATS304=1"
-//  Set the SIGFOX region to FCC.
-#define ATSET_REGION_FCC "ATS304=2"
-//  Send test message 1 times every 10 second, each message is sent once, using automatic channel selection.
-#define ATSEND_TEST "AT$ST="
-
-//  End UnaBiz
-
-#define ATCOMMAND_TIMEOUT (3000)
-#define ATSIGFOXTX_TIMEOUT (30000)
-#define ATDOWNLINK_TIMEOUT (45000)
-
-// Set to 1 if you want to print the AT commands and answers
-// on the serial monitor, set to 0 otherwise.
-//#define _cmdEcho 1
+const unsigned int COMMAND_TIMEOUT = 3000;
 
 class Radiocrafts
 {
@@ -141,13 +93,17 @@ public:
   // For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
   bool sendString(const String str);
 
-  //  End UnaBiz
+  //  Set the port for sending echo output.
+  void setEchoPort(Print *);
 
 private:
-  bool sendATCommand(const String command, const int timeout, String *dataOut);
-  SoftwareSerial* serialPort;
+  bool setFrequency(int zone, String *result);
+  bool sendCommand(const String command, const int timeout, String *dataOut);
+  SoftwareSerial *serialPort;
+  Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
+  Print *lastEchoPort;  //  Last port used for sending echo output.
   unsigned long _lastSend;
-  bool _cmdEcho = false;
+  uint8_t hexDigitToDecimal(char ch);
 };
 
 #endif // UNABIZ_ARDUINO_RADIOCRAFTS_H
