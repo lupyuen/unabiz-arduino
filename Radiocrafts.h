@@ -1,17 +1,21 @@
 #ifndef UNABIZ_ARDUINO_RADIOCRAFTS_H
 #define UNABIZ_ARDUINO_RADIOCRAFTS_H
 
-#if (ARDUINO >= 100)
-#include <Arduino.h>
-#else
-#include <WProgram.h>
-#endif
+#ifdef ARDUINO
+  #if (ARDUINO >= 100)
+    #include <Arduino.h>
+  #else  //  ARDUINO >= 100
+    #include <WProgram.h>
+  #endif  //  ARDUINO  >= 100
 
-#ifdef CLION
-  #include <src/SoftwareSerial.h>
-#else
-  #include <SoftwareSerial.h>
-#endif  //  CLION
+  #ifdef CLION
+    #include <src/SoftwareSerial.h>
+  #else  //  CLION
+    #include <SoftwareSerial.h>
+  #endif  //  CLION
+
+#else  //  ARDUINO
+#endif  //  ARDUINO
 
 //  According to regulations, messages should be sent only every 10 minutes.
 const unsigned long SEND_DELAY = 10 * 60 * 1000;
