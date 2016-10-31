@@ -1,6 +1,7 @@
 # Created by .ignore support plugin (hsz.mobi)
 
 .idea/*
+test/.idea/*
 
 ### C++ template
 # Compiled Object files

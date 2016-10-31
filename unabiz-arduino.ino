@@ -210,7 +210,7 @@ bool Radiocrafts::isReady()
   // You've been warned!
   
   unsigned long currentTime = millis();
-    if(currentTime >= _lastSend && (currentTime - _lastSend) <= 600000) return false;
+  if (currentTime >= _lastSend && (currentTime - _lastSend) <= 600000) return false;
   else return true;
 }
 
@@ -521,8 +521,7 @@ String Radiocrafts::toHex(char *c, int length)
   return bytes;
 }
 
-bool Radiocrafts::sendATCommand(const String command, const int timeout, String *dataOut)
-{
+bool Radiocrafts::sendATCommand(const String command, const int timeout, String *dataOut) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert the String to binary and send.
   // Start serial interface
@@ -533,17 +532,15 @@ bool Radiocrafts::sendATCommand(const String command, const int timeout, String 
 
   String ATCommand = "", ATCommandHex = "}} [";
   ATCommand.concat(command);
-  if (_cmdEcho)
-  {
+  if (_cmdEcho) {
     Serial.println((String)"\n}} " + ATCommand);
   }
   // Send the command : need to write/read char by char because of echo
-  char *commandBuffer = command.c_str();
+  const char *commandBuffer = command.c_str();
   for (int i = 0; i < command.length(); i = i + 2)
   {
-    char[]
     String hex = String("0x") + commandBuffer[i] + commandBuffer[i + 1];
-    char txChar = (char) strtoul(hex, NULL, 0);
+    char txChar = (char) strtoul(hex.c_str(), NULL, 0);
     //  Change "\x7F...", "M\x7F..." and "Y\x7F..." to "\x00...", "M\x00..." and "Y\x00...".
     if (txChar == ZERO_BYTE[0]) {
       char firstChar = ATCommand.charAt(0);
