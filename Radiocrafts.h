@@ -7,7 +7,7 @@
 #include <WProgram.h>
 #endif
 
-//#include <SoftwareSerial.h>
+#include <SoftwareSerial.h>
 
 #define ATOK "OK"
 #define ATCOMMAND "AT"
