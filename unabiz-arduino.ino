@@ -106,6 +106,12 @@ class Radiocrafts
 
     //  Begin UnaBiz
 
+    //  Enable emulator mode.
+    bool enableEmulator(String *result);
+
+    //  Disable emulator mode.
+    bool disableEmulator(String *result);
+
     //  Get the frequency used for the SIGFOX module, e.g. 868130000
     bool getFrequency(String *result);
 
@@ -666,6 +672,46 @@ bool Radiocrafts::sendATCommand(const String command, const int timeout, String 
   }
 }
 
+bool Radiocrafts::disableEmulator(String *result)
+{
+  //  Set the module key to the unique SIGFOX key.  This is needed for sending
+  //  to a real SIGFOX base station.
+  String data = "", cmd = "M";  //  Tell module to receive address.
+  cmd.concat("\x28");  //  Address of parameter = PUBLIC_KEY (0x28)
+  cmd.concat(ZERO_BYTE);  //  Value of parameter = Unique ID + key (0x00)
+  if (sendCommand(cmd, &data))  //  TODO
+  {
+    *result = toHex((char) data.charAt(0));
+    sendCommand("\xff", &data);  //  Exit config mode.
+    return true;
+  }
+  else
+  {
+    sendCommand("\xff", &data);  //  Exit config mode.
+    return false;
+  }
+}
+
+bool Radiocrafts::enableEmulator(String *result)
+{
+  //  Set the module key to the public key.  This is needed for sending
+  //  to an emulator.
+  String data = "", cmd = "M";  //  Tell module to receive address.
+  cmd.concat("\x28");  //  Address of parameter = PUBLIC_KEY (0x28)
+  cmd.concat("\x01");  //  Value of parameter = Public ID + key (0x01)
+  if (sendCommand(cmd, &data))  //  TODO
+  {
+    *result = toHex((char) data.charAt(0));
+    sendCommand("\xff", &data);  //  Exit config mode.
+    return true;
+  }
+  else
+  {
+    sendCommand("\xff", &data);  //  Exit config mode.
+    return false;
+  }
+}
+
 bool Radiocrafts::getFrequency(String *result)
 {
   //  Get the frequency used for the SIGFOX module
@@ -688,10 +734,10 @@ bool Radiocrafts::getFrequency(String *result)
 bool Radiocrafts::setFrequencySG(String *result)
 {
   //  Set the frequency for the SIGFOX module to Singapore frequency.
-  //  3: AU/NZ (RCZ4)
-  String data = "", cmd = "M";
-  cmd.concat(ZERO_BYTE);
-  cmd.concat("\x03");
+  //  3: RCZ4
+  String data = "", cmd = "M";  //  Tell module to receive address.
+  cmd.concat(ZERO_BYTE);  //  Address of parameter = RF_FREQUENCY_DOMAIN (0x0)
+  cmd.concat("\x03");  //  Value of parameter = RCZ4 (0x3)
   if (sendCommand(cmd, &data))  //  TODO
   {
     *result = toHex((char) data.charAt(0));
@@ -906,14 +952,24 @@ void setup()
 void loop()
 {
   String result = "";
-  //  Enter command mode.
+  //  Enter command mode.  TODO: Confirm response = '>'
+  Serial.print("\nEntering command mode (expecting '>')");  
   Radiocrafts.sendCommand(ZERO_BYTE, &result);
 
-  //  Get public key for transmission.  TODO: Confirm public key = 0 for production key.
+  //  Disable emulation mode.
+  Serial.print("\Disable emulation mode");
+  Radiocrafts.disableEmulator(&result);
+
+  //  Check whether SIGFOX or public key is used for transmission.  TODO: Confirm response = 0 for SIGFOX key.
+  Serial.print("\nPublic Key Enabled (expecting 0) = ");
   Radiocrafts.sendCommand("Y\x28", &result);
+  
   //  Get network mode for transmission.  TODO: Confirm network mode = 0 for uplink only, no downlink.
+  Serial.print("\nNetwork Mode (expecting 0) = ");
   Radiocrafts.sendCommand("Y\x3b", &result);
-  //  Get baud rate.  TODO: Confirm baud rate = 5 for 1920 0bps.
+  
+  //  Get baud rate.  TODO: Confirm baud rate = 5 for 19200 bps.
+  Serial.print("\nBaud Rate (expecting 5) = ");
   Radiocrafts.sendCommand("Y\x30", &result);
   
   //  Set the frequency of SIGFOX module to SG/TW.
@@ -925,7 +981,7 @@ void loop()
   //  Get and display the frequency used by the SIGFOX module.  TODO: Confirm that it returns 3 for RCZ4 (SG/TW).
   String frequency = "";
   Radiocrafts.getFrequency(&frequency);
-  Serial.print("Frequency = ");
+  Serial.print("Frequency (expecting 3) = ");
   Serial.println(frequency);
 
   // Read module temperature
@@ -955,10 +1011,11 @@ void loop()
   }
 
   // Read module identification
+  // Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
   String id = "";
   if (Radiocrafts.getID(&id))
   {
-    Serial.print("ID = ");
+    Serial.print("\n4 bytes ID (LSB first) and 8 bytes PAC (MSB first) = ");
     Serial.println(id);
   }
   else
