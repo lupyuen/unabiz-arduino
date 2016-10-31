@@ -15,14 +15,10 @@
 
 //  According to regulations, messages should be sent only every 10 minutes.
 const unsigned long SEND_DELAY = 10 * 60 * 1000;
+const unsigned int COMMAND_TIMEOUT = 3000;
 
 const int MODEM_BITS_PER_SECOND = 19200;
 const int END_OF_RESPONSE = '>';  //  Character '>' marks the end of response.
-const char *CMD_READ_MEMORY = "59";  //  'Y' to read memory.
-const char *CMD_ENTER_CONFIG = "4d";  //  'M' to enter config mode.
-const char *CMD_EXIT_CONFIG = "ff";  //  Exit config mode.
-
-const unsigned int COMMAND_TIMEOUT = 3000;
 
 class Radiocrafts
 {
@@ -37,6 +33,7 @@ public:
   bool sendString(const String str);  //  Sending a text string, max 12 characters allowed.
   bool receive(String &data);  //  Receive a message.
   bool enterCommandMode();  //  Enter Command Mode for sending module commands, not data.
+  bool exitCommandMode();  //  Exit Command Mode so we can send data.
 
   //  Commands for the module, must be run in Command Mode.
   bool getEmulator(int &result);  //  Return 0 if emulator mode disabled, else return 1.

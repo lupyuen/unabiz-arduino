@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include "Radiocrafts.h"
 
+static const char *CMD_READ_MEMORY = "59";  //  'Y' to read memory.
+static const char *CMD_ENTER_CONFIG = "4d";  //  'M' to enter config mode.
+static const char *CMD_EXIT_CONFIG = "ff";  //  Exit config mode.
+
 //  Drop all data passed to this port.  Used to suppress echo output.
 class NullPort: public Print {
   virtual size_t write(uint8_t) {}
@@ -146,8 +150,16 @@ bool Radiocrafts::isReady()
 static String data = "";
 
 bool Radiocrafts::enterCommandMode() {
+  //  Enter Command Mode for sending module commands, not data.
   if (!sendCommand("00", data)) return false;
   echoPort->println(F("Radiocrafts.enterCommandMode: OK "));
+  return true;
+}
+
+bool Radiocrafts::exitCommandMode() {
+  //  Exit Command Mode so we can send data.
+  if (!sendCommand(toHex('X'), data)) return false;
+  echoPort->println(F("Radiocrafts.exitCommandMode: OK "));
   return true;
 }
 
@@ -229,7 +241,7 @@ bool Radiocrafts::disableEmulator(String &result) {
   if (!sendCommand(String(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
       "28" + //  Address of parameter = PUBLIC_KEY (0x28)
       "00",  //  Value of parameter = Unique ID & key (0x00)
-      &data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
+      data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
   result = data;
   sendCommand(CMD_EXIT_CONFIG, data);  //  Exit config mode.
   return true;
