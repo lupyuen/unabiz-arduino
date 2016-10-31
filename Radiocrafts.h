@@ -150,4 +150,9 @@ private:
   bool _cmdEcho = false;
 };
 
+//  To compile under CLION, include the source file.
+#ifdef CLION
+#include "Radiocrafts.cpp"
+#endif
+
 #endif // UNABIZ_ARDUINO_RADIOCRAFTS_H

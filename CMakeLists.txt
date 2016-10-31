@@ -5,15 +5,15 @@ set(PROJECT_NAME unabiz-arduino)
 project(${PROJECT_NAME})
 
 ####
-#set(SOURCE_FILES Radiocrafts.cpp)
-#add_definitions(-DUNITTEST)
-#set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
-set(${CMAKE_PROJECT_NAME}_SRCS
-        ${PROJECT_NAME}.ino
-        Radiocrafts.cpp
-        #test/test.cpp
-        )
+add_definitions(-DCLION)
 set(${CMAKE_PROJECT_NAME}_ARDLIBS SoftwareSerial)
+
+#set(SOURCE_FILES Radiocrafts.cpp)
+#set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
+#set(${CMAKE_PROJECT_NAME}_SRCS
+#        ${PROJECT_NAME}.ino
+#        Radiocrafts.cpp
+#        )
 ####
 
 set(${CMAKE_PROJECT_NAME}_SKETCH ${PROJECT_NAME}.ino)
