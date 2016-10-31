@@ -221,28 +221,14 @@ bool Radiocrafts::sendAT()
 
 bool Radiocrafts::sendPayload(const String payload)
 {
-  //  Payload must be a String formatted in hexadecimal, 12 bytes max.
-  //  We convert the String to binary and send.
-
+  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   Serial.print("sendPayload: ");  Serial.println(payload);
   
   //  UnaBiz TODO: Temporarily disabled limits on sending messages.  Should not send more than 140 messages per day.
   //if (!isReady()) return false; // prevent user from sending to many messages
 
   //  First byte is payload length, followed by rest of payload.
-  String message = "", messageHex = "[";
-  char len = (char) (payload.length() / 2);
-  message.concat(len);  
-  for (int i = 0; i < payload.length() - 1; i = i + 2) {
-    String ch = payload.substring(i, i + 1);
-    long ch2 = strtol(ch.c_str(), NULL, 16);   
-    if (message.length() > 0) messageHex.concat(" ");                
-    messageHex.concat(ch);
-    message.concat((char) ch2);
-  }    
-  messageHex.concat("]");
-  Serial.print("sendPayload2: ");  Serial.println(messageHex);
-  
+  String message = String((char) payload.length()) + payload;
   String data = "";
   if (sendCommand(message, &data))
   {
@@ -537,6 +523,8 @@ String Radiocrafts::toHex(char *c, int length)
 
 bool Radiocrafts::sendATCommand(const String command, const int timeout, String *dataOut)
 {
+  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
+  //  We convert the String to binary and send.
   // Start serial interface
   serialPort->begin(MODEM_BITS_PER_SECOND);
   delay(200); 
@@ -545,16 +533,17 @@ bool Radiocrafts::sendATCommand(const String command, const int timeout, String 
 
   String ATCommand = "", ATCommandHex = "}} [";
   ATCommand.concat(command);
-
   if (_cmdEcho)
   {
     Serial.println((String)"\n}} " + ATCommand);
   }
-
   // Send the command : need to write/read char by char because of echo
-  for (int i = 0; i < ATCommand.length(); ++i)
+  char *commandBuffer = command.c_str();
+  for (int i = 0; i < command.length(); i = i + 2)
   {
-    char txChar = ATCommand.charAt(i);
+    char[]
+    String hex = String("0x") + commandBuffer[i] + commandBuffer[i + 1];
+    char txChar = (char) strtoul(hex, NULL, 0);
     //  Change "\x7F...", "M\x7F..." and "Y\x7F..." to "\x00...", "M\x00..." and "Y\x00...".
     if (txChar == ZERO_BYTE[0]) {
       char firstChar = ATCommand.charAt(0);
