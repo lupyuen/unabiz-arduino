@@ -18,6 +18,7 @@ const unsigned long SEND_DELAY = 10 * 60 * 1000;
 
 const int MODEM_BITS_PER_SECOND = 19200;
 const int END_OF_RESPONSE = '>';  //  Character '>' marks the end of response.
+const char *CMD_READ_MEMORY = "59";  //  'Y' to read memory.
 const char *CMD_ENTER_CONFIG = "4d";  //  'M' to enter config mode.
 const char *CMD_EXIT_CONFIG = "ff";  //  Exit config mode.
 
@@ -27,20 +28,42 @@ class Radiocrafts
 {
 public:
   Radiocrafts(unsigned int rx, unsigned int tx);
-  void echoOn();
-  void echoOff();
   bool begin();
+  void echoOn();  //  Turn on send/receive echo.
+  void echoOff();  //  Turn off send/receive echo.
+  void setEchoPort(Print *port);  //  Set the port for sending echo output.
   bool isReady();
-  bool sendAT();
-  bool sendPayload(const String payload);
-  bool getTemperature(int *temperature);
-  bool getID(String *id);
-  bool getVoltage(float *voltage);
-  bool getHardware(String *hardware);
-  bool getFirmware(String *firmware);
-  bool getPower(int *power);
+  bool sendPayload(const String payload);  //  Send the payload of hex digits to the network, max 12 bytes.
+  bool sendString(const String str);  //  Sending a text string, max 12 characters allowed.
+  bool receive(String &data);  //  Receive a message.
+  bool enterCommandMode();  //  Enter Command Mode for sending module commands, not data.
+
+  //  Commands for the module, must be run in Command Mode.
+  bool getEmulator(int &result);  //  Return 0 if emulator mode disabled, else return 1.
+  bool enableEmulator(String &result);  //  Enable emulator mode.
+  bool disableEmulator(String &result);  //  Disable emulator mode.
+  //  Get the frequency used for the SIGFOX module.
+  bool getFrequency(String &result);
+  //  Set the frequency for the SIGFOX module to Singapore frequency (RCZ4).
+  bool setFrequencySG(String &result);
+  //  Set the frequency for the SIGFOX module to Taiwan frequency (RCZ4).
+  bool setFrequencyTW(String &result);
+  //  Set the frequency for the SIGFOX module to ETSI frequency for Europe (RCZ1).
+  bool setFrequencyETSI(String &result);
+  //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
+  bool setFrequencyUS(String &result);
+  bool writeSettings(String &result); //  Write frequency and other settings to flash memory of the module.
+  bool reboot(String &result);  //  Reboot the SIGFOX module.
+  bool getTemperature(int &temperature);
+  bool getID(String &id);
+  bool getVoltage(float &voltage);
+  bool getHardware(String &hardware);
+  bool getFirmware(String &firmware);
+  bool getPower(int &power);
   bool setPower(int power);
-  bool receive(String *data);
+  bool getParameter(uint8_t address, String &value);  //  Return the parameter at that address.
+
+  //  Message conversion functions.
   String toHex(int i);
   String toHex(unsigned int i);
   String toHex(long l);
@@ -50,60 +73,16 @@ public:
   String toHex(char c);
   String toHex(char *c, int length);
 
-  //  Begin UnaBiz
-
-  //  Enable emulator mode.
-  bool enableEmulator(String *result);
-
-  //  Disable emulator mode.
-  bool disableEmulator(String *result);
-
-  //  Get the frequency used for the SIGFOX module, e.g. 868130000
-  bool getFrequency(String *result);
-
-  //  Set the frequency for the SIGFOX module to Singapore frequency.
-  bool setFrequencySG(String *result);
-
-  //  Set the frequency for the SIGFOX module to Taiwan frequency, which is same as Singapore frequency.
-  bool setFrequencyTW(String *result);
-
-  //  Set the frequency for the SIGFOX module to ETSI frequency for Europe or demo for 868 MHz base station.
-  bool setFrequencyETSI(String *result);
-
-  //  Set the frequency for the SIGFOX module to US frequency.
-  bool setFrequencyUS(String *result);
-
-  //  Write frequency and other settings to flash memory of the SIGFOX module.  Must be followed by reboot command.
-  bool writeSettings(String *result);
-
-  //  Reboot the SIGFOX module.
-  bool reboot(String *result);
-
-  //  Get SIGFOX region.
-  bool getRegion(String *result);
-  //  Set SIGFOX region to ETSI.
-  bool setRegionETSI(String *result);
-  //  Set SIGFOX region to FCC.
-  bool setRegionFCC(String *result);
-  //  Send test message.
-  bool sendTestMessage(int count, int period, int channel, String *result);
-  //  Send command.
-  bool sendCommand(String cmd, String *result);
-
-  // For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
-  bool sendString(const String str);
-
-  //  Set the port for sending echo output.
-  void setEchoPort(Print *);
-
 private:
-  bool setFrequency(int zone, String *result);
-  bool sendCommand(const String command, const int timeout, String *dataOut);
+  bool sendCommand(String cmd, String &result);
+  bool sendCommand(const String command, const int timeout, String &dataOut);
+  bool setFrequency(int zone, String &result);
+  uint8_t hexDigitToDecimal(char ch);
+
   SoftwareSerial *serialPort;
   Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
   Print *lastEchoPort;  //  Last port used for sending echo output.
   unsigned long _lastSend;
-  uint8_t hexDigitToDecimal(char ch);
 };
 
 #endif // UNABIZ_ARDUINO_RADIOCRAFTS_H

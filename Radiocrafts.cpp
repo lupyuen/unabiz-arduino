@@ -34,7 +34,7 @@ bool Radiocrafts::sendPayload(const String payload) {
   //  Decode and send the data.
   //  First byte is payload length, followed by rest of payload.
   String message = toHex((char) payload.length()) + payload, data = "";
-  if (sendCommand(message, &data)) {
+  if (sendCommand(message, data)) {
     echoPort->println(data);
     _lastSend = millis();
     return true;
@@ -42,7 +42,7 @@ bool Radiocrafts::sendPayload(const String payload) {
   return false;
 }
 
-bool Radiocrafts::sendCommand(const String command, const int timeout, String *dataOut) {
+bool Radiocrafts::sendCommand(const String command, const int timeout, String &dataOut) {
   //  command contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
@@ -80,18 +80,18 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String *d
   }
   serialPort->end();
   echoPort->print(F("Radiocrafts.sendCommand response: "));  echoPort->println(response);
-  if (dataOut != NULL) *dataOut = response;
+  dataOut = response;
 
   //  TODO: Parse the downlink response.
   return true;
 }
 
-bool Radiocrafts::sendCommand(String cmd, String *result) {
+bool Radiocrafts::sendCommand(String cmd, String &result) {
   //  cmd contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   String data = "";
-  if (!sendCommand(cmd, COMMAND_TIMEOUT, &data)) return false;
-  if (result != NULL) *result = data;
+  if (!sendCommand(cmd, COMMAND_TIMEOUT, data)) return false;
+  result = data;
   return true;
 }
 
@@ -145,92 +145,119 @@ bool Radiocrafts::isReady()
 
 static String data = "";
 
-bool Radiocrafts::getTemperature(int *temperature) {
-  if (!sendCommand(toHex('U'), &data)) return false;
-  *temperature = (int) data.charAt(0);
-  echoPort->print(F("Radiocrafts.getTemperature: returned "));  echoPort->println(*temperature);
+bool Radiocrafts::enterCommandMode() {
+  if (!sendCommand("00", data)) return false;
+  echoPort->println(F("Radiocrafts.enterCommandMode: OK "));
   return true;
 }
 
-bool Radiocrafts::getID(String *id) {
+bool Radiocrafts::getTemperature(int &temperature) {
+  if (!sendCommand(toHex('U'), data)) return false;
+  temperature = (int) data.charAt(0);
+  echoPort->print(F("Radiocrafts.getTemperature: returned "));  echoPort->println(temperature);
+  return true;
+}
+
+bool Radiocrafts::getID(String &id) {
   //  Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
-  if (!sendCommand(toHex('9'), &data)) return false;
-  *id = data;
-  echoPort->print(F("Radiocrafts.getID: returned "));  echoPort->println(*id);
+  if (!sendCommand(toHex('9'), data)) return false;
+  id = data;
+  echoPort->print(F("Radiocrafts.getID: returned "));  echoPort->println(id);
   return true;
 }
 
-bool Radiocrafts::getVoltage(float *voltage) {
+bool Radiocrafts::getVoltage(float &voltage) {
   //  Returns one byte indicating the power supply voltage.
-  if (!sendCommand(toHex('V'), &data)) return false;
-  *voltage = (float) data.charAt(0);
-  echoPort->print(F("Radiocrafts.getVoltage: returned "));  echoPort->println(*voltage);
+  if (!sendCommand(toHex('V'), data)) return false;
+  voltage = (float) data.charAt(0);
+  echoPort->print(F("Radiocrafts.getVoltage: returned "));  echoPort->println(voltage);
   return true;
 }
 
-bool Radiocrafts::getHardware(String *hardware) {
+bool Radiocrafts::getHardware(String &hardware) {
   //  TODO
-  echoPort->println("Radiocrafts.getHardware: ERROR - Not implemented");
-  *hardware = "TODO";
+  echoPort->println(F("Radiocrafts.getHardware: ERROR - Not implemented"));
+  hardware = "TODO";
   return true;
 }
 
-bool Radiocrafts::getFirmware(String *firmware) {
+bool Radiocrafts::getFirmware(String &firmware) {
   //  TODO
-  echoPort->println("Radiocrafts.getFirmware: ERROR - Not implemented");
-  *firmware = "TODO";
+  echoPort->println(F("Radiocrafts.getFirmware: ERROR - Not implemented"));
+  firmware = "TODO";
   return true;
 }
 
-bool Radiocrafts::getPower(int *power) {
+bool Radiocrafts::getParameter(uint8_t address, String &value) {
+  //  Read the parameter at the address.
+  echoPort->print(F("Radiocrafts.getParameter: address="));  echoPort->println(address);
+  if (!sendCommand(String(CMD_READ_MEMORY) +   //  Read memory ('Y')
+                   toHex((char) address),  //  Address of parameter
+                   data)) return false;
+  value = data;
+  echoPort->print(F("Radiocrafts.getParameter: address="));  echoPort->print(address);
+  echoPort->print(F(" returned "));  echoPort->println(value);
+  return true;
+}
+
+bool Radiocrafts::getPower(int &power) {
   //  Get the power step-down.
-  if (!sendCommand(toHex('Y') + "01", &data)) return false;
-  *power = (int) data.toInt();
-  echoPort->print(F("Radiocrafts.getPower: returned "));  echoPort->println(*power);
+  if (!getParameter(0x01, data)) return false;  //  Address of parameter = RF_POWER (0x01)
+  power = (int) data.toInt();
+  echoPort->print(F("Radiocrafts.getPower: returned "));  echoPort->println(power);
   return true;
 }
 
 bool Radiocrafts::setPower(int power) {
   //  TODO: Power value: 0...14
-  echoPort->println("Radiocrafts.receive: ERROR - Not implemented");
+  echoPort->println(F("Radiocrafts.receive: ERROR - Not implemented"));
   return true;
 }
 
-bool Radiocrafts::disableEmulator(String *result) {
+bool Radiocrafts::getEmulator(int &result) {
+  //  Get the current emulation mode of the module.
+  //  0 = Emulator disabled (sending to SIGFOX network with unique ID & key)
+  //  1 = Emulator enabled (sending to emulator with public ID & key)
+  if (!getParameter(0x28, data)) return false;  //  Address of parameter = PUBLIC_KEY (0x28)
+  result = (int) data.toInt();
+  return true;
+}
+
+bool Radiocrafts::disableEmulator(String &result) {
   //  Set the module key to the unique SIGFOX key.  This is needed for sending
   //  to a real SIGFOX base station.
   if (!sendCommand(String(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
       "28" + //  Address of parameter = PUBLIC_KEY (0x28)
       "00",  //  Value of parameter = Unique ID & key (0x00)
-      &data)) { sendCommand(CMD_EXIT_CONFIG, &data); return false; }
-  *result = data;
-  sendCommand(CMD_EXIT_CONFIG, &data);  //  Exit config mode.
+      &data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
+  result = data;
+  sendCommand(CMD_EXIT_CONFIG, data);  //  Exit config mode.
   return true;
 }
 
-bool Radiocrafts::enableEmulator(String *result) {
+bool Radiocrafts::enableEmulator(String &result) {
   //  Set the module key to the public key.  This is needed for sending
   //  to an emulator.
   if (!sendCommand(String(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
       "28" + //  Address of parameter = PUBLIC_KEY (0x28)
       "01",  //  Value of parameter = Public ID & key (0x00)
-      &data)) { sendCommand(CMD_EXIT_CONFIG, &data); return false; }
-  *result = data;
-  sendCommand(CMD_EXIT_CONFIG, &data);  //  Exit config mode.
+      data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
+  result = data;
+  sendCommand(CMD_EXIT_CONFIG, data);  //  Exit config mode.
   return true;
 }
 
-bool Radiocrafts::getFrequency(String *result) {
+bool Radiocrafts::getFrequency(String &result) {
   //  Get the frequency used for the SIGFOX module
   //  0: Europe (RCZ1)
   //  1: US (RCZ2)
   //  3: SG, TW, AU, NZ (RCZ4)
-  if (!sendCommand(toHex('Y') + "00", &data)) return false;
-  *result = data;
+  if (!sendCommand(toHex('Y') + "00", data)) return false;
+  result = data;
   return true;
 }
 
-bool Radiocrafts::setFrequency(int zone, String *result) {
+bool Radiocrafts::setFrequency(int zone, String &result) {
   //  Get the frequency used for the SIGFOX module
   //  0: Europe (RCZ1)
   //  1: US (RCZ2)
@@ -238,40 +265,48 @@ bool Radiocrafts::setFrequency(int zone, String *result) {
   if (!sendCommand(String(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
     "00" + //  Address of parameter = RF_FREQUENCY_DOMAIN (0x0)
     toHex(zone - 1),  //  Value of parameter = RCZ - 1
-    &data)) { sendCommand(CMD_EXIT_CONFIG, &data); return false; }
-  *result = data;
-  sendCommand(CMD_EXIT_CONFIG, &data);  //  Exit config mode.
+    data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
+  result = data;
+  sendCommand(CMD_EXIT_CONFIG, data);  //  Exit config mode.
   return true;
 }
 
 //  Set the frequency for the SIGFOX module to Singapore frequency (RCZ4).
-bool Radiocrafts::setFrequencySG(String *result) { return setFrequency(4, result); }
+bool Radiocrafts::setFrequencySG(String &result) {
+  echoPort->println(F("Radiocrafts.setFrequencySG"));
+  return setFrequency(4, result); }
 
 //  Set the frequency for the SIGFOX module to Taiwan frequency (RCZ4).
-bool Radiocrafts::setFrequencyTW(String *result) { return setFrequency(4, result); }
+bool Radiocrafts::setFrequencyTW(String &result) {
+  echoPort->println(F("Radiocrafts.setFrequencyTW"));
+  return setFrequency(4, result); }
 
 //  Set the frequency for the SIGFOX module to ETSI frequency for Europe (RCZ1).
-bool Radiocrafts::setFrequencyETSI(String *result) { return setFrequency(1, result); }
+bool Radiocrafts::setFrequencyETSI(String &result) {
+  echoPort->println(F("Radiocrafts.setFrequencyETSI"));
+  return setFrequency(1, result); }
 
 //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
-bool Radiocrafts::setFrequencyUS(String *result) { return setFrequency(2, result); }
+bool Radiocrafts::setFrequencyUS(String &result) {
+  echoPort->println(F("Radiocrafts.setFrequencyUS"));
+  return setFrequency(2, result); }
 
-bool Radiocrafts::writeSettings(String *result) {
+bool Radiocrafts::writeSettings(String &result) {
   //  TODO: Write settings to module's flash memory.
-  echoPort->println("Radiocrafts.writeSettings: ERROR - Not implemented");
+  echoPort->println(F("Radiocrafts.writeSettings: ERROR - Not implemented"));
   return true;
 }
 
-bool Radiocrafts::reboot(String *result) {
+bool Radiocrafts::reboot(String &result) {
   //  TODO: Reboot the module.
-  echoPort->println("Radiocrafts.reboot: ERROR - Not implemented");
+  echoPort->println(F("Radiocrafts.reboot: ERROR - Not implemented"));
   return true;
 }
 
 //  Echo commands and responses to the echo port.
 void Radiocrafts::echoOn() {
-  echoPort->println("Radiocrafts.echoOn");
   echoPort = lastEchoPort;
+  echoPort->println(F("Radiocrafts.echoOn"));
 }
 
 //  Stop echoing commands and responses to the echo port.
@@ -279,9 +314,15 @@ void Radiocrafts::echoOff() {
   lastEchoPort = echoPort; echoPort = &nullPort;
 }
 
-bool Radiocrafts::receive(String *data) {
+void Radiocrafts::setEchoPort(Print *port) {
+  //  Set the port for sending echo output.
+  lastEchoPort = echoPort;
+  echoPort = port;
+}
+
+bool Radiocrafts::receive(String &data) {
   //  TODO
-  echoPort->println("Radiocrafts.receive: ERROR - Not implemented");
+  echoPort->println(F("Radiocrafts.receive: ERROR - Not implemented"));
   return true;
 }
 
@@ -372,3 +413,4 @@ uint8_t Radiocrafts::hexDigitToDecimal(char ch) {
   echoPort->println(ch);
   return 0;
 }
+
