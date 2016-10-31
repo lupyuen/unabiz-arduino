@@ -9,11 +9,12 @@ project(${PROJECT_NAME})
 #add_definitions(-DUNITTEST)
 #set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 set(${CMAKE_PROJECT_NAME}_SRCS
-        unabiz-arduino.ino
+        ${PROJECT_NAME}.ino
         Radiocrafts.cpp
         #test/test.cpp
         )
+set(${CMAKE_PROJECT_NAME}_ARDLIBS SoftwareSerial)
 ####
 
-set(${CMAKE_PROJECT_NAME}_SKETCH unabiz-arduino.ino)
+set(${CMAKE_PROJECT_NAME}_SKETCH ${PROJECT_NAME}.ino)
 generate_arduino_firmware(${CMAKE_PROJECT_NAME})
