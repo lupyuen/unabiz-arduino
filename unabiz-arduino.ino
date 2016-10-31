@@ -210,7 +210,7 @@ bool Radiocrafts::isReady()
 
 bool Radiocrafts::sendAT()
 {
-  return sendATCommand(ATCOMMAND, ATCOMMAND_TIMEOUT, nullptr);
+  return sendATCommand(ATCOMMAND, ATCOMMAND_TIMEOUT, NULL);
 }
 
 bool Radiocrafts::sendPayload(const String payload)
@@ -651,7 +651,8 @@ bool Radiocrafts::sendATCommand(const String command, const int timeout, String 
   // Check if we have data on the first string.
   if (firstData != "" && secondData == "")
   {
-    *dataOut = firstData;
+    if (dataOut != NULL)
+      *dataOut = firstData;
     return true;
   }
   else if (firstData == "" && secondData == "")
