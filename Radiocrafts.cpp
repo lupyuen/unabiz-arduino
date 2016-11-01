@@ -94,8 +94,8 @@ bool Radiocrafts::sendCommand(const String command, const int timeout,
       echoReceive.concat(toHex((char) rxChar) + ' ');
       if (rxChar == -1) continue;
       if (rxChar == END_OF_RESPONSE) {
-        actualMarkerCount++;  //  TODO: Count the number of end markers.
-        //break;  //  TODO: Don't wait for timeout.
+        actualMarkerCount++;  //  Count the number of end markers.
+        if (actualMarkerCount >= expectedMarkerCount) break;  //  Seen all markers already.
       }
       else {
         response.concat(toHex((char) rxChar));
