@@ -1,3 +1,4 @@
+//  Library for sending and receiving SIGFOX messages with Arduino shield based on Radiocrafts RC1692HP-SIG.
 #include <stdlib.h>
 #include "Radiocrafts.h"
 
@@ -11,9 +12,13 @@ class NullPort: public Print {
 };
 static NullPort nullPort;
 
+Radiocrafts::Radiocrafts(): Radiocrafts(RADIOCRAFTS_RX, RADIOCRAFTS_TX) {}
+
 Radiocrafts::Radiocrafts(unsigned int rx, unsigned int tx) {
   //  Init the module with the specified transmit and receive pins.
   //  Default to no echo.
+  Serial.begin(9600);
+  Serial.print(String(F("Radiocrafts.Radiocrafts: (rx,tx)=")) + rx + ',' + tx + '\n');
   serialPort = new SoftwareSerial(rx, tx);
   echoPort = &nullPort;
   lastEchoPort = &Serial;
@@ -33,7 +38,7 @@ bool Radiocrafts::sendPayload(const String payload) {
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
   //  valid payload and this causes string truncation in C libraries.
-  echoPort->print(F("Radiocrafts.sendPayload: "));  echoPort->println(payload);
+  echoPort->print(String(F("Radiocrafts.sendPayload: ")) + payload + '\n');
   if (!isReady()) return false;  //  Prevent user from sending too many messages.
   //  Decode and send the data.
   //  First byte is payload length, followed by rest of payload.
@@ -51,8 +56,7 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String &d
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
   //  valid payload and this causes string truncation in C libraries.
-  echoPort->print(F("Radiocrafts.sendCommand: "));  echoPort->println(command);
-
+  echoPort->print(String(F("Radiocrafts.sendCommand: ")) + command + '\n');
   //  Start serial interface.
   serialPort->begin(MODEM_BITS_PER_SECOND);
   delay(200);
@@ -60,16 +64,20 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String &d
   serialPort->listen();
 
   //  Send the command: need to write/read char by char because of echo.
+  echoPort->print(">> ");  //
   const char *commandBuffer = command.c_str();
   for (int i = 0; i < command.length(); i = i + 2)
   {
     //  Convert 2 hex digits to 1 char.
     uint8_t txChar = hexDigitToDecimal(commandBuffer[i]) * 16 +
       hexDigitToDecimal(commandBuffer[i + 1]);
+    echoPort->print(toHex((char) txChar) + ' ');  //
     serialPort->write(txChar);
-    serialPort->read();
+    //int rxChar = serialPort->read();
+    //if (rxChar >=0) echoPort->print(String("<< ") + toHex((char) rxChar) + "] ");  //
   }
   //  Read response.  Loop until timeout or we see the end of response marker.
+  echoPort->print("\n<< ");  //
   String response = ""; const unsigned long startTime = millis();
   for (;;) {
     const unsigned long currentTime = millis();
@@ -77,13 +85,14 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String &d
     if (serialPort->available() > 0)
     {
       int rxChar = serialPort->read();
+      echoPort->print(toHex((char) rxChar) + ' ');  //
       if (rxChar == -1) continue;
       if (rxChar == END_OF_RESPONSE) break;
       response.concat(toHex((byte) rxChar));
     }
   }
   serialPort->end();
-  echoPort->print(F("Radiocrafts.sendCommand response: "));  echoPort->println(response);
+  echoPort->print(F("\nRadiocrafts.sendCommand response: "));  echoPort->println(response);
   dataOut = response;
 
   //  TODO: Parse the downlink response.

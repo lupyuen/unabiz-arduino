@@ -1,3 +1,4 @@
+//  Library for sending and receiving SIGFOX messages with Arduino shield based on Radiocrafts RC1692HP-SIG.
 #ifndef UNABIZ_ARDUINO_RADIOCRAFTS_H
 #define UNABIZ_ARDUINO_RADIOCRAFTS_H
 
@@ -21,12 +22,16 @@
 const unsigned long SEND_DELAY = 10 * 60 * 1000;
 const unsigned int COMMAND_TIMEOUT = 3000;
 
+const unsigned int RADIOCRAFTS_TX = 4;  //  Transmit port for For UnaBiz / Radiocrafts Dev Kit
+const unsigned int RADIOCRAFTS_RX = 5;  //  Receive port for UnaBiz / Radiocrafts Dev Kit
+
 const int MODEM_BITS_PER_SECOND = 19200;
 const int END_OF_RESPONSE = '>';  //  Character '>' marks the end of response.
 
 class Radiocrafts
 {
 public:
+  Radiocrafts();
   Radiocrafts(unsigned int rx, unsigned int tx);
   bool begin();
   void echoOn();  //  Turn on send/receive echo.

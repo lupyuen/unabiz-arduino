@@ -8,10 +8,10 @@ add_definitions(-DCLION)
 
 # Arduino Options - See https://github.com/queezythegreat/arduino-cmake
 # Change this to the Arduino port.
-if(APPLE)
-    set(${PROJECT_NAME}_PORT zzzz)
-elseif(WIN32)
+if(WIN32)
     set(${PROJECT_NAME}_PORT COM1:)
+else()
+    set(${PROJECT_NAME}_PORT /dev/tty.usbmodem1421)
 endif()
 
 # Build the library.
