@@ -41,7 +41,7 @@ bool Radiocrafts::sendPayload(const String payload) {
   if (!isReady()) return false;  //  Prevent user from sending too many messages.
   //  Decode and send the data.
   //  First byte is payload length, followed by rest of payload.
-  String message = toHex((char) payload.length()) + payload, data = "";
+  String message = toHex((char) (payload.length() / 2)) + payload, data = "";
   if (sendCommand(message, data)) {
     echoPort->println(data);
     _lastSend = millis();

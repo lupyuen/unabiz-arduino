@@ -150,142 +150,177 @@ void loop()
 }
 
 /*
-test
-Demo sketch for Radiocrafts library :)
+Demo sketch for SIGFOX transceiver library :)
 Radiocrafts.echoOn
 
-Entering command mode (expecting '>')
+Entering command mode (expecting '>')...
 Radiocrafts.sendCommand: 00
-Radiocrafts.sendCommand response:
+>> 00 [3e]
+
+Radiocrafts.sendCommand: response:
 Radiocrafts.enterCommandMode: OK
 
-Disable emulation mode
+Disabling emulation mode...
 Radiocrafts.sendCommand: 4d2800
-Radiocrafts.sendCommand response:
-Radiocrafts.sendCommand: ff
-Radiocrafts.sendCommand response:
+>> 4d 28 00 [3e]
 
-Emulator Enabled (expecting 0) =
-Radiocrafts.getParameter: address=40
+Radiocrafts.sendCommand: response:
+Radiocrafts.sendCommand: ff
+>> ff [3e]
+
+Radiocrafts.sendCommand: response:
+
+Checking emulation mode (expecting 0)...
+Radiocrafts.getParameter: address=0x28
 Radiocrafts.sendCommand: 5928
-Radiocrafts.sendCommand response:
-Radiocrafts.getParameter: address=40 returned
+>> 59 28 [3e]
 
-Network Mode (expecting 0) =
-Radiocrafts.getParameter: address=59
-Radiocrafts.sendCommand: 593B
-Radiocrafts.sendCommand response:
-Radiocrafts.getParameter: address=59 returned
+Radiocrafts.sendCommand: response:
+Radiocrafts.getParameter: address=0x28 returned
 
-Baud Rate (expecting 5) =
-Radiocrafts.getParameter: address=48
+Getting network mode (expecting 0)...
+Radiocrafts.getParameter: address=0x3b
+Radiocrafts.sendCommand: 593b
+>> 59 3b [3e]
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.getParameter: address=0x3b returned
+
+Getting baud rate (expecting 5)...
+Radiocrafts.getParameter: address=0x30
 Radiocrafts.sendCommand: 5930
-Radiocrafts.sendCommand response:
-Radiocrafts.getParameter: address=48 returned
+>> 59 30 [3e]
 
-Setting frequency
+Radiocrafts.sendCommand: response:
+Radiocrafts.getParameter: address=0x30 returned
+
+Setting frequency...
 Radiocrafts.setFrequencySG
-Radiocrafts.sendCommand: 4d000300
-Radiocrafts.sendCommand response:
+Radiocrafts.sendCommand: 4d0003
+>> 4d 00 03 [3e]
+
+Radiocrafts.sendCommand: response:
 Radiocrafts.sendCommand: ff
-Radiocrafts.sendCommand response:
+>> ff [3e]
+
+Radiocrafts.sendCommand: response:
 Set frequency result =
 
-Getting frequency
+Getting frequency (expecting 3)...
 Radiocrafts.sendCommand: 5900
-Radiocrafts.sendCommand response:
+>> 59 00 [3e]
+
+Radiocrafts.sendCommand: response:
 Frequency (expecting 3) =
 
-Getting temperature
+Getting temperature...
 Radiocrafts.sendCommand: 55
-Radiocrafts.sendCommand response:
-Radiocrafts.getTemperature: returned 0
-Temperature = 0 C
+>> 55 [a2] [3e]
 
-Getting voltage
+Radiocrafts.sendCommand: response: a2
+Radiocrafts.getTemperature: returned 97
+Temperature = 97 C
+
+Getting voltage...
 Radiocrafts.sendCommand: 56
-Radiocrafts.sendCommand response:
-Radiocrafts.getVoltage: returned 0.000000
-Supply voltage = 0.000000 V
+>> 56 [73] [3e]
 
-Getting ID
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Supply voltage = 55.00 V
+
+Getting SIGFOX ID...
 Radiocrafts.sendCommand: 39
-Radiocrafts.sendCommand response:
-Radiocrafts.getID: returned
+>> 39 [68] [86] [1c] [00] [95] [22] [6f] [82] [2b] [cd] [7d] [3c] [3e]
 
-4 bytes ID (LSB first) and 8 bytes PAC (MSB first) =
+Radiocrafts.sendCommand: response: 68861c0095226f822bcd7d3c
+Radiocrafts.getID: returned id=001c8668, pac=95226f822bcd7d3c
+SIGFOX ID = 001c8668
+PAC = 95226f822bcd7d3c
 
-Getting hardware
-Radiocrafts.getHardware: ERROR - Not implemented
-Hardware version = TODO
-
-Getting firmware
-Radiocrafts.getFirmware: ERROR - Not implemented
-Firmware version = TODO
-
-Getting power
-Radiocrafts.getParameter: address=1
+Getting power...
+Radiocrafts.getParameter: address=0x01
 Radiocrafts.sendCommand: 5901
-Radiocrafts.sendCommand response:
-Radiocrafts.getParameter: address=1 returned
+>> 59 01 [3e]
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.getParameter: address=0x01 returned
 Radiocrafts.getPower: returned 0
 Power level = 0 dB
 Radiocrafts.sendCommand: 58
-Radiocrafts.sendCommand response:
-Radiocrafts.exitCommandMode: OK
+>> 58
+
+Radiocrafts.sendCommand: Error: No response
 
 Sending payload
-Radiocrafts.sendPayload: 000000000000
-Radiocrafts.sendCommand: 0C000000000000
-Radiocrafts.sendCommand response:
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
 
-Message sent !
-
-Sending payload
-Radiocrafts.sendPayload: 000000000000
-Warning: Should wait 10 mins before sending the next message
-Radiocrafts.sendCommand: 0C000000000000
-Radiocrafts.sendCommand response:
-
-Message sent !
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
 
 Sending payload
-Radiocrafts.sendPayload: 000000000000
-Warning: Should wait 10 mins before sending the next message
-Radiocrafts.sendCommand: 0C000000000000
-Radiocrafts.sendCommand response:
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
 
-Message sent !
-
-Sending payload
-Radiocrafts.sendPayload: 000000000000
-Warning: Should wait 10 mins before sending the next message
-Radiocrafts.sendCommand: 0C000000000000
-Radiocrafts.sendCommand response:
-
-Message sent !
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
 
 Sending payload
-Radiocrafts.sendPayload: 000000000000
-Warning: Should wait 10 mins before sending the next message
-Radiocrafts.sendCommand: 0C000000000000
-Radiocrafts.sendCommand response:
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
 
-Message sent !
-
-Sending payload
-Radiocrafts.sendPayload: 000000000000
-Warning: Should wait 10 mins before sending the next message
-Radiocrafts.sendCommand: 0C000000000000
-Radiocrafts.sendCommand response:
-
-Message sent !
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
 
 Sending payload
-Radiocrafts.sendPayload: 000000000000
-Warning: Should wait 10 mins before sending the next message
-Radiocrafts.sendCommand: 0C000000000000
-Radiocrafts.sendCommand response:
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
 
-Message sent !
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
+
+Sending payload
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
+
+Sending payload
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
+
+Sending payload
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
+
+Sending payload
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
+
+Sending payload
+Radiocrafts.sendPayload: 610000005c42
+Radiocrafts.sendCommand: 06610000005c42
+>> 06 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: Error: No response
+Message not sent !
 */
