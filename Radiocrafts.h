@@ -38,7 +38,7 @@ public:
   void echoOff();  //  Turn off send/receive echo.
   void setEchoPort(Print *port);  //  Set the port for sending echo output.
   bool isReady();
-  bool sendPayload(const String payload);  //  Send the payload of hex digits to the network, max 12 bytes.
+  bool sendMessage(const String payload);  //  Send the payload of hex digits to the network, max 12 bytes.
   bool sendString(const String str);  //  Sending a text string, max 12 characters allowed.
   bool receive(String &data);  //  Receive a message.
   bool enterCommandMode();  //  Enter Command Mode for sending module commands, not data.
@@ -80,8 +80,10 @@ public:
   String toHex(char *c, int length);
 
 private:
-  bool sendCommand(String cmd, String &result);
-  bool sendCommand(const String command, const int timeout, String &dataOut);
+  bool sendCommand(const String cmd, const int expectedMarkers,
+                   String &result, int &actualMarkers);
+  bool sendCommand(const String command, const int timeout, const int expectedMarkers,
+                   String &dataOut, int &actualMarkers);
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
 

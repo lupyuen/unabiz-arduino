@@ -123,18 +123,24 @@ void loop()
     Serial.println(F("Power level KO"));
   }
 
-  //  Exit command mode.
+  //  Exit command mode and prepare to send message.
   transceiver.exitCommandMode();
 
-  //  Send temperature and voltage as a SIGFOX message.  Convert to hexadecimal before sending.
-  String temp = transceiver.toHex(temperature);
-  String volt = transceiver.toHex(voltage);
-  String msg = temp + volt;
+  //  Send counter, temperature and voltage as a SIGFOX message.  Convert to hexadecimal before sending.
+  for (int i = 0; i < 10; i++) {  //  Send 10 times.
+    //  Get temperature and voltage.
+    transceiver.enterCommandMode();
+    transceiver.getTemperature(temperature);
+    transceiver.getVoltage(voltage);
+    transceiver.exitCommandMode();
 
-  //  Send 10 times.
-  for (int i = 0; i < 10; i++) {
-    Serial.println(F("\nSending payload "));
-    if (transceiver.sendPayload(msg))
+    //  Convert to hex and combine them.
+    String temp = transceiver.toHex(temperature);
+    String volt = transceiver.toHex(voltage);
+    String msg = transceiver.toHex((char) i) + temp + volt;
+
+    Serial.println(F("\nSending message..."));
+    if (transceiver.sendMessage(msg))
     {
       Serial.println(F("Message sent !"));
     }

@@ -11,6 +11,7 @@ class NullPort: public Print {
   virtual size_t write(uint8_t) {}
 };
 static NullPort nullPort;
+static int markers = 0;
 
 Radiocrafts::Radiocrafts(): Radiocrafts(RADIOCRAFTS_RX, RADIOCRAFTS_TX) {}  //  Forward to constructor below.
 
@@ -32,7 +33,7 @@ bool Radiocrafts::begin() {
   return true;
 }
 
-bool Radiocrafts::sendPayload(const String payload) {
+bool Radiocrafts::sendMessage(const String payload) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
@@ -42,7 +43,7 @@ bool Radiocrafts::sendPayload(const String payload) {
   //  Decode and send the data.
   //  First byte is payload length, followed by rest of payload.
   String message = toHex((char) (payload.length() / 2)) + payload, data = "";
-  if (sendCommand(message, data)) {
+  if (sendCommand(message, 0, data, markers)) {  //  No markers expected.
     echoPort->println(data);
     _lastSend = millis();
     return true;
@@ -50,12 +51,16 @@ bool Radiocrafts::sendPayload(const String payload) {
   return false;
 }
 
-bool Radiocrafts::sendCommand(const String command, const int timeout, String &dataOut) {
+bool Radiocrafts::sendCommand(const String command, const int timeout,
+  const int expectedMarkerCount, String &dataOut, int &actualMarkerCount) {
   //  command contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
   //  valid payload and this causes string truncation in C libraries.
+  //  expectedMarkerCount is the number of end-of-command markers '>' we
+  //  expect to see.  actualMarkerCount contains the actual number seen.
   echoPort->print(String(F("Radiocrafts.sendCommand: ")) + command + '\n');
+  actualMarkerCount = 0;
   //  Start serial interface.
   serialPort->begin(MODEM_BITS_PER_SECOND);
   delay(200);
@@ -63,39 +68,45 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String &d
   serialPort->listen();
 
   //  Send the command: need to write/read char by char because of echo.
-  echoPort->print(">> ");  //
   const char *commandBuffer = command.c_str();
   //  Send command and read response.  Loop until timeout or we see the end of response marker.
-  String response = ""; const unsigned long startTime = millis();
-  bool sawEndOfResponse = false; int i = 0; String echoOutput = "";
+  const unsigned long startTime = millis(); int i = 0;
+  String response = "", echoSend = "", echoReceive = "";
   for (;;) {
     //  If there is data to send, send it.
     if (i < command.length()) {
       //  Convert 2 hex digits to 1 char and send.
       uint8_t txChar = hexDigitToDecimal(commandBuffer[i]) * 16 +
                        hexDigitToDecimal(commandBuffer[i + 1]);
-      echoOutput.concat(toHex((char) txChar) + ' ');  //
+      echoSend.concat(toHex((char) txChar) + ' ');
       serialPort->write(txChar);
       i = i + 2;
     }
+
+    //  If timeout, quit.
     const unsigned long currentTime = millis();
     if (currentTime - startTime > timeout) break;
+
+    //  If data is available to receive, receive it.
     if (serialPort->available() > 0)
     {
       int rxChar = serialPort->read();
-      echoOutput.concat(String('[') + toHex((char) rxChar) + "] ");  //
+      echoReceive.concat(toHex((char) rxChar) + ' ');
       if (rxChar == -1) continue;
       if (rxChar == END_OF_RESPONSE) {
-        sawEndOfResponse = true;
-        break;
+        actualMarkerCount++;  //  TODO: Count the number of end markers.
+        //break;  //  TODO: Don't wait for timeout.
       }
-      response.concat(toHex((char) rxChar));
+      else {
+        response.concat(toHex((char) rxChar));
+      }
     }
   }
   serialPort->end();
-  echoPort->println(echoOutput);
+  echoPort->print(">> ");  echoPort->println(echoSend);
+  if (echoReceive.length() > 0) { echoPort->print("<< ");  echoPort->println(echoReceive); }
   //  If we did not see the terminating '>', something is wrong.
-  if (!sawEndOfResponse) {
+  if (actualMarkerCount < expectedMarkerCount) {
     if (response.length() == 0)
       echoPort->println(F("\nRadiocrafts.sendCommand: Error: No response"));  //  Response timeout.
     else
@@ -109,11 +120,13 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String &d
   return true;
 }
 
-bool Radiocrafts::sendCommand(String cmd, String &result) {
+bool Radiocrafts::sendCommand(String cmd, int expectedMarkerCount,
+                              String &result, int &actualMarkerCount) {
   //  cmd contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   String data = "";
-  if (!sendCommand(cmd, COMMAND_TIMEOUT, data)) return false;
+  if (!sendCommand(cmd, COMMAND_TIMEOUT, expectedMarkerCount,
+                   data, actualMarkerCount)) return false;
   result = data;
   return true;
 }
@@ -128,7 +141,7 @@ bool Radiocrafts::sendString(const String str) {
     payload.concat(toHex(ch));
   }
   //  Send the encoded payload.
-  return sendPayload(payload);
+  return sendMessage(payload);
 }
 
 bool Radiocrafts::isReady()
@@ -170,20 +183,20 @@ static String data = "";
 
 bool Radiocrafts::enterCommandMode() {
   //  Enter Command Mode for sending module commands, not data.
-  if (!sendCommand("00", data)) return false;
+  if (!sendCommand("00", 1, data, markers)) return false;
   echoPort->println(F("Radiocrafts.enterCommandMode: OK "));
   return true;
 }
 
 bool Radiocrafts::exitCommandMode() {
   //  Exit Command Mode so we can send data.
-  if (!sendCommand(toHex('X'), data)) return false;
+  if (!sendCommand(toHex('X'), 0, data, markers)) return false;
   echoPort->println(F("Radiocrafts.exitCommandMode: OK "));
   return true;
 }
 
 bool Radiocrafts::getTemperature(int &temperature) {
-  if (!sendCommand(toHex('U'), data)) return false;
+  if (!sendCommand(toHex('U'), 1, data, markers)) return false;
   temperature = (int) data.charAt(0);
   echoPort->print(F("Radiocrafts.getTemperature: returned "));  echoPort->println(temperature);
   return true;
@@ -191,7 +204,7 @@ bool Radiocrafts::getTemperature(int &temperature) {
 
 bool Radiocrafts::getID(String &id, String &pac) {
   //  Get the SIGFOX ID and PAC for the module.
-  if (!sendCommand(toHex('9'), data)) return false;
+  if (!sendCommand(toHex('9'), 1, data, markers)) return false;
   //  Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
   if (data.length() != 12 * 2) {
     echoPort->println(String(F("Radiocrafts.getID: Unknown response: ")) + data);
@@ -205,7 +218,7 @@ bool Radiocrafts::getID(String &id, String &pac) {
 
 bool Radiocrafts::getVoltage(float &voltage) {
   //  Returns one byte indicating the power supply voltage.
-  if (!sendCommand(toHex('V'), data)) return false;
+  if (!sendCommand(toHex('V'), 1, data, markers)) return false;
   voltage = (float) data.charAt(0);
   echoPort->print(F("Radiocrafts.getVoltage: returned "));  echoPort->println(voltage);
   return true;
@@ -230,7 +243,8 @@ bool Radiocrafts::getParameter(uint8_t address, String &value) {
   echoPort->print(F("Radiocrafts.getParameter: address=0x"));  echoPort->println(toHex((char) address));
   if (!sendCommand(String(CMD_READ_MEMORY) +   //  Read memory ('Y')
                    toHex((char) address),  //  Address of parameter
-                   data)) return false;
+                   2,  //  Expect 1 marker for command, 1 for response.
+                   data, markers)) return false;
   value = data;
   echoPort->print(F("Radiocrafts.getParameter: address=0x"));  echoPort->print(toHex((char) address));
   echoPort->print(F(" returned "));  echoPort->println(value);
@@ -266,9 +280,9 @@ bool Radiocrafts::disableEmulator(String &result) {
   if (!sendCommand(String(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
       "28" + //  Address of parameter = PUBLIC_KEY (0x28)
       "00",  //  Value of parameter = Unique ID & key (0x00)
-      data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
+       1, data, markers)) { sendCommand(CMD_EXIT_CONFIG, 1, data, markers); return false; }
   result = data;
-  sendCommand(CMD_EXIT_CONFIG, data);  //  Exit config mode.
+  sendCommand(CMD_EXIT_CONFIG, 1, data, markers);  //  Exit config mode.
   return true;
 }
 
@@ -278,9 +292,9 @@ bool Radiocrafts::enableEmulator(String &result) {
   if (!sendCommand(String(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
       "28" + //  Address of parameter = PUBLIC_KEY (0x28)
       "01",  //  Value of parameter = Public ID & key (0x00)
-      data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
+      1, data, markers)) { sendCommand(CMD_EXIT_CONFIG, 1, data, markers); return false; }
   result = data;
-  sendCommand(CMD_EXIT_CONFIG, data);  //  Exit config mode.
+  sendCommand(CMD_EXIT_CONFIG, 1, data, markers);  //  Exit config mode.
   return true;
 }
 
@@ -289,7 +303,7 @@ bool Radiocrafts::getFrequency(String &result) {
   //  0: Europe (RCZ1)
   //  1: US (RCZ2)
   //  3: SG, TW, AU, NZ (RCZ4)
-  if (!sendCommand(toHex('Y') + "00", data)) return false;
+  if (!sendCommand(toHex('Y') + "00", 1, data, markers)) return false;
   result = data;
   return true;
 }
@@ -302,9 +316,9 @@ bool Radiocrafts::setFrequency(int zone, String &result) {
   if (!sendCommand(String(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
     "00" + //  Address of parameter = RF_FREQUENCY_DOMAIN (0x0)
     toHex((char) (zone - 1)),  //  Value of parameter = RCZ - 1
-    data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
+    1, data, markers)) { sendCommand(CMD_EXIT_CONFIG, 1, data, markers); return false; }
   result = data;
-  sendCommand(CMD_EXIT_CONFIG, data);  //  Exit config mode.
+  sendCommand(CMD_EXIT_CONFIG, 1, data, markers);  //  Exit config mode.
   return true;
 }
 
