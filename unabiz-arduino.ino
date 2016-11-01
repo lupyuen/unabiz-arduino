@@ -36,16 +36,16 @@ void loop()
   Serial.println(F("\nChecking emulation mode (expecting 0)...")); int emulator = 0;
   transceiver.getEmulator(emulator);
 
-  for(;;) {}
-
   //  Get network mode for transmission.  Should return network mode = 0 for uplink only, no downlink.
   Serial.println(F("\nNetwork Mode (expecting 0) = "));
   transceiver.getParameter(0x3b, result);
-  
+
   //  Get baud rate.  Should return baud rate = 5 for 19200 bps.
   Serial.println(F("\nBaud Rate (expecting 5) = "));
   transceiver.getParameter(0x30, result);
-  
+
+  for(;;) {}
+
   //  Set the frequency of SIGFOX module to SG/TW.
   Serial.println(F("\nSetting frequency "));  result = "";
   transceiver.setFrequencySG(result);

@@ -12,13 +12,12 @@ class NullPort: public Print {
 };
 static NullPort nullPort;
 
-Radiocrafts::Radiocrafts(): Radiocrafts(RADIOCRAFTS_RX, RADIOCRAFTS_TX) {}
+Radiocrafts::Radiocrafts(): Radiocrafts(RADIOCRAFTS_RX, RADIOCRAFTS_TX) {}  //  Forward to constructor below.
 
 Radiocrafts::Radiocrafts(unsigned int rx, unsigned int tx) {
   //  Init the module with the specified transmit and receive pins.
   //  Default to no echo.
-  Serial.begin(9600);
-  Serial.print(String(F("Radiocrafts.Radiocrafts: (rx,tx)=")) + rx + ',' + tx + '\n');
+  //Serial.begin(9600); Serial.print(String(F("Radiocrafts.Radiocrafts: (rx,tx)=")) + rx + ',' + tx + '\n');
   serialPort = new SoftwareSerial(rx, tx);
   echoPort = &nullPort;
   lastEchoPort = &Serial;
@@ -79,6 +78,7 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String &d
   //  Read response.  Loop until timeout or we see the end of response marker.
   echoPort->print("\n<< ");  //
   String response = ""; const unsigned long startTime = millis();
+  bool sawEndOfResponse = false;
   for (;;) {
     const unsigned long currentTime = millis();
     if (currentTime - startTime > timeout) break;
@@ -87,12 +87,23 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String &d
       int rxChar = serialPort->read();
       echoPort->print(toHex((char) rxChar) + ' ');  //
       if (rxChar == -1) continue;
-      if (rxChar == END_OF_RESPONSE) break;
+      if (rxChar == END_OF_RESPONSE) {
+        sawEndOfResponse = true;
+        break;
+      }
       response.concat(toHex((byte) rxChar));
     }
   }
   serialPort->end();
-  echoPort->print(F("\nRadiocrafts.sendCommand response: "));  echoPort->println(response);
+  //  If we did not see the terminating '>', something is wrong.
+  if (!sawEndOfResponse) {
+    if (response.length() == 0)
+      echoPort->println(F("\nRadiocrafts.sendCommand: Error: No response"));  //  Response timeout.
+    else
+      echoPort->println(String(F("\nRadiocrafts.sendCommand: Error: Unknown response: ")) + response);
+    return false;
+  }
+  echoPort->println(String(F("\nRadiocrafts.sendCommand: response: ")) + response);
   dataOut = response;
 
   //  TODO: Parse the downlink response.
@@ -211,12 +222,12 @@ bool Radiocrafts::getFirmware(String &firmware) {
 
 bool Radiocrafts::getParameter(uint8_t address, String &value) {
   //  Read the parameter at the address.
-  echoPort->print(F("Radiocrafts.getParameter: address="));  echoPort->println(address);
+  echoPort->print(F("Radiocrafts.getParameter: address=0x"));  echoPort->println(toHex((char) address));
   if (!sendCommand(String(CMD_READ_MEMORY) +   //  Read memory ('Y')
                    toHex((char) address),  //  Address of parameter
                    data)) return false;
   value = data;
-  echoPort->print(F("Radiocrafts.getParameter: address="));  echoPort->print(address);
+  echoPort->print(F("Radiocrafts.getParameter: address=0x"));  echoPort->print(toHex((char) address));
   echoPort->print(F(" returned "));  echoPort->println(value);
   return true;
 }
