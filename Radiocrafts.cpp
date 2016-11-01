@@ -108,12 +108,12 @@ bool Radiocrafts::sendCommand(const String command, const int timeout,
   //  If we did not see the terminating '>', something is wrong.
   if (actualMarkerCount < expectedMarkerCount) {
     if (response.length() == 0)
-      echoPort->println(F("\nRadiocrafts.sendCommand: Error: No response"));  //  Response timeout.
+      echoPort->println(F("Radiocrafts.sendCommand: Error: No response"));  //  Response timeout.
     else
-      echoPort->println(String(F("\nRadiocrafts.sendCommand: Error: Unknown response: ")) + response);
+      echoPort->println(String(F("Radiocrafts.sendCommand: Error: Unknown response: ")) + response);
     return false;
   }
-  echoPort->println(String(F("\nRadiocrafts.sendCommand: response: ")) + response);
+  echoPort->println(String(F("Radiocrafts.sendCommand: response: ")) + response);
   dataOut = response;
 
   //  TODO: Parse the downlink response.
@@ -195,13 +195,6 @@ bool Radiocrafts::exitCommandMode() {
   return true;
 }
 
-bool Radiocrafts::getTemperature(int &temperature) {
-  if (!sendCommand(toHex('U'), 1, data, markers)) return false;
-  temperature = (int) data.charAt(0);
-  echoPort->print(F("Radiocrafts.getTemperature: returned "));  echoPort->println(temperature);
-  return true;
-}
-
 bool Radiocrafts::getID(String &id, String &pac) {
   //  Get the SIGFOX ID and PAC for the module.
   if (!sendCommand(toHex('9'), 1, data, markers)) return false;
@@ -216,10 +209,27 @@ bool Radiocrafts::getID(String &id, String &pac) {
   return true;
 }
 
+bool Radiocrafts::getTemperature(int &temperature) {
+  if (!sendCommand(toHex('U'), 1, data, markers)) return false;
+  if (data.length() != 2) {
+    echoPort->println(String(F("Radiocrafts.getTemperature: Unknown response: ")) + data);
+    return false;
+  }
+  temperature = hexDigitToDecimal(data.charAt(0)) * 16 +
+                   hexDigitToDecimal(data.charAt(1));
+  echoPort->print(F("Radiocrafts.getTemperature: returned "));  echoPort->println(temperature);
+  return true;
+}
+
 bool Radiocrafts::getVoltage(float &voltage) {
   //  Returns one byte indicating the power supply voltage.
   if (!sendCommand(toHex('V'), 1, data, markers)) return false;
-  voltage = (float) data.charAt(0);
+  if (data.length() != 2) {
+    echoPort->println(String(F("Radiocrafts.getVoltage: Unknown response: ")) + data);
+    return false;
+  }
+  voltage = hexDigitToDecimal(data.charAt(0)) * 16 +
+                hexDigitToDecimal(data.charAt(1));
   echoPort->print(F("Radiocrafts.getVoltage: returned "));  echoPort->println(voltage);
   return true;
 }
