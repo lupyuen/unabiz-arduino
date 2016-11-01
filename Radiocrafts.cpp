@@ -65,36 +65,35 @@ bool Radiocrafts::sendCommand(const String command, const int timeout, String &d
   //  Send the command: need to write/read char by char because of echo.
   echoPort->print(">> ");  //
   const char *commandBuffer = command.c_str();
-  for (int i = 0; i < command.length(); i = i + 2)
-  {
-    //  Convert 2 hex digits to 1 char.
-    uint8_t txChar = hexDigitToDecimal(commandBuffer[i]) * 16 +
-      hexDigitToDecimal(commandBuffer[i + 1]);
-    echoPort->print(toHex((char) txChar) + ' ');  //
-    serialPort->write(txChar);
-    //int rxChar = serialPort->read();
-    //if (rxChar >=0) echoPort->print(String("<< ") + toHex((char) rxChar) + "] ");  //
-  }
-  //  Read response.  Loop until timeout or we see the end of response marker.
-  echoPort->print("\n<< ");  //
+  //  Send command and read response.  Loop until timeout or we see the end of response marker.
   String response = ""; const unsigned long startTime = millis();
-  bool sawEndOfResponse = false;
+  bool sawEndOfResponse = false; int i = 0; String echoOutput = "";
   for (;;) {
+    //  If there is data to send, send it.
+    if (i < command.length()) {
+      //  Convert 2 hex digits to 1 char and send.
+      uint8_t txChar = hexDigitToDecimal(commandBuffer[i]) * 16 +
+                       hexDigitToDecimal(commandBuffer[i + 1]);
+      echoOutput.concat(toHex((char) txChar) + ' ');  //
+      serialPort->write(txChar);
+      i = i + 2;
+    }
     const unsigned long currentTime = millis();
     if (currentTime - startTime > timeout) break;
     if (serialPort->available() > 0)
     {
       int rxChar = serialPort->read();
-      echoPort->print(toHex((char) rxChar) + ' ');  //
+      echoOutput.concat(String('[') + toHex((char) rxChar) + "] ");  //
       if (rxChar == -1) continue;
       if (rxChar == END_OF_RESPONSE) {
         sawEndOfResponse = true;
         break;
       }
-      response.concat(toHex((byte) rxChar));
+      response.concat(toHex((char) rxChar));
     }
   }
   serialPort->end();
+  echoPort->println(echoOutput);
   //  If we did not see the terminating '>', something is wrong.
   if (!sawEndOfResponse) {
     if (response.length() == 0)
@@ -190,11 +189,17 @@ bool Radiocrafts::getTemperature(int &temperature) {
   return true;
 }
 
-bool Radiocrafts::getID(String &id) {
-  //  Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
+bool Radiocrafts::getID(String &id, String &pac) {
+  //  Get the SIGFOX ID and PAC for the module.
   if (!sendCommand(toHex('9'), data)) return false;
-  id = data;
-  echoPort->print(F("Radiocrafts.getID: returned "));  echoPort->println(id);
+  //  Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
+  if (data.length() != 12 * 2) {
+    echoPort->println(String(F("Radiocrafts.getID: Unknown response: ")) + data);
+    return false;
+  }
+  id = data.substring(6, 8) + data.substring(4, 6) + data.substring(2, 4) + data.substring(0, 2);
+  pac = data.substring(8, 8 + 16);
+  echoPort->println(String(F("Radiocrafts.getID: returned id=")) + id + ", pac=" + pac);
   return true;
 }
 
@@ -296,7 +301,7 @@ bool Radiocrafts::setFrequency(int zone, String &result) {
   //  3: AU/NZ (RCZ4)
   if (!sendCommand(String(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
     "00" + //  Address of parameter = RF_FREQUENCY_DOMAIN (0x0)
-    toHex(zone - 1),  //  Value of parameter = RCZ - 1
+    toHex((char) (zone - 1)),  //  Value of parameter = RCZ - 1
     data)) { sendCommand(CMD_EXIT_CONFIG, data); return false; }
   result = data;
   sendCommand(CMD_EXIT_CONFIG, data);  //  Exit config mode.

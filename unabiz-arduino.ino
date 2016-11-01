@@ -37,27 +37,25 @@ void loop()
   transceiver.getEmulator(emulator);
 
   //  Get network mode for transmission.  Should return network mode = 0 for uplink only, no downlink.
-  Serial.println(F("\nNetwork Mode (expecting 0) = "));
+  Serial.println(F("\nGetting network mode (expecting 0)..."));
   transceiver.getParameter(0x3b, result);
 
   //  Get baud rate.  Should return baud rate = 5 for 19200 bps.
-  Serial.println(F("\nBaud Rate (expecting 5) = "));
+  Serial.println(F("\nGetting baud rate (expecting 5)..."));
   transceiver.getParameter(0x30, result);
 
-  for(;;) {}
-
   //  Set the frequency of SIGFOX module to SG/TW.
-  Serial.println(F("\nSetting frequency "));  result = "";
+  Serial.println(F("\nSetting frequency..."));  result = "";
   transceiver.setFrequencySG(result);
   Serial.print(F("Set frequency result = "));  Serial.println(result);
 
   //  Get and display the frequency used by the SIGFOX module.  Should return 3 for RCZ4 (SG/TW).
-  Serial.println(F("\nGetting frequency "));  String frequency = "";
+  Serial.println(F("\nGetting frequency (expecting 3)..."));  String frequency = "";
   transceiver.getFrequency(frequency);
   Serial.print(F("Frequency (expecting 3) = "));  Serial.println(frequency);
 
   //  Read module temperature.
-  Serial.println(F("\nGetting temperature "));  int temperature = 0;
+  Serial.println(F("\nGetting temperature..."));  int temperature = 0;
   if (transceiver.getTemperature(temperature))
   {
     Serial.print(F("Temperature = "));  Serial.print(temperature);  Serial.println(F(" C"));
@@ -68,7 +66,7 @@ void loop()
   }
 
   //  Read module supply voltage.
-  Serial.println(F("\nGetting voltage "));  float voltage = 0.0;
+  Serial.println(F("\nGetting voltage..."));  float voltage = 0.0;
   if (transceiver.getVoltage(voltage))
   {
     Serial.print(F("Supply voltage = "));  Serial.print(voltage);  Serial.println(F(" V"));
@@ -78,18 +76,19 @@ void loop()
     Serial.println(F("Supply voltage KO"));
   }
 
-  //  Read module identification with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
-  Serial.println(F("\nGetting ID "));  String id = "";
-  if (transceiver.getID(id))
+  //  Read SIGFOX ID and PAC from module.
+  Serial.println(F("\nGetting SIGFOX ID..."));  String id = "", pac = "";
+  if (transceiver.getID(id, pac))
   {
-    Serial.print(F("\n4 bytes ID (LSB first) and 8 bytes PAC (MSB first) = "));
-    Serial.println(id);
+    Serial.print(F("SIGFOX ID = "));  Serial.println(id);
+    Serial.print(F("PAC = "));  Serial.println(pac);
   }
   else
   {
     Serial.println(F("ID KO"));
   }
 
+#if NOTUSED
   //  Read module hardware version.
   Serial.println(F("\nGetting hardware "));  String hardware = "";
   if (transceiver.getHardware(hardware))
@@ -111,9 +110,10 @@ void loop()
   {
     Serial.println(F("Firmware version KO"));
   }
+#endif  //  NOTUSED
 
   //  Read power.
-  Serial.println(F("\nGetting power "));  int power = 0;
+  Serial.println(F("\nGetting power..."));  int power = 0;
   if (transceiver.getPower(power))
   {
     Serial.print(F("Power level = "));  Serial.print(power);  Serial.println(F(" dB"));
@@ -126,12 +126,12 @@ void loop()
   //  Exit command mode.
   transceiver.exitCommandMode();
 
-  // Convert to hexadecimal before sending
+  //  Send temperature and voltage as a SIGFOX message.  Convert to hexadecimal before sending.
   String temp = transceiver.toHex(temperature);
   String volt = transceiver.toHex(voltage);
-  
-  String msg = temp + volt; // Put everything together
+  String msg = temp + volt;
 
+  //  Send 10 times.
   for (int i = 0; i < 10; i++) {
     Serial.println(F("\nSending payload "));
     if (transceiver.sendPayload(msg))

@@ -61,7 +61,7 @@ public:
   bool writeSettings(String &result); //  Write frequency and other settings to flash memory of the module.
   bool reboot(String &result);  //  Reboot the SIGFOX module.
   bool getTemperature(int &temperature);
-  bool getID(String &id);
+  bool getID(String &id, String &pac);  //  Get the SIGFOX ID and PAC for the module.
   bool getVoltage(float &voltage);
   bool getHardware(String &hardware);
   bool getFirmware(String &firmware);
