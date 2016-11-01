@@ -142,11 +142,11 @@ void loop()
     Serial.println(F("\nSending message..."));
     if (transceiver.sendMessage(msg))
     {
-      Serial.println(F("Message sent !"));
+      Serial.println(F("Message sent!"));
     }
     else
     {
-      Serial.println(F("Message not sent !"));
+      Serial.println(F("Message not sent!"));
     }
     delay(6000);
   }
@@ -161,67 +161,77 @@ Radiocrafts.echoOn
 
 Entering command mode (expecting '>')...
 Radiocrafts.sendCommand: 00
->> 00 [3e]
+>> 00
+<< 3e
 
 Radiocrafts.sendCommand: response:
 Radiocrafts.enterCommandMode: OK
 
 Disabling emulation mode...
 Radiocrafts.sendCommand: 4d2800
->> 4d 28 00 [3e]
+>> 4d 28 00
+<< 3e
 
 Radiocrafts.sendCommand: response:
 Radiocrafts.sendCommand: ff
->> ff [3e]
+>> ff
+<< 3e
 
 Radiocrafts.sendCommand: response:
 
 Checking emulation mode (expecting 0)...
 Radiocrafts.getParameter: address=0x28
 Radiocrafts.sendCommand: 5928
->> 59 28 [3e]
+>> 59 28
+<< 3e 00 3e
 
-Radiocrafts.sendCommand: response:
-Radiocrafts.getParameter: address=0x28 returned
+Radiocrafts.sendCommand: response: 00
+Radiocrafts.getParameter: address=0x28 returned 00
 
 Getting network mode (expecting 0)...
 Radiocrafts.getParameter: address=0x3b
 Radiocrafts.sendCommand: 593b
->> 59 3b [3e]
+>> 59 3b
+<< 3e 00 3e
 
-Radiocrafts.sendCommand: response:
-Radiocrafts.getParameter: address=0x3b returned
+Radiocrafts.sendCommand: response: 00
+Radiocrafts.getParameter: address=0x3b returned 00
 
 Getting baud rate (expecting 5)...
 Radiocrafts.getParameter: address=0x30
 Radiocrafts.sendCommand: 5930
->> 59 30 [3e]
+>> 59 30
+<< 3e 05 3e
 
-Radiocrafts.sendCommand: response:
-Radiocrafts.getParameter: address=0x30 returned
+Radiocrafts.sendCommand: response: 05
+Radiocrafts.getParameter: address=0x30 returned 05
 
 Setting frequency...
 Radiocrafts.setFrequencySG
 Radiocrafts.sendCommand: 4d0003
->> 4d 00 03 [3e]
+>> 4d 00 03
+<< 3e
 
 Radiocrafts.sendCommand: response:
 Radiocrafts.sendCommand: ff
->> ff [3e]
+>> ff
+<< 3e
 
 Radiocrafts.sendCommand: response:
 Set frequency result =
 
 Getting frequency (expecting 3)...
 Radiocrafts.sendCommand: 5900
->> 59 00 [3e]
+>> 59 00
+<< 3e 03 3e
 
-Radiocrafts.sendCommand: response:
-Frequency (expecting 3) =
+Radiocrafts.sendCommand: response: 03
+Frequency (expecting 3) = 03
 
 Getting temperature...
 Radiocrafts.sendCommand: 55
->> 55 [a2] [3e]
+>> 55
+<< a2 3e
 
 Radiocrafts.sendCommand: response: a2
 Radiocrafts.getTemperature: returned 97
@@ -229,7 +239,8 @@ Temperature = 97 C
 
 Getting voltage...
 Radiocrafts.sendCommand: 56
->> 56 [73] [3e]
+>> 56
+<< 73 3e
 
 Radiocrafts.sendCommand: response: 73
 Radiocrafts.getVoltage: returned 55.00
@@ -237,7 +248,8 @@ Supply voltage = 55.00 V
 
 Getting SIGFOX ID...
 Radiocrafts.sendCommand: 39
->> 39 [68] [86] [1c] [00] [95] [22] [6f] [82] [2b] [cd] [7d] [3c] [3e]
+>> 39
+<< 68 86 1c 00 95 22 6f 82 2b cd 7d 3c 3e
 
 Radiocrafts.sendCommand: response: 68861c0095226f822bcd7d3c
 Radiocrafts.getID: returned id=001c8668, pac=95226f822bcd7d3c
@@ -247,86 +259,336 @@ PAC = 95226f822bcd7d3c
 Getting power...
 Radiocrafts.getParameter: address=0x01
 Radiocrafts.sendCommand: 5901
->> 59 01 [3e]
+>> 59 01
+<< 3e 00 3e
 
-Radiocrafts.sendCommand: response:
-Radiocrafts.getParameter: address=0x01 returned
+Radiocrafts.sendCommand: response: 00
+Radiocrafts.getParameter: address=0x01 returned 00
 Radiocrafts.getPower: returned 0
 Power level = 0 dB
 Radiocrafts.sendCommand: 58
 >> 58
 
-Radiocrafts.sendCommand: Error: No response
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a2 3e
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Radiocrafts.sendCommand: response: a2
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Sending message...
+Radiocrafts.sendPayload: 00610000005c42
+Radiocrafts.sendCommand: 0700610000005c42
+>> 07 00 61 00 00 00 5c 42
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Radiocrafts.sendCommand: response:
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a2 3e
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Radiocrafts.sendCommand: response: a2
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Sending message...
+Radiocrafts.sendPayload: 01610000005c42
+Radiocrafts.sendCommand: 0701610000005c42
+>> 07 01 61 00 00 00 5c 42
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Radiocrafts.sendCommand: response:
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a3 3e
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Radiocrafts.sendCommand: response: a3
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
 
-Sending payload
-Radiocrafts.sendPayload: 610000005c42
-Radiocrafts.sendCommand: 06610000005c42
->> 06 61 00 00 00 5c 42
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
 
-Radiocrafts.sendCommand: Error: No response
-Message not sent !
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+
+Sending message...
+Radiocrafts.sendPayload: 02610000005c42
+Radiocrafts.sendCommand: 0702610000005c42
+>> 07 02 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: response:
+
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a3 3e
+
+Radiocrafts.sendCommand: response: a3
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
+
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+
+Sending message...
+Radiocrafts.sendPayload: 03610000005c42
+Radiocrafts.sendCommand: 0703610000005c42
+>> 07 03 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: response:
+
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a3 3e
+
+Radiocrafts.sendCommand: response: a3
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
+
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+
+Sending message...
+Radiocrafts.sendPayload: 04610000005c42
+Radiocrafts.sendCommand: 0704610000005c42
+>> 07 04 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: response:
+
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a3 3e
+
+Radiocrafts.sendCommand: response: a3
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
+
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+
+Sending message...
+Radiocrafts.sendPayload: 05610000005c42
+Radiocrafts.sendCommand: 0705610000005c42
+>> 07 05 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: response:
+
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a3 3e
+
+Radiocrafts.sendCommand: response: a3
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
+
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+
+Sending message...
+Radiocrafts.sendPayload: 06610000005c42
+Radiocrafts.sendCommand: 0706610000005c42
+>> 07 06 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: response:
+
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a4 3e
+
+Radiocrafts.sendCommand: response: a4
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
+
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+
+Sending message...
+Radiocrafts.sendPayload: 07610000005c42
+Radiocrafts.sendCommand: 0707610000005c42
+>> 07 07 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: response:
+
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a4 3e
+
+Radiocrafts.sendCommand: response: a4
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
+
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+
+Sending message...
+Radiocrafts.sendPayload: 08610000005c42
+Radiocrafts.sendCommand: 0708610000005c42
+>> 07 08 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: response:
+
+Message sent !
+Radiocrafts.sendCommand: 00
+>> 00
+<< 3e
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.enterCommandMode: OK
+Radiocrafts.sendCommand: 55
+>> 55
+<< a4 3e
+
+Radiocrafts.sendCommand: response: a4
+Radiocrafts.getTemperature: returned 97
+Radiocrafts.sendCommand: 56
+>> 56
+<< 73 3e
+
+Radiocrafts.sendCommand: response: 73
+Radiocrafts.getVoltage: returned 55.00
+Radiocrafts.sendCommand: 58
+>> 58
+
+Radiocrafts.sendCommand: response:
+Radiocrafts.exitCommandMode: OK
+
+Sending message...
+Radiocrafts.sendPayload: 09610000005c42
+Radiocrafts.sendCommand: 0709610000005c42
+>> 07 09 61 00 00 00 5c 42
+
+Radiocrafts.sendCommand: response:
+
+Message sent !
 */
