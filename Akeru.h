@@ -36,29 +36,20 @@
 #define ATFIRMWARE "ATI13"
 #define ATTEMPERATURE "ATI26"
 #define ATVOLTAGE "ATI27"
-#define ATKEEP "ATS300"
 #define ATPOWER "ATS302"
 #define ATDOWNLINK "AT$SB=1,2,1"
 #define ATSIGFOXTX "AT$SS="
-#define ATDISPLAY "AT&V"
+#define ATTDLANTX "AT$SL="
 #define DOWNLINKEND "+RX END"
 
 const unsigned int AKERU_RX = 4;  //  Receive port for UnaBiz / Akene Dev Kit
 const unsigned int AKERU_TX = 5;  //  Transmit port for UnaBiz / Akene Dev Kit
 
-//  Set frequency of the SIGFOX module to Singapore and Taiwan (same frequency): 
-//  Set IF frequency to 920.8 MHz, 
-//  max channel is 200, 
-//  min channel is 20 
-//#define ATSET_FREQUENCY_SG "AT$IF=920800000,200,20"  
-#define ATSET_FREQUENCY_SG "AT$IF=920800000"  
+//  Set frequency of the SIGFOX module to Singapore and Taiwan (920.8 MHz):
+#define ATSET_FREQUENCY_SG "AT$IF=920800000"
 
-//  Set frequency of the SIGFOX module to ETSI (Europe): 
-//  Set IF frequency to 868.2 MHz, 
-//  max channel is 200, 
-//  min channel is 20 
-//#define ATSET_FREQUENCY_ETSI "AT$IF=868200000,200,20"  
-#define ATSET_FREQUENCY_ETSI "AT$IF=868200000"  
+//  Set frequency of the SIGFOX module to ETSI (Europe, 868.2 MHz):
+#define ATSET_FREQUENCY_ETSI "AT$IF=868200000"
 
 //  Get frequency used by the SIGFOX module.
 #define ATGET_FREQUENCY "AT$IF?"
@@ -68,12 +59,6 @@ const unsigned int AKERU_TX = 5;  //  Transmit port for UnaBiz / Akene Dev Kit
 
 //  Reboot the SIGFOX module.
 #define ATREBOOT "ATZ"
-
-//  Enable emulator mode.
-#define ATENABLE_EMULATOR "ATPID=1"
-
-//  Disable emulator mode.
-#define ATDISABLE_EMULATOR "ATPID=0"
 
 #define ATMODEL "ATI0"  //  Get manufacturer and model.
 #define ATRELEASE "ATI5"  //  Get firmware release date.

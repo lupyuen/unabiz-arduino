@@ -114,7 +114,8 @@ bool Akeru::sendMessage(const String payload)
 {
   // Payload must be a String formatted in hexadecimal, 12 bytes max, use toHex()
 	if (!isReady()) return false; // prevent user from sending to many messages
-	String message = (String) ATSIGFOXTX + payload;
+  //  For emulation mode, send message locally to another TD module using TD LAN mode.
+	String message = String(_emulationMode ? ATTDLANTX : ATSIGFOXTX) + payload;
 	String data = "";
 	if (sendATCommand(message, ATSIGFOXTX_TIMEOUT, data))
 	{
@@ -136,7 +137,7 @@ bool Akeru::getTemperature(int &temperature)
 	String data = "";
 	if (sendATCommand(ATTEMPERATURE, ATCOMMAND_TIMEOUT, data))
 	{
-		temperature = data.toInt();
+		temperature = (int) data.toInt();
 		return true;
 	}
 	else
@@ -784,7 +785,6 @@ bool Akeru::sendString(const String str)
 	//  Send the encoded payload.
 	return sendMessage(payload);
 }
-
 
 /*
 Demo sketch for Akeru library :)
