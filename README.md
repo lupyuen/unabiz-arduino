@@ -1,12 +1,12 @@
 # unabiz-arduino
 
-Sample Arduino code for connecting UnaBiz / SIGFOX Module to UnaBiz SIGFOX network
+Sample Arduino code for connecting UnaBiz / SIGFOX Module to UnaBiz SIGFOX network for
 
-(1) Radiocrafts RC1692HP
+0. UnaBiz UnaKit Dev Kit based on Radiocrafts RC1692HP
 
-(2) TD1208R
+0. [Snootlab Akene Dev Kit](http://snootlab.com/lang-en/snootlab-shields/889-akene-v1-en.html) with UnaBiz Emulator (optional)
 
-Library Documentation:
+Original Library Documentation:
 http://forum.snootlab.com/viewtopic.php?f=51&t=1509
 
 Source code:
@@ -19,7 +19,9 @@ Requirements
 ------------
 
 0. [Arduino/Genuino Uno](http://snootlab.com/lang-en/arduino-genuino-en/956-genuino-uno-arduino-uno-en.html) + [Akene](http://snootlab.com/lang-en/snootlab-shields/889-akene-v1-en.html) or [TD1208 Breakout](http://snootlab.com/lang-en/snootlab-shields/962-breakout-td1208-connectivity-1-year-accessories-en.html)
+
 0. Either UnaBiz UnaKit Dev Kit based on Radiocrafts RC1692HP
+
 0. Or [Snootlab Akene Dev Kit](http://snootlab.com/lang-en/snootlab-shields/889-akene-v1-en.html) with UnaBiz Emulator (optional)
 
 Examples
@@ -74,14 +76,21 @@ UnaBiz Emulator Installation
 
 0. Boot up Raspbian on Raspberry Pi
 
-0. 
+0. Test the serial connection from the Pi to TD1208R.  Log in to the Pi and run:
+
     ```
     sudo apt install screen
-    
+    screen /dev/ttyUSB0    
     ```
 
-0. If /dev/ttyUSB is missing, download microUSB-UART Converter drivers for Linux from:
+0. Type `AT` and Enter. You should see `OK`.
+
+0. Exit `screen` by pressing `Ctrl-A` then `\`
+
+0. If /dev/ttyUSB0 is missing, download microUSB-UART Converter drivers for Linux from:
    http://www.silabs.com/products/mcu/pages/usbtouartbridgevcpdrivers.aspx#linux
 
-0. Exit `screen` by pressing Ctrl-A, Ctrl-\
+0. If your Mac can't detect the Arduino board, follow the instructions here:
+   https://www.kiwi-electronics.nl/blog?journal_blog_post_id=7
 
+   
