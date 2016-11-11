@@ -83,10 +83,10 @@ private:
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
 
-  SoftwareSerial *serialPort;
+  SoftwareSerial *serialPort;  //  Serial port for the SIGFOX module.
   Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
   Print *lastEchoPort;  //  Last port used for sending echo output.
-  unsigned long _lastSend;
+  unsigned long _lastSend;  //  Timestamp of last send.
 };
 
 #endif // UNABIZ_ARDUINO_RADIOCRAFTS_H

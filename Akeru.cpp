@@ -39,7 +39,6 @@ Akeru::Akeru(unsigned int rx, unsigned int tx)
 void Akeru::echoOn()
 {
   //  Echo commands and responses to the echo port.
-	_cmdEcho = true;
   echoPort = lastEchoPort;
   echoPort->println(F("Akeru.echoOn"));
 }
@@ -47,7 +46,6 @@ void Akeru::echoOn()
 void Akeru::echoOff()
 {
   //  Stop echoing commands and responses to the echo port.
-	_cmdEcho = false;
   lastEchoPort = echoPort;
   echoPort = &nullPort;
 }
@@ -119,10 +117,7 @@ bool Akeru::sendMessage(const String payload)
 	String data = "";
 	if (sendATCommand(message, ATSIGFOXTX_TIMEOUT, data))
 	{
-		if (_cmdEcho)
-		{
-			Serial.println(data);
-		}
+    echoPort->println(data);
 		_lastSend = millis();
 		return true;
 	}
@@ -226,7 +221,7 @@ bool Akeru::setPower(int power)
 	String data = "";
 	if (sendATCommand(message, ATCOMMAND_TIMEOUT, data))
 	{
-		Serial.println(data);
+		echoPort->println(data);
 		return true;
 	}
 	else
@@ -268,11 +263,8 @@ bool Akeru::receive(String &data)
 		}while(((currentTime - startTime) < ATDOWNLINK_TIMEOUT) && response.endsWith(DOWNLINKEND) == false);
 
 		serialPort->end();
-		if (_cmdEcho)
-		{
-			Serial.println(response);
-		}
-		
+    echoPort->println(response);
+
 		// Now that we have the full answer we can look for the received bytes
 		if (response.length() != 0)
 		{
@@ -432,11 +424,7 @@ bool Akeru::sendATCommand(const String command, const int timeout, String &dataO
 	String ATCommand = "";
 	ATCommand.concat(command);
 	ATCommand.concat("\r\n");
-
-	if (_cmdEcho)
-	{
-		Serial.print((String)"\n>> " + ATCommand);
-	}
+  echoPort->print((String)"\n>> " + ATCommand);
 
 	// Send the command : need to write/read char by char because of echo
 	for (int i = 0; i < ATCommand.length(); ++i)
@@ -444,11 +432,8 @@ bool Akeru::sendATCommand(const String command, const int timeout, String &dataO
 		serialPort->print(ATCommand.c_str()[i]);
 		serialPort->read();
 	}
-	if (_cmdEcho)
-	{
-		Serial.print("<< ");
-	}
-	
+  echoPort->print("<< ");
+
 	// Read response 
 	String response = "";
 	
@@ -471,11 +456,7 @@ bool Akeru::sendATCommand(const String command, const int timeout, String &dataO
 	}while(((currentTime - startTime) < timeout) && response.endsWith(ATOK) == false);
 
 	serialPort->end();
-	
-	if (_cmdEcho)
-	{
-		Serial.println(response);
-	}
+  echoPort->println(response);
 
 	// Split the response
 	int index = 0;
@@ -513,7 +494,7 @@ bool Akeru::sendATCommand(const String command, const int timeout, String &dataO
 					}
 					else
 					{
-						Serial.println("ERROR on rx frame");
+						echoPort->println("ERROR on rx frame");
 						return false;
 					}
 				}
@@ -542,29 +523,13 @@ bool Akeru::sendATCommand(const String command, const int timeout, String &dataO
 	}
 	else
 	{
-		Serial.println("Wrong AT response");
+		echoPort->println("Wrong AT response");
 		return false;
 	}
 }
 
-//  Begin UnaBiz
-
-/*
-Singapore and Taiwan: 920.8 MHz Uplink, 922.3 MHz Downlink
-
-AT$IF=920800000,200,20
-Means: Set IF frequency to 920.8 MHz, 
-  max channel is 200, 
-  min channel is 20 
-
-ETSI (Europe): 868.2 MHz
-
-AT$IF=868200000,200,20
-Means: Set IF frequency to 868.2 MHz, 
-  max channel is 200, 
-  min channel is 20 
-
-*/
+//  Singapore and Taiwan: 920.8 MHz Uplink, 922.3 MHz Downlink
+//  ETSI (Europe): 868.2 MHz
 
 bool Akeru::getFrequency(String &result)
 {

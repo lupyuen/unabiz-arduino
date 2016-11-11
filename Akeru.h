@@ -146,10 +146,8 @@ private:
 		SoftwareSerial* serialPort;
     Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
     Print *lastEchoPort;  //  Last port used for sending echo output.
-
-		unsigned long _lastSend;
-		bool _cmdEcho = false;
-    bool _emulationMode = false;
+    bool _emulationMode = false;  //  True if using emulation (TD LAN) mode.
+		unsigned long _lastSend;  //  Timestamp of last send.
 };
 
 #endif // AKERU_H
