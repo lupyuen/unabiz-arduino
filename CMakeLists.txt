@@ -5,14 +5,15 @@ set(PROJECT_NAME unabiz-arduino)
 set(PROJECT_LIB ${PROJECT_NAME}_lib)
 project(${PROJECT_NAME})
 add_definitions(-DCLION)
+message("CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 
 # Arduino Options - See https://github.com/queezythegreat/arduino-cmake
 # Change this to the Arduino port.
-if(WIN32)
-    set(${PROJECT_NAME}_PORT COM4:)
-else()
-    set(${PROJECT_NAME}_PORT /dev/tty.usbmodem1421)
-endif()
+#if(WIN32)
+set(${PROJECT_NAME}_PORT COM4)
+#else()
+#set(${PROJECT_NAME}_PORT /dev/tty.usbmodem1421)
+#endif()
 
 # Build the library.
 set(${PROJECT_LIB}_SRCS Radiocrafts.cpp)
