@@ -4,9 +4,9 @@
 #include "SIGFOX.h"
 
 //  IMPORTANT: Check these settings with UnaBiz to use the right SIGFOX library.
-const bool useEmulator = true;
-Akeru transceiver;  //  UnaBiz / Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
-//  Radiocrafts transceiver;  //  UnaBiz / Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
+const bool useEmulator = true;  //  Set to true if using UnaBiz Emulator.
+Akeru transceiver;  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
+//  Radiocrafts transceiver;  //  Uncomment this for UnaBiz Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 
 void setup() {
   //  Initialize console serial communication at 9600 bits per second:
@@ -112,7 +112,288 @@ void loop() {
   for(;;) {}
 }
 
-/*
+/* Expected output for Akene Dev Kit with emulation:
+
+Demo sketch for SIGFOX transceiver library :)
+Akeru.echoOn
+
+>> AT
+<< 
+OK
+
+Entering command mode...
+
+Setting frequency...
+
+>> AT$IF=920800000
+<< 
+OK
+Set frequency result = 
+
+Getting frequency (expecting 3)...
+
+>> AT$IF?
+<< 
+920800000
+
+OK
+Frequency (expecting 3) = 920800000
+
+Getting temperature...
+
+>> ATI26
+<< 
+24
+
+OK
+Temperature = 24 C
+
+Getting voltage...
+
+>> ATI27
+<< 
+3.32
+
+OK
+Supply voltage = 3.32 V
+
+Getting SIGFOX ID...
+
+>> ATI7
+<< 
+1AE8E2
+TDID: 070457100571
+
+OK
+SIGFOX ID = 1AE8E2
+PAC = 
+
+Getting power...
+
+>> ATS302?
+<< 
+14
+
+OK
+Power level = 14 dB
+
+>> ATI26
+<< 
+25
+
+OK
+
+>> ATI27
+<< 
+3.32
+
+OK
+
+Sending message...
+Must wait 5 seconds before sending the next message
+Message not sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.32
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=011800e17a5440
+<< 
+ERROR
+
+Wrong AT response
+Message not sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.32
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=021800e17a5440
+<< 
+ERROR
+
+Wrong AT response
+Message not sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.32
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=031800e17a5440
+<< 
+ERROR
+
+Wrong AT response
+Message not sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.32
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=041800e17a5440
+<< 
+OK
+
+Message sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.31
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=0518000ad75340
+<< 
+ERROR
+
+Wrong AT response
+Message not sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.32
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=061800e17a5440
+<< 
+ERROR
+
+Wrong AT response
+Message not sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.32
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=071800e17a5440
+<< 
+ERROR
+
+Wrong AT response
+Message not sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.31
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=0818000ad75340
+<< 
+ERROR
+
+Wrong AT response
+Message not sent!
+
+>> ATI26
+<< 
+24
+
+OK
+
+>> ATI27
+<< 
+3.32
+
+OK
+
+Sending message...
+Warning: Should wait 10 mins before sending the next message
+
+>> AT$SL=091800e17a5440
+<< 
+ERROR
+
+Wrong AT response
+Message not sent!
+
+*/
+
+/* Expected output for Radiocrafts Dev Kit without emulation:
+  
 Demo sketch for SIGFOX transceiver library :)
 Radiocrafts.echoOn
 
