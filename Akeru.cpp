@@ -17,29 +17,50 @@
  *   - TD1208 downlink request
  *   - Data conversion in hexadecimal
  */
- 
+
+#include "SIGFOX.h"
 #include "Akeru.h"
+
+static NullPort nullPort;
 
 Akeru::Akeru(): Akeru(AKERU_RX, AKERU_TX) {}  //  Forward to constructor below.
 
 Akeru::Akeru(unsigned int rx, unsigned int tx)
 {
-	serialPort = new SoftwareSerial(rx, tx);
-	_lastSend = -1;
+  //  Init the module with the specified transmit and receive pins.
+  //  Default to no echo.
+  //Serial.begin(9600); Serial.print(String(F("Akeru.Akeru: (rx,tx)=")) + rx + ',' + tx + '\n');
+  serialPort = new SoftwareSerial(rx, tx);
+  echoPort = &nullPort;
+  lastEchoPort = &Serial;
+  _lastSend = 0;
 }
 
 void Akeru::echoOn()
 {
+  //  Echo commands and responses to the echo port.
 	_cmdEcho = true;
+  echoPort = lastEchoPort;
+  echoPort->println(F("Akeru.echoOn"));
 }
 
 void Akeru::echoOff()
 {
+  //  Stop echoing commands and responses to the echo port.
 	_cmdEcho = false;
+  lastEchoPort = echoPort;
+  echoPort = &nullPort;
+}
+
+void Akeru::setEchoPort(Print *port) {
+  //  Set the port for sending echo output.
+  lastEchoPort = echoPort;
+  echoPort = port;
 }
 
 bool Akeru::begin()
 {
+  //  Wait for the module to power up. Return true if module is ready to send.
 	// Let the modem warm up a bit
 	delay(2000);
 	_lastSend = -1;
@@ -69,27 +90,33 @@ bool Akeru::isReady()
 	// TO BE BLOCKED BY YOUR SIFGOX NETWORK OPERATOR.
 	//
 	// You've been warned!
-	
-	unsigned long currentTime = millis();
-    if(currentTime >= _lastSend && (currentTime - _lastSend) <= 600000) return false;
-	else return true;
+
+  unsigned long currentTime = millis();
+  if (_lastSend == 0) return true;  //  First time sending.
+  const unsigned long elapsedTime = currentTime - _lastSend;
+  //  For development, allow sending every 5 seconds.
+  if (elapsedTime <= 5 * 1000) {
+    echoPort->println(F("Must wait 5 seconds before sending the next message"));
+    return false;
+  }  //  Wait before sending.
+  if (elapsedTime <= SEND_DELAY)
+    echoPort->println(F("Warning: Should wait 10 mins before sending the next message"));
+  return true;
 }
 
 bool Akeru::sendAT()
 {
-	return sendATCommand(ATCOMMAND, ATCOMMAND_TIMEOUT, nullptr);
+  String data = "";
+	return sendATCommand(ATCOMMAND, ATCOMMAND_TIMEOUT, data);
 }
 
-// Payload must be a String formatted in hexadecimal, 12 bytes max, use toHex()
-bool Akeru::sendPayload(const String payload)
+bool Akeru::sendMessage(const String payload)
 {
-	//  UnaBiz TODO: Temporarily disabled limits on sending messages.  Should not send more than 140 messages per day.
-	//if (!isReady()) return false; // prevent user from sending to many messages
-	
+  // Payload must be a String formatted in hexadecimal, 12 bytes max, use toHex()
+	if (!isReady()) return false; // prevent user from sending to many messages
 	String message = (String) ATSIGFOXTX + payload;
-
 	String data = "";
-	if (sendATCommand(message, ATSIGFOXTX_TIMEOUT, &data))
+	if (sendATCommand(message, ATSIGFOXTX_TIMEOUT, data))
 	{
 		if (_cmdEcho)
 		{
@@ -107,7 +134,7 @@ bool Akeru::sendPayload(const String payload)
 bool Akeru::getTemperature(int &temperature)
 {
 	String data = "";
-	if (sendATCommand(ATTEMPERATURE, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATTEMPERATURE, ATCOMMAND_TIMEOUT, data))
 	{
 		temperature = data.toInt();
 		return true;
@@ -118,14 +145,14 @@ bool Akeru::getTemperature(int &temperature)
 	}
 }
 
-
-
-bool Akeru::getID(String &id)
+bool Akeru::getID(String &id, String &pac)
 {
+  //  Get the SIGFOX ID and PAC for the module.  PAC is not available for Akene.
 	String data = "";
-	if (sendATCommand(ATID, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATID, ATCOMMAND_TIMEOUT, data))
 	{
 		id = data;
+    pac = "";  //  PAC is not available for Akene.
 		return true;
 	}
 	else
@@ -137,7 +164,7 @@ bool Akeru::getID(String &id)
 bool Akeru::getVoltage(float &voltage)
 {
 	String data = "";
-	if (sendATCommand(ATVOLTAGE, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATVOLTAGE, ATCOMMAND_TIMEOUT, data))
 	{
 		voltage = data.toFloat();
 		return true;
@@ -151,7 +178,7 @@ bool Akeru::getVoltage(float &voltage)
 bool Akeru::getHardware(String &hardware)
 {
 	String data = "";
-	if (sendATCommand(ATHARDWARE, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATHARDWARE, ATCOMMAND_TIMEOUT, data))
 	{
 		hardware = data;
 		return true;
@@ -165,7 +192,7 @@ bool Akeru::getHardware(String &hardware)
 bool Akeru::getFirmware(String &firmware)
 {
 	String data = "";
-	if (sendATCommand(ATFIRMWARE, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATFIRMWARE, ATCOMMAND_TIMEOUT, data))
 	{
 		firmware = data;
 		return true;
@@ -180,7 +207,7 @@ bool Akeru::getPower(int &power)
 {	
 	String message = (String) ATPOWER + '?';
 	String data = "";
-	if (sendATCommand(message, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(message, ATCOMMAND_TIMEOUT, data))
 	{
 		power = data.toInt();
 		return true;
@@ -196,7 +223,7 @@ bool Akeru::setPower(int power)
 {
 	String message = (String) ATPOWER + "=" + power;
 	String data = "";
-	if (sendATCommand(message, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(message, ATCOMMAND_TIMEOUT, data))
 	{
 		Serial.println(data);
 		return true;
@@ -269,7 +296,7 @@ bool Akeru::receive(String &data)
 
 String Akeru::toHex(int i)
 {
-	byte & b = (byte*) & i;
+	byte *b = (byte*) & i;
 	
 	String bytes = "";
 	for (int j=0; j<2; j++)
@@ -543,7 +570,7 @@ bool Akeru::getFrequency(String &result)
 	//  Get the frequency used for the SIGFOX module, e.g.
 	//  868130000
 	String data = "";
-	if (sendATCommand(ATGET_FREQUENCY, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATGET_FREQUENCY, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -559,7 +586,7 @@ bool Akeru::setFrequencySG(String &result)
 	//  Set the frequency for the SIGFOX module to Singapore frequency.
 	//  Must be followed by writeSettings and reboot commands.
 	String data = "";
-	if (sendATCommand(ATSET_FREQUENCY_SG, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATSET_FREQUENCY_SG, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -582,7 +609,7 @@ bool Akeru::setFrequencyETSI(String &result)
 	//  Set the frequency for the SIGFOX module to ETSI frequency for Europe or demo for 868 MHz base station.
 	//  Must be followed by writeSettings and reboot commands.
 	String data = "";
-	if (sendATCommand(ATSET_FREQUENCY_ETSI, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATSET_FREQUENCY_ETSI, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -597,7 +624,7 @@ bool Akeru::writeSettings(String &result)
 {
 	//  Write frequency and other settings to flash memory of the SIGFOX module.  Must be followed by reboot command.
 	String data = "";
-	if (sendATCommand(ATWRITE_SETTINGS, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATWRITE_SETTINGS, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -612,7 +639,7 @@ bool Akeru::reboot(String &result)
 {
 	//  Reboot the SIGFOX module.
 	String data = "";
-	if (sendATCommand(ATREBOOT, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATREBOOT, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -626,38 +653,24 @@ bool Akeru::reboot(String &result)
 bool Akeru::enableEmulator(String &result)
 {
 	//  Enable emulator mode.
-	String data = "";
-	if (sendATCommand(ATENABLE_EMULATOR, ATCOMMAND_TIMEOUT, &data))
-	{
-		result = data;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+  result = "";
+  _emulationMode = true;
+  return true;
 }
 
 bool Akeru::disableEmulator(String &result)
 {
 	//  Disable emulator mode.
-	String data = "";
-	if (sendATCommand(ATDISABLE_EMULATOR, ATCOMMAND_TIMEOUT, &data))
-	{
-		&result = data;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+  result = "";
+  _emulationMode = false;
+  return true;
 }
 
 bool Akeru::getModel(String &result)
 {
 	//  Get manufacturer and model.
 	String data = "";
-	if (sendATCommand(ATMODEL, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATMODEL, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -672,7 +685,7 @@ bool Akeru::getRelease(String &result)
 {
 	//  Get firmware release date.
 	String data = "";
-	if (sendATCommand(ATRELEASE, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATRELEASE, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -687,7 +700,7 @@ bool Akeru::getBaseband(String &result)
 {
 	//  Get baseband unique ID.
 	String data = "";
-	if (sendATCommand(ATBASEBAND, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATBASEBAND, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -702,7 +715,7 @@ bool Akeru::getRFPart(String &result)
 {
 	///  Get RF chip part number.
 	String data = "";
-	if (sendATCommand(ATRF_PART, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATRF_PART, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -717,7 +730,7 @@ bool Akeru::getRFRevision(String &result)
 {
 	//  Get RF chip revision number.
 	String data = "";
-	if (sendATCommand(ATRF_REVISION, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATRF_REVISION, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -732,7 +745,7 @@ bool Akeru::getPowerActive(String &result)
 {
 	//  Get module RF active power supply voltage
 	String data = "";
-	if (sendATCommand(ATPOWER_ACTIVE, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATPOWER_ACTIVE, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -747,7 +760,7 @@ bool Akeru::getLibraryVersion(String &result)
 {
 	//  Get RF library version.
 	String data = "";
-	if (sendATCommand(ATLIBRARY, ATCOMMAND_TIMEOUT, &data))
+	if (sendATCommand(ATLIBRARY, ATCOMMAND_TIMEOUT, data))
 	{
 		result = data;
 		return true;
@@ -769,7 +782,7 @@ bool Akeru::sendString(const String str)
 		payload += toHex(ch);
 	}
 	//  Send the encoded payload.
-	return sendPayload(payload);
+	return sendMessage(payload);
 }
 
 

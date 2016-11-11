@@ -96,58 +96,56 @@ class Akeru
 	public:
     Akeru();
 		Akeru(unsigned int rx, unsigned int tx);
-		void echoOn();
-		void echoOff();
-		bool begin();
-		bool isReady();
-		bool sendAT();
-		bool sendPayload(const String payload);
-		bool getTemperature(int &temperature);
-		bool getID(String &id);
-		bool getVoltage(float &voltage);
-		bool getHardware(String &hardware);
-		bool getFirmware(String &firmware);
-		bool getPower(int &power);
-		bool setPower(int power);
-		bool receive(String &data);
+    bool begin();
+    void echoOn();  //  Turn on send/receive echo.
+    void echoOff();  //  Turn off send/receive echo.
+    void setEchoPort(Print *port);  //  Set the port for sending echo output.
+    bool isReady();
+    bool sendMessage(const String payload);  //  Send the payload of hex digits to the network, max 12 bytes.
+    bool sendString(const String str);  //  Sending a text string, max 12 characters allowed.
+    bool receive(String &data);  //  Receive a message.
     bool enterCommandMode() {}  //  Enter Command Mode for sending module commands, not data.
     bool exitCommandMode() {}  //  Exit Command Mode so we can send data.
 
+    //  Commands for the module, must be run in Command Mode.
+    bool getEmulator(int &result)  //  Return 0 if emulator mode disabled, else return 1.
+      { result = _emulationMode ? 1 : 0; return true; }
+    bool enableEmulator(String &result);  //  Enable emulator mode.
+    bool disableEmulator(String &result);  //  Disable emulator mode.
+    //  Get the frequency used for the SIGFOX module.
+    bool getFrequency(String &result);
+    //  Set the frequency for the SIGFOX module to Singapore frequency (RCZ4).
+    bool setFrequencySG(String &result);
+    //  Set the frequency for the SIGFOX module to Taiwan frequency (RCZ4).
+    bool setFrequencyTW(String &result);
+    //  Set the frequency for the SIGFOX module to ETSI frequency for Europe (RCZ1).
+    bool setFrequencyETSI(String &result);
+    //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
+    bool setFrequencyUS(String &result);
+    bool writeSettings(String &result); //  Write frequency and other settings to flash memory of the module.
+    bool reboot(String &result);  //  Reboot the SIGFOX module.
+    bool getTemperature(int &temperature);
+    bool getID(String &id, String &pac);  //  Get the SIGFOX ID and PAC for the module.
+    bool getVoltage(float &voltage);
+    bool getHardware(String &hardware);
+    bool getFirmware(String &firmware);
+    bool getPower(int &power);
+    bool setPower(int power);
+    bool getParameter(uint8_t address, String &value) {
+      //  Return the parameter at that address.  Not used for Akene.
+      value = "";
+      return false;
+    }
+
+    //  Message conversion functions.
     String toHex(int i);
-		String toHex(unsigned int i);
-		String toHex(long l);
-		String toHex(unsigned long ul);
-		String toHex(float f);
-		String toHex(double d);
-		String toHex(char c);
-		String toHex(char *c, int length);
-
-		//  Get the frequency used for the SIGFOX module, e.g. 868130000
-		bool getFrequency(String &result);
-
-		//  Set the frequency for the SIGFOX module to Singapore frequency.
-		//  Must be followed by writeSettings and reboot commands.
-		bool setFrequencySG(String &result);
-
-		//  Set the frequency for the SIGFOX module to Taiwan frequency, which is same as Singapore frequency.
-		//  Must be followed by writeSettings and reboot commands.
-		bool setFrequencyTW(String &result);
-
-		//  Set the frequency for the SIGFOX module to ETSI frequency for Europe or demo for 868 MHz base station.
-		//  Must be followed by writeSettings and reboot commands.
-		bool setFrequencyETSI(String &result);
-
-		//  Write frequency and other settings to flash memory of the SIGFOX module.  Must be followed by reboot command.
-		bool writeSettings(String &result);
-
-		//  Reboot the SIGFOX module.
-		bool reboot(String &result);
-
-		//  Enable emulator mode.
-		bool enableEmulator(String &result);
-
-		//  Disable emulator mode.
-		bool disableEmulator(String &result);
+    String toHex(unsigned int i);
+    String toHex(long l);
+    String toHex(unsigned long ul);
+    String toHex(float f);
+    String toHex(double d);
+    String toHex(char c);
+    String toHex(char *c, int length);
 
 		bool getModel(String &model);  //  Get manufacturer and model.
 		bool getRelease(String &release);  //  Get firmware release date.
@@ -157,16 +155,16 @@ class Akeru
 		bool getPowerActive(String &power);  //  Get module RF active power supply voltage
 		bool getLibraryVersion(String &version); //  Get RF library version.
 
-		// For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
-		bool sendString(const String str);
-
-		//  End UnaBiz
-
-	private:
+private:
+    bool sendAT();
 		bool sendATCommand(const String command, const int timeout, String &dataOut);
 		SoftwareSerial* serialPort;
+    Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
+    Print *lastEchoPort;  //  Last port used for sending echo output.
+
 		unsigned long _lastSend;
 		bool _cmdEcho = false;
+    bool _emulationMode = false;
 };
 
 #endif // AKERU_H

@@ -18,10 +18,6 @@
 #else  //  ARDUINO
 #endif  //  ARDUINO
 
-//  According to regulations, messages should be sent only every 10 minutes.
-const unsigned long SEND_DELAY = 10 * 60 * 1000;
-const unsigned int COMMAND_TIMEOUT = 3000;
-
 const unsigned int RADIOCRAFTS_TX = 4;  //  Transmit port for For UnaBiz / Radiocrafts Dev Kit
 const unsigned int RADIOCRAFTS_RX = 5;  //  Receive port for UnaBiz / Radiocrafts Dev Kit
 

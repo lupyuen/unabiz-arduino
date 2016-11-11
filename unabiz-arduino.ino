@@ -3,35 +3,36 @@
 
 #include "SIGFOX.h"
 
-//  Create the SIGFOX library. Default to pin D4 for transmit, pin D5 for receive.
-#ifdef CLION
-  Akeru transceiver;  //  UnaBiz / Akene Dev Kit
+//  Create the SIGFOX library.
+#ifdef CLION  //  For testing emulator.
+  #define EMULATOR
+  Akeru transceiver;  //  UnaBiz / Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
 #else  //  CLION
-  Radiocrafts transceiver;  //  UnaBiz / Radiocrafts Dev Kit
+  Radiocrafts transceiver;  //  UnaBiz / Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 #endif  //  CLION
 
-void setup()
-{
+void setup() {
   //  Initialize console serial communication at 9600 bits per second:
   Serial.begin(9600);
   Serial.println(F("Demo sketch for SIGFOX transceiver library :)"));
 
   transceiver.echoOn();  //  Comment this line to hide the echoing of commands.
   //  Check whether the SIGFOX module is functioning.
-  if (!transceiver.begin())
-  {
+  if (!transceiver.begin()) {
     Serial.println(F("Error: SIGFOX Module KO!"));
     for(;;) {}  //  Loop forever because we can't continue.
   }
 }
 
-void loop()
-{
+void loop() {
   String result = "";
   //  Enter command mode.  TODO: Confirm response = '>'
   Serial.println(F("\nEntering command mode (expecting '>')..."));
   transceiver.enterCommandMode();
 
+#ifdef EMULATOR
+  transceiver.enableEmulator(result);
+#else  //  EMULATOR
   //  Disable emulation mode.
   Serial.println(F("\nDisabling emulation mode..."));
   transceiver.disableEmulator(result);
@@ -39,14 +40,7 @@ void loop()
   //  Check whether emulator is used for transmission.
   Serial.println(F("\nChecking emulation mode (expecting 0)...")); int emulator = 0;
   transceiver.getEmulator(emulator);
-
-  //  Get network mode for transmission.  Should return network mode = 0 for uplink only, no downlink.
-  Serial.println(F("\nGetting network mode (expecting 0)..."));
-  transceiver.getParameter(0x3b, result);
-
-  //  Get baud rate.  Should return baud rate = 5 for 19200 bps.
-  Serial.println(F("\nGetting baud rate (expecting 5)..."));
-  transceiver.getParameter(0x30, result);
+#endif  //  EMULATOR
 
   //  Set the frequency of SIGFOX module to SG/TW.
   Serial.println(F("\nSetting frequency..."));  result = "";
@@ -60,70 +54,34 @@ void loop()
 
   //  Read module temperature.
   Serial.println(F("\nGetting temperature..."));  int temperature = 0;
-  if (transceiver.getTemperature(temperature))
-  {
+  if (transceiver.getTemperature(temperature)) {
     Serial.print(F("Temperature = "));  Serial.print(temperature);  Serial.println(F(" C"));
-  }
-  else
-  {
+  } else {
     Serial.println(F("Temperature KO"));
   }
 
   //  Read module supply voltage.
   Serial.println(F("\nGetting voltage..."));  float voltage = 0.0;
-  if (transceiver.getVoltage(voltage))
-  {
+  if (transceiver.getVoltage(voltage)) {
     Serial.print(F("Supply voltage = "));  Serial.print(voltage);  Serial.println(F(" V"));
-  }
-  else
-  {
+  } else {
     Serial.println(F("Supply voltage KO"));
   }
 
   //  Read SIGFOX ID and PAC from module.
   Serial.println(F("\nGetting SIGFOX ID..."));  String id = "", pac = "";
-  if (transceiver.getID(id, pac))
-  {
+  if (transceiver.getID(id, pac)) {
     Serial.print(F("SIGFOX ID = "));  Serial.println(id);
     Serial.print(F("PAC = "));  Serial.println(pac);
-  }
-  else
-  {
+  } else {
     Serial.println(F("ID KO"));
   }
 
-#if NOTUSED
-  //  Read module hardware version.
-  Serial.println(F("\nGetting hardware "));  String hardware = "";
-  if (transceiver.getHardware(hardware))
-  {
-    Serial.print(F("Hardware version = "));  Serial.println(hardware);
-  }
-  else
-  {
-    Serial.println(F("Hardware version KO"));
-  }
-
-  //  Read module firmware version.
-  Serial.println(F("\nGetting firmware "));  String firmware = "";
-  if (transceiver.getFirmware(firmware))
-  {
-    Serial.print(F("Firmware version = "));  Serial.println(firmware);
-  }
-  else
-  {
-    Serial.println(F("Firmware version KO"));
-  }
-#endif  //  NOTUSED
-
   //  Read power.
   Serial.println(F("\nGetting power..."));  int power = 0;
-  if (transceiver.getPower(power))
-  {
+  if (transceiver.getPower(power)) {
     Serial.print(F("Power level = "));  Serial.print(power);  Serial.println(F(" dB"));
-  }
-  else
-  {
+  } else {
     Serial.println(F("Power level KO"));
   }
 
@@ -144,12 +102,9 @@ void loop()
     String msg = transceiver.toHex((char) i) + temp + volt;
 
     Serial.println(F("\nSending message..."));
-    if (transceiver.sendMessage(msg))
-    {
+    if (transceiver.sendMessage(msg)) {
       Serial.println(F("Message sent!"));
-    }
-    else
-    {
+    } else {
       Serial.println(F("Message not sent!"));
     }
     delay(6000);

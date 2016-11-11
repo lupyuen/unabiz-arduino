@@ -1,17 +1,24 @@
 //  Library for sending and receiving SIGFOX messages with Arduino shield based on Radiocrafts RC1692HP-SIG.
 #include <stdlib.h>
+#include "SIGFOX.h"
 #include "Radiocrafts.h"
 
 static const char *CMD_READ_MEMORY = "59";  //  'Y' to read memory.
 static const char *CMD_ENTER_CONFIG = "4d";  //  'M' to enter config mode.
 static const char *CMD_EXIT_CONFIG = "ff";  //  Exit config mode.
 
-//  Drop all data passed to this port.  Used to suppress echo output.
-class NullPort: public Print {
-  virtual size_t write(uint8_t) {}
-};
 static NullPort nullPort;
 static int markers = 0;
+
+/* TODO: Run some sanity checks to ensure that Radiocrafts module is configured OK.
+  //  Get network mode for transmission.  Should return network mode = 0 for uplink only, no downlink.
+  Serial.println(F("\nGetting network mode (expecting 0)..."));
+  transceiver.getParameter(0x3b, result);
+
+  //  Get baud rate.  Should return baud rate = 5 for 19200 bps.
+  Serial.println(F("\nGetting baud rate (expecting 5)..."));
+  transceiver.getParameter(0x30, result);
+*/
 
 Radiocrafts::Radiocrafts(): Radiocrafts(RADIOCRAFTS_RX, RADIOCRAFTS_TX) {}  //  Forward to constructor below.
 
