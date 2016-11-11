@@ -4,7 +4,11 @@
 #include "SIGFOX.h"
 
 //  Create the SIGFOX library. Default to pin D4 for transmit, pin D5 for receive.
-Radiocrafts transceiver;
+#ifdef CLION
+  Akeru transceiver;  //  UnaBiz / Akene Dev Kit
+#else  //  CLION
+  Radiocrafts transceiver;  //  UnaBiz / Radiocrafts Dev Kit
+#endif  //  CLION
 
 void setup()
 {

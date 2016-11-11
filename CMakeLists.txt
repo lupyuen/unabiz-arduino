@@ -9,7 +9,7 @@ add_definitions(-DCLION)
 # Arduino Options - See https://github.com/queezythegreat/arduino-cmake
 # Change this to the Arduino port.
 if(WIN32)
-    set(${PROJECT_NAME}_PORT COM1:)
+    set(${PROJECT_NAME}_PORT COM4:)
 else()
     set(${PROJECT_NAME}_PORT /dev/tty.usbmodem1421)
 endif()
@@ -17,6 +17,8 @@ endif()
 # Build the library.
 set(${PROJECT_LIB}_SRCS Radiocrafts.cpp)
 set(${PROJECT_LIB}_HDRS Radiocrafts.h)
+set(${PROJECT_LIB}_SRCS Akeru.cpp)
+set(${PROJECT_LIB}_HDRS Akeru.h)
 generate_arduino_library(${PROJECT_LIB})
 
 # Build the application.

@@ -43,7 +43,8 @@
 #define ATDISPLAY "AT&V"
 #define DOWNLINKEND "+RX END"
 
-//  Begin UnaBiz
+const unsigned int AKERU_RX = 4;  //  Receive port for UnaBiz / Akene Dev Kit
+const unsigned int AKERU_TX = 5;  //  Transmit port for UnaBiz / Akene Dev Kit
 
 //  Set frequency of the SIGFOX module to Singapore and Taiwan (same frequency): 
 //  Set IF frequency to 920.8 MHz, 
@@ -82,8 +83,6 @@
 #define ATPOWER_ACTIVE "ATI28"  //  Get module RF active power supply voltage
 #define ATLIBRARY "ATI30"  //  Get RF library version.
 
-//  End UnaBiz
-
 #define ATCOMMAND_TIMEOUT (3000)
 #define ATSIGFOXTX_TIMEOUT (30000)
 #define ATDOWNLINK_TIMEOUT (45000)
@@ -95,6 +94,7 @@
 class Akeru
 {
 	public:
+    Akeru();
 		Akeru(unsigned int rx, unsigned int tx);
 		void echoOn();
 		void echoOff();
@@ -102,15 +102,18 @@ class Akeru
 		bool isReady();
 		bool sendAT();
 		bool sendPayload(const String payload);
-		bool getTemperature(int *temperature);
-		bool getID(String *id);
-		bool getVoltage(float *voltage);
-		bool getHardware(String *hardware);
-		bool getFirmware(String *firmware);
-		bool getPower(int *power);
+		bool getTemperature(int &temperature);
+		bool getID(String &id);
+		bool getVoltage(float &voltage);
+		bool getHardware(String &hardware);
+		bool getFirmware(String &firmware);
+		bool getPower(int &power);
 		bool setPower(int power);
-		bool receive(String *data);
-		String toHex(int i);
+		bool receive(String &data);
+    bool enterCommandMode() {}  //  Enter Command Mode for sending module commands, not data.
+    bool exitCommandMode() {}  //  Exit Command Mode so we can send data.
+
+    String toHex(int i);
 		String toHex(unsigned int i);
 		String toHex(long l);
 		String toHex(unsigned long ul);
@@ -119,42 +122,40 @@ class Akeru
 		String toHex(char c);
 		String toHex(char *c, int length);
 
-		//  Begin UnaBiz
-
 		//  Get the frequency used for the SIGFOX module, e.g. 868130000
-		bool getFrequency(String *result);
+		bool getFrequency(String &result);
 
 		//  Set the frequency for the SIGFOX module to Singapore frequency.
 		//  Must be followed by writeSettings and reboot commands.
-		bool setFrequencySG(String *result);
+		bool setFrequencySG(String &result);
 
 		//  Set the frequency for the SIGFOX module to Taiwan frequency, which is same as Singapore frequency.
 		//  Must be followed by writeSettings and reboot commands.
-		bool setFrequencyTW(String *result);
+		bool setFrequencyTW(String &result);
 
 		//  Set the frequency for the SIGFOX module to ETSI frequency for Europe or demo for 868 MHz base station.
 		//  Must be followed by writeSettings and reboot commands.
-		bool setFrequencyETSI(String *result);
+		bool setFrequencyETSI(String &result);
 
 		//  Write frequency and other settings to flash memory of the SIGFOX module.  Must be followed by reboot command.
-		bool writeSettings(String *result);
+		bool writeSettings(String &result);
 
 		//  Reboot the SIGFOX module.
-		bool reboot(String *result);
+		bool reboot(String &result);
 
 		//  Enable emulator mode.
-		bool enableEmulator(String *result);
+		bool enableEmulator(String &result);
 
 		//  Disable emulator mode.
-		bool disableEmulator(String *result);
+		bool disableEmulator(String &result);
 
-		bool getModel(String *model);  //  Get manufacturer and model.
-		bool getRelease(String *release);  //  Get firmware release date.
-		bool getBaseband(String *baseband);  //  Get baseband unique ID.
-		bool getRFPart(String *part);  //  Get RF chip part number.
-		bool getRFRevision(String *revision);  //  Get RF chip revision number.
-		bool getPowerActive(String *power);  //  Get module RF active power supply voltage
-		bool getLibraryVersion(String *version); //  Get RF library version.
+		bool getModel(String &model);  //  Get manufacturer and model.
+		bool getRelease(String &release);  //  Get firmware release date.
+		bool getBaseband(String &baseband);  //  Get baseband unique ID.
+		bool getRFPart(String &part);  //  Get RF chip part number.
+		bool getRFRevision(String &revision);  //  Get RF chip revision number.
+		bool getPowerActive(String &power);  //  Get module RF active power supply voltage
+		bool getLibraryVersion(String &version); //  Get RF library version.
 
 		// For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
 		bool sendString(const String str);
@@ -162,7 +163,7 @@ class Akeru
 		//  End UnaBiz
 
 	private:
-		bool sendATCommand(const String command, const int timeout, String *dataOut);
+		bool sendATCommand(const String command, const int timeout, String &dataOut);
 		SoftwareSerial* serialPort;
 		unsigned long _lastSend;
 		bool _cmdEcho = false;
