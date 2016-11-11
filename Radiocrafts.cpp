@@ -190,6 +190,7 @@ static String data = "";
 
 bool Radiocrafts::enterCommandMode() {
   //  Enter Command Mode for sending module commands, not data.
+  //  TODO: Confirm response = '>'
   if (!sendCommand("00", 1, data, markers)) return false;
   echoPort->println(F("Radiocrafts.enterCommandMode: OK "));
   return true;

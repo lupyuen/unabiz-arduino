@@ -3,13 +3,10 @@
 
 #include "SIGFOX.h"
 
-//  Create the SIGFOX library.
-#ifdef CLION  //  For testing emulator.
-  #define EMULATOR
-  Akeru transceiver;  //  UnaBiz / Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
-#else  //  CLION
-  Radiocrafts transceiver;  //  UnaBiz / Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
-#endif  //  CLION
+//  IMPORTANT: Check these settings with UnaBiz to use the right SIGFOX library.
+const bool useEmulator = true;
+Akeru transceiver;  //  UnaBiz / Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
+//  Radiocrafts transceiver;  //  UnaBiz / Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 
 void setup() {
   //  Initialize console serial communication at 9600 bits per second:
@@ -26,21 +23,22 @@ void setup() {
 
 void loop() {
   String result = "";
-  //  Enter command mode.  TODO: Confirm response = '>'
-  Serial.println(F("\nEntering command mode (expecting '>')..."));
+  //  Enter command mode.
+  Serial.println(F("\nEntering command mode..."));
   transceiver.enterCommandMode();
 
-#ifdef EMULATOR
-  transceiver.enableEmulator(result);
-#else  //  EMULATOR
-  //  Disable emulation mode.
-  Serial.println(F("\nDisabling emulation mode..."));
-  transceiver.disableEmulator(result);
-
-  //  Check whether emulator is used for transmission.
-  Serial.println(F("\nChecking emulation mode (expecting 0)...")); int emulator = 0;
-  transceiver.getEmulator(emulator);
-#endif  //  EMULATOR
+  if (useEmulator) {
+    //  Emulation mode.
+    transceiver.enableEmulator(result);
+  } else {
+    //  Disable emulation mode.
+    Serial.println(F("\nDisabling emulation mode..."));
+    transceiver.disableEmulator(result);
+  
+    //  Check whether emulator is used for transmission.
+    Serial.println(F("\nChecking emulation mode (expecting 0)...")); int emulator = 0;
+    transceiver.getEmulator(emulator);    
+  }
 
   //  Set the frequency of SIGFOX module to SG/TW.
   Serial.println(F("\nSetting frequency..."));  result = "";

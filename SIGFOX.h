@@ -3,7 +3,7 @@
 #define UNABIZ_ARDUINO_SIGFOX_H
 
 //  According to regulations, messages should be sent only every 10 minutes.
-const unsigned long SEND_DELAY = 10 * 60 * 1000;
+const unsigned long SEND_DELAY = (unsigned long) 10 * 60 * 1000;
 const unsigned int COMMAND_TIMEOUT = 3000;
 
 //  Newer UnaBiz / Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
