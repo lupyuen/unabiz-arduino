@@ -148,6 +148,7 @@ private:
     Print *lastEchoPort;  //  Last port used for sending echo output.
     bool _emulationMode = false;  //  True if using emulation (TD LAN) mode.
 		unsigned long _lastSend;  //  Timestamp of last send.
+    unsigned int _sequenceNumber;  //  Sequence number for the message.
 };
 
 #endif // AKERU_H

@@ -112,8 +112,24 @@ bool Akeru::sendMessage(const String payload)
 {
   // Payload must be a String formatted in hexadecimal, 12 bytes max, use toHex()
 	if (!isReady()) return false; // prevent user from sending to many messages
+
+  //  Construct the message.
   //  For emulation mode, send message locally to another TD module using TD LAN mode.
-	String message = String(_emulationMode ? ATTDLANTX : ATSIGFOXTX) + payload;
+	String message = _emulationMode ? ATTDLANTX : ATSIGFOXTX;
+	if (_emulationMode) {
+    //  Emulation message format: device ID (4 bytes) + sequence number (1 byte) + payload (max 12 bytes)
+    String id, pac;
+    getID(id, pac);
+    id = String("00000000").substring(id.length()); // Pad to 4 bytes.
+    echoPort->println(String("id=") + id);
+    message.concat(id);  //  4 bytes
+    message.concat(toHex((char) _sequenceNumber));  //  1 byte
+	}
+	message.concat(payload);  //  Max 12 bytes
+  _sequenceNumber++;
+  if (_sequenceNumber > 255) _sequenceNumber = 0;
+
+  //  Send the message.
 	String data = "";
 	if (sendATCommand(message, ATSIGFOXTX_TIMEOUT, data))
 	{
