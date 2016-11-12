@@ -89,6 +89,7 @@ void loop() {
   //  Send counter, temperature and voltage as a SIGFOX message.  Convert to hexadecimal before sending.
   for (int i = 0; i < 10; i++) {  //  Send 10 times.
     //  Get temperature and voltage.
+    transceiver.echoOff();
     transceiver.enterCommandMode();
     transceiver.getTemperature(temperature);
     transceiver.getVoltage(voltage);
@@ -99,9 +100,10 @@ void loop() {
     String volt = transceiver.toHex(voltage);
     String msg = transceiver.toHex((char) i) + temp + volt;
 
-    Serial.println(F("\nSending message..."));
+    Serial.print(F("\n>> Device sending message ")); Serial.print(msg + "...");
+    transceiver.echoOn();
     if (transceiver.sendMessage(msg)) {
-      Serial.println(F("Message sent!"));
+      //  Serial.println(F("Message sent!"));
     } else {
       Serial.println(F("Message not sent!"));
     }

@@ -40,7 +40,7 @@ void Akeru::echoOn()
 {
   //  Echo commands and responses to the echo port.
   echoPort = lastEchoPort;
-  echoPort->println(F("Akeru.echoOn"));
+  //  echoPort->println(F("Akeru.echoOn"));
 }
 
 void Akeru::echoOff()
@@ -97,7 +97,7 @@ bool Akeru::isReady()
     echoPort->println(F("Must wait 5 seconds before sending the next message"));
     return false;
   }  //  Wait before sending.
-  if (elapsedTime <= SEND_DELAY)
+  if (elapsedTime <= SEND_DELAY && _id != "1AE8E2")
     echoPort->println(F("Warning: Should wait 10 mins before sending the next message"));
   return true;
 }
@@ -121,7 +121,6 @@ bool Akeru::sendMessage(const String payload)
     String id, pac;
     getID(id, pac);
     id = String("00000000").substring(id.length()) + id; // Prepad to 4 bytes.
-    echoPort->println(String("id=") + id);
     message.concat(id);  //  4 bytes
     message.concat(toHex((char) _sequenceNumber));  //  1 byte
 	}
@@ -456,7 +455,6 @@ bool Akeru::sendATCommand(const String command, const int timeout, String &dataO
 
 	// Read response 
 	String response = "";
-	
 	unsigned int startTime = millis();
 	volatile unsigned int currentTime = millis();
 	volatile char rxChar = '\0';
@@ -476,7 +474,10 @@ bool Akeru::sendATCommand(const String command, const int timeout, String &dataO
 	}while(((currentTime - startTime) < timeout) && response.endsWith(ATOK) == false);
 
 	serialPort->end();
-  echoPort->println(response);
+  String res = response;
+  while (res.length() > 0 && (res.charAt(0) == '\r' || res.charAt(0) == '\n'))
+    res = res.substring(1);  //  Strip off leading newline.
+  echoPort->print(res);
 
 	// Split the response
 	int index = 0;
