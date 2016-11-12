@@ -1,4 +1,4 @@
-//  Send sample SIGFOX messages with Arduino shield based on Radiocrafts RC1692HP-SIG.
+//  Send sample SIGFOX messages with UnaBiz UnaKit development kit.
 //  Based on https://github.com/Snootlab/Akeru
 
 #include "SIGFOX.h"
@@ -114,283 +114,95 @@ void loop() {
   for(;;) {}
 }
 
-/* Expected output for Akene Dev Kit with emulation:
+/* Expected output for Akene Dev Kit with UnaBiz Emulator:
+
 
 Demo sketch for SIGFOX transceiver library :)
-Akeru.echoOn
 
 >> AT
-<< 
-OK
-
+<< OK
 Entering command mode...
 
 Setting frequency...
 
 >> AT$IF=920800000
-<< 
-OK
-Set frequency result = 
+<< OKSet frequency result =
 
 Getting frequency (expecting 3)...
 
 >> AT$IF?
-<< 
-920800000
+<< 920800000
 
-OK
-Frequency (expecting 3) = 920800000
+OKFrequency (expecting 3) = 920800000
 
 Getting temperature...
 
 >> ATI26
-<< 
-24
+<< 26
 
-OK
-Temperature = 24 C
+OKTemperature = 26 C
 
 Getting voltage...
 
 >> ATI27
-<< 
-3.32
+<< 3.29
 
-OK
-Supply voltage = 3.32 V
+OKSupply voltage = 3.29 V
 
 Getting SIGFOX ID...
 
 >> ATI7
-<< 
-1AE8E2
+<< 1AE8E2
 TDID: 070457100571
 
-OK
-SIGFOX ID = 1AE8E2
-PAC = 
+OKSIGFOX ID = 1AE8E2
+PAC =
 
 Getting power...
 
 >> ATS302?
-<< 
-14
+<< 14
 
-OK
-Power level = 14 dB
+OKPower level = 14 dB
 
->> ATI26
-<< 
-25
-
-OK
-
->> ATI27
-<< 
-3.32
-
-OK
-
-Sending message...
-Must wait 5 seconds before sending the next message
+>> Device sending message 001b005c8f5240...Must wait 5 seconds before sending the next message
 Message not sent!
 
->> ATI26
-<< 
-24
+>> Device sending message 011b0033335340...
+>> AT$SL=001AE8E200011b0033335340
+<< OK
 
-OK
+>> Device sending message 021a005c8f5240...
+>> AT$SL=001AE8E201021a005c8f5240
+<< OK
 
->> ATI27
-<< 
-3.32
+>> Device sending message 031a0033335340...
+>> AT$SL=001AE8E202031a0033335340
+<< OK
 
-OK
+>> Device sending message 041a0033335340...
+>> AT$SL=001AE8E203041a0033335340
+<< OK
 
-Sending message...
-Warning: Should wait 10 mins before sending the next message
+>> Device sending message 051b0033335340...
+>> AT$SL=001AE8E204051b0033335340
+<< OK
 
->> AT$SL=011800e17a5440
-<< 
-ERROR
+>> Device sending message 061b0033335340...
+>> AT$SL=001AE8E205061b0033335340
+<< OK
 
-Wrong AT response
-Message not sent!
+>> Device sending message 071b0033335340...
+>> AT$SL=001AE8E206071b0033335340
+<< OK
 
->> ATI26
-<< 
-24
+>> Device sending message 081b005c8f5240...
+>> AT$SL=001AE8E207081b005c8f5240
+<< OK
 
-OK
-
->> ATI27
-<< 
-3.32
-
-OK
-
-Sending message...
-Warning: Should wait 10 mins before sending the next message
-
->> AT$SL=021800e17a5440
-<< 
-ERROR
-
-Wrong AT response
-Message not sent!
-
->> ATI26
-<< 
-24
-
-OK
-
->> ATI27
-<< 
-3.32
-
-OK
-
-Sending message...
-Warning: Should wait 10 mins before sending the next message
-
->> AT$SL=031800e17a5440
-<< 
-ERROR
-
-Wrong AT response
-Message not sent!
-
->> ATI26
-<< 
-24
-
-OK
-
->> ATI27
-<< 
-3.32
-
-OK
-
-Sending message...
-Warning: Should wait 10 mins before sending the next message
-
->> AT$SL=041800e17a5440
-<< 
-OK
-
-Message sent!
-
->> ATI26
-<< 
-24
-
-OK
-
->> ATI27
-<< 
-3.31
-
-OK
-
-Sending message...
-Warning: Should wait 10 mins before sending the next message
-
->> AT$SL=0518000ad75340
-<< 
-ERROR
-
-Wrong AT response
-Message not sent!
-
->> ATI26
-<< 
-24
-
-OK
-
->> ATI27
-<< 
-3.32
-
-OK
-
-Sending message...
-Warning: Should wait 10 mins before sending the next message
-
->> AT$SL=061800e17a5440
-<< 
-ERROR
-
-Wrong AT response
-Message not sent!
-
->> ATI26
-<< 
-24
-
-OK
-
->> ATI27
-<< 
-3.32
-
-OK
-
-Sending message...
-Warning: Should wait 10 mins before sending the next message
-
->> AT$SL=071800e17a5440
-<< 
-ERROR
-
-Wrong AT response
-Message not sent!
-
->> ATI26
-<< 
-24
-
-OK
-
->> ATI27
-<< 
-3.31
-
-OK
-
-Sending message...
-Warning: Should wait 10 mins before sending the next message
-
->> AT$SL=0818000ad75340
-<< 
-ERROR
-
-Wrong AT response
-Message not sent!
-
->> ATI26
-<< 
-24
-
-OK
-
->> ATI27
-<< 
-3.32
-
-OK
-
-Sending message...
-Warning: Should wait 10 mins before sending the next message
-
->> AT$SL=091800e17a5440
-<< 
-ERROR
-
-Wrong AT response
-Message not sent!
+>> Device sending message 091b005c8f5240...
+>> AT$SL=001AE8E208091b005c8f5240
+<< OK
 
 */
 
