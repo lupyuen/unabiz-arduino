@@ -160,11 +160,15 @@ bool Akeru::getTemperature(int &temperature)
 bool Akeru::getID(String &id, String &pac)
 {
   //  Get the SIGFOX ID and PAC for the module.  PAC is not available for Akene.
+  //  Reuse the previous data if available.
+  if (_id.length() > 0) {
+    id = _id; pac = _pac; return true;
+  }
 	String data = "";
 	if (sendATCommand(ATID, ATCOMMAND_TIMEOUT, data))
 	{
-		id = data;
-    pac = "";  //  PAC is not available for Akene.
+		id = data; pac = "";  //  PAC is not available for Akene.
+    _id = id; _pac = pac;  //  Cache for later use.
 		return true;
 	}
 	else

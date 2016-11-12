@@ -149,6 +149,8 @@ private:
     bool _emulationMode = false;  //  True if using emulation (TD LAN) mode.
 		unsigned long _lastSend;  //  Timestamp of last send.
     unsigned int _sequenceNumber;  //  Sequence number for the message.
+    String _id = "";  //  SIGFOX device ID.
+    String _pac = "";  //  SIGFOX PAC.
 };
 
 #endif // AKERU_H
