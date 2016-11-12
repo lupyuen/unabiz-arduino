@@ -120,7 +120,7 @@ bool Akeru::sendMessage(const String payload)
     //  Emulation message format: device ID (4 bytes) + sequence number (1 byte) + payload (max 12 bytes)
     String id, pac;
     getID(id, pac);
-    id = String("00000000").substring(id.length()); // Pad to 4 bytes.
+    id = String("00000000").substring(id.length()) + id; // Prepad to 4 bytes.
     echoPort->println(String("id=") + id);
     message.concat(id);  //  4 bytes
     message.concat(toHex((char) _sequenceNumber));  //  1 byte
