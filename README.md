@@ -1,8 +1,10 @@
 # unabiz-arduino
 
-Sample Arduino code for connecting UnaBiz / SIGFOX Module to UnaBiz SIGFOX network for
+Check out the wiki: https://github.com/UnaBiz/unabiz-arduino/wiki
 
-0. UnaBiz UnaKit Dev Kit based on Radiocrafts RC1692HP
+Arduino library for connecting UnaShield to SIGFOX network:
+
+0. UnaBiz UnaShield Dev Kit based on Radiocrafts RC1692HP
 
 0. [Snootlab Akene Dev Kit](http://snootlab.com/lang-en/snootlab-shields/889-akene-v1-en.html) with UnaBiz Emulator (optional)
 
