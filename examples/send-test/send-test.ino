@@ -9,18 +9,12 @@
 ////////////////////////////////////////////////////////////
 //  Begin SIGFOX Module Declaration
 
-#include <Akeru.h>
+#include "SIGFOX.h"
 
-// TD1208 Sigfox module IO definition
-/*   Snootlab device | TX | RX
-               Akeru | D4 | D5
-               Akene | D5 | D4
-            Breakout | your pick */
-#define TX 5  //  For UnaBiz / Akene
-#define RX 4  //  For UnaBiz / Akene
-
-// Sigfox instance management 
-Akeru akeru(RX, TX);
+//  IMPORTANT: Check these settings with UnaBiz to use the right SIGFOX library.
+const bool useEmulator = false;  //  Set to true if using UnaBiz Emulator.
+//  Akeru transceiver;  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
+Radiocrafts transceiver;  //  Uncomment this for UnaBiz Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 
 //  End SIGFOX Module Declaration
 ////////////////////////////////////////////////////////////
@@ -29,31 +23,62 @@ void setup()
 {
   ////////////////////////////////////////////////////////////
   //  Begin General Setup
-  
-  //  Initialize serial communication at 9600 bits per second:
+
+  //  Initialize console serial communication at 9600 bits per second:
   Serial.begin(9600);
-  Serial.println("Demo sketch for Akeru library :)");
+  Serial.println(F("Demo sketch for sending temperature sensor values to SIGFOX cloud :)"));
 
   //  End General Setup
   ////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////
   //  Begin Sensor Setup
-  
+
   //  End Sensor Setup
   ////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////
   //  Begin SIGFOX Module Setup
 
-  // Check SIGFOX Module.
-  if (!akeru.begin())
-  {
-    Serial.println("TD1208 KO");
-    while(1);
+  String result = "";
+  //  Enter command mode.
+  Serial.println(F("\nEntering command mode..."));
+  transceiver.enterCommandMode();
+
+  if (useEmulator) {
+    //  Emulation mode.
+    transceiver.enableEmulator(result);
+  } else {
+    //  Disable emulation mode.
+    Serial.println(F("\nDisabling emulation mode..."));
+    transceiver.disableEmulator(result);
+
+    //  Check whether emulator is used for transmission.
+    Serial.println(F("\nChecking emulation mode (expecting 0)...")); int emulator = 0;
+    transceiver.getEmulator(emulator);
   }
-  
-  akeru.echoOn(); //  Comment this line to hide debug output.
+
+  //  Set the frequency of SIGFOX module to SG/TW.
+  Serial.println(F("\nSetting frequency..."));  result = "";
+  transceiver.setFrequencySG(result);
+  Serial.print(F("Set frequency result = "));  Serial.println(result);
+
+  //  Get and display the frequency used by the SIGFOX module.  Should return 3 for RCZ4 (SG/TW).
+  Serial.println(F("\nGetting frequency (expecting 3)..."));  String frequency = "";
+  transceiver.getFrequency(frequency);
+  Serial.print(F("Frequency (expecting 3) = "));  Serial.println(frequency);
+
+  //  Read SIGFOX ID and PAC from module.
+  Serial.println(F("\nGetting SIGFOX ID..."));  String id = "", pac = "";
+  if (transceiver.getID(id, pac)) {
+    Serial.print(F("SIGFOX ID = "));  Serial.println(id);
+    Serial.print(F("PAC = "));  Serial.println(pac);
+  } else {
+    Serial.println(F("ID KO"));
+  }
+
+  //  Exit command mode and prepare to send message.
+  transceiver.exitCommandMode();
 
   //  End SIGFOX Module Setup
   ////////////////////////////////////////////////////////////
@@ -74,12 +99,9 @@ void loop()
   //  Begin SIGFOX Module Loop
 
   //  Send sensor data.
-  if (akeru.sendString(msg))
-  {
+  if (transceiver.sendString(msg)) {
     Serial.println("Message sent");
-  }
-  else
-  {
+  } else {
     Serial.println("Message not sent");
   }
 
@@ -93,19 +115,5 @@ void loop()
 /*
 Expected output:
 
-Demo sketch for Akeru library :)
-
->> AT$SS=743a302c683a30
-<< 
-OK
-
-Message sent
-
->> AT$SS=743a302c683a30
-<< 
-OK
-
-Message sent
-
+Message sent !
 */
-

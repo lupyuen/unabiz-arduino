@@ -14,12 +14,12 @@
 ////////////////////////////////////////////////////////////
 //  Begin Sensor Declaration
 
-#include "DHT.h"
+#include "DHT.h"  //  From https://github.com/Seeed-Studio/Grove_Temperature_And_Humidity_Sensor
 
 #define DHTPIN 2     // UnaBiz: what pin we're connected to. 2 means Port D2.
 
 // Uncomment whatever type you're using!
-#define DHTTYPE DHT11   // DHT 11 
+#define DHTTYPE DHT11   // DHT 11
 //#define DHTTYPE DHT22   // DHT 22  (AM2302)
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
 
@@ -31,18 +31,12 @@ DHT dht(DHTPIN, DHTTYPE);
 ////////////////////////////////////////////////////////////
 //  Begin SIGFOX Module Declaration
 
-#include <Akeru.h>
+#include "SIGFOX.h"
 
-// TD1208 Sigfox module IO definition
-/*   Snootlab device | TX | RX
-               Akeru | D4 | D5
-               Akene | D5 | D4
-            Breakout | your pick */
-#define TX 5  //  For UnaBiz / Akene
-#define RX 4  //  For UnaBiz / Akene
-
-// Sigfox instance management 
-Akeru akeru(RX, TX);
+//  IMPORTANT: Check these settings with UnaBiz to use the right SIGFOX library.
+const bool useEmulator = false;  //  Set to true if using UnaBiz Emulator.
+//  Akeru transceiver;  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
+Radiocrafts transceiver;  //  Uncomment this for UnaBiz Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 
 //  End SIGFOX Module Declaration
 ////////////////////////////////////////////////////////////
@@ -51,33 +45,64 @@ void setup()
 {
   ////////////////////////////////////////////////////////////
   //  Begin General Setup
-  
-  //  Initialize serial communication at 9600 bits per second:
+
+  //  Initialize console serial communication at 9600 bits per second:
   Serial.begin(9600);
-  Serial.println("Demo sketch for Akeru library :)");
+  Serial.println(F("Demo sketch for sending temperature sensor values to SIGFOX cloud :)"));
 
   //  End General Setup
   ////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////
   //  Begin Sensor Setup
-  
+
   dht.begin();
-      
+
   //  End Sensor Setup
   ////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////
   //  Begin SIGFOX Module Setup
 
-  // Check SIGFOX Module.
-  if (!akeru.begin())
-  {
-    Serial.println("TD1208 KO");
-    while(1);
+  String result = "";
+  //  Enter command mode.
+  Serial.println(F("\nEntering command mode..."));
+  transceiver.enterCommandMode();
+
+  if (useEmulator) {
+    //  Emulation mode.
+    transceiver.enableEmulator(result);
+  } else {
+    //  Disable emulation mode.
+    Serial.println(F("\nDisabling emulation mode..."));
+    transceiver.disableEmulator(result);
+
+    //  Check whether emulator is used for transmission.
+    Serial.println(F("\nChecking emulation mode (expecting 0)...")); int emulator = 0;
+    transceiver.getEmulator(emulator);
   }
-  
-  akeru.echoOn(); //  Comment this line to hide debug output.
+
+  //  Set the frequency of SIGFOX module to SG/TW.
+  Serial.println(F("\nSetting frequency..."));  result = "";
+  transceiver.setFrequencySG(result);
+  Serial.print(F("Set frequency result = "));  Serial.println(result);
+
+  //  Get and display the frequency used by the SIGFOX module.  Should return 3 for RCZ4 (SG/TW).
+  Serial.println(F("\nGetting frequency (expecting 3)..."));  String frequency = "";
+  transceiver.getFrequency(frequency);
+  Serial.print(F("Frequency (expecting 3) = "));  Serial.println(frequency);
+
+  //  Read SIGFOX ID and PAC from module.
+  Serial.println(F("\nGetting SIGFOX ID..."));  String id = "", pac = "";
+  if (transceiver.getID(id, pac)) {
+    Serial.print(F("SIGFOX ID = "));  Serial.println(id);
+    Serial.print(F("PAC = "));  Serial.println(pac);
+  } else {
+    Serial.println(F("ID KO"));
+  }
+
+  //  Exit command mode and prepare to send message.
+  transceiver.exitCommandMode();
 
   //  End SIGFOX Module Setup
   ////////////////////////////////////////////////////////////
@@ -95,28 +120,25 @@ void loop()
   String msg = "";  //  Will contain the sensor data.
 
   // Check if returns are valid, if they are NaN (not a number) then something went wrong!
-  if (isnan(t) || isnan(h)) 
-  {
+  if (isnan(t) || isnan(h)) {
     Serial.println("Failed to read from sensor");
     msg = "error";
-  } 
-  else 
-  {
-    Serial.println("Temperature:"); 
+  } else {
+    Serial.println("Temperature:");
     Serial.println(t);
-    
-    Serial.println("Humidity:"); 
+
+    Serial.println("Humidity:");
     Serial.println(h);
 
     //  Convert the numeric temperature and humidity to text strings, 0 decimal places.
     //  Concatenate them with field names, separated by comma.  e.g.:
     //  t:28,h:44
-    msg = 
-      "t:" + String(t, 0) + "," +
-      "h:" + String(h, 0);
+    msg =
+        "t:" + String(t, 0) + "," +
+        "h:" + String(h, 0);
   }
-  Serial.println("msg:"); 
-  Serial.println(msg);  
+  Serial.println("msg:");
+  Serial.println(msg);
 
   //  End Sensor Loop
   ////////////////////////////////////////////////////////////
@@ -125,12 +147,9 @@ void loop()
   //  Begin SIGFOX Module Loop
 
   //  Send sensor data.
-  if (akeru.sendString(msg))
-  {
+  if (transceiver.sendString(msg)) {
     Serial.println("Message sent");
-  }
-  else
-  {
+  } else {
     Serial.println("Message not sent");
   }
 
@@ -153,7 +172,7 @@ msg:
 t:28,h:44
 
 >> AT$SS=743a32382c683a3434
-<< 
+<<
 OK
 
 Message sent !
@@ -165,9 +184,8 @@ msg:
 t:28,h:44
 
 >> AT$SS=743a32382c683a3434
-<< 
+<<
 OK
 
 Message sent !
 */
-
