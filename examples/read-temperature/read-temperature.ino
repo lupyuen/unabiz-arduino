@@ -41,7 +41,7 @@ void setup()
 
   //  Initialize console serial communication at 9600 bits per second:
   Serial.begin(9600);
-  Serial.println(F("Demo sketch for sending temperature sensor values to SIGFOX cloud :)"));
+  Serial.println(F("Demo sketch for reading temperature sensor values :)"));
 
   //  End General Setup
   ////////////////////////////////////////////////////////////

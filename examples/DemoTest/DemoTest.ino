@@ -11,7 +11,7 @@ Radiocrafts transceiver;  //  Uncomment this for UnaBiz Radiocrafts Dev Kit. Def
 void setup() {
   //  Initialize console serial communication at 9600 bits per second:
   Serial.begin(9600);
-  Serial.println(F("Demo sketch for SIGFOX transceiver library :)"));
+  Serial.println(F("Demo sketch for sending data to SIGFOX cloud :)"));
 
   transceiver.echoOn();  //  Comment this line to hide the echoing of commands.
   //  Check whether the SIGFOX module is functioning.
