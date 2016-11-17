@@ -184,7 +184,7 @@ void loop()
     Serial.println("Humidity:");
     Serial.println(hmd);
 
-    //  Convert the numeric temperature and humidity to integer binary fields.
+    //  Convert the numeric temperature and humidity to binary fields.
     //  Field names must have 3 letters, no digits.  Field names occupy 2 bytes.
     //  Numeric fields occupy 2 bytes, with 1 decimal place.
     msg.addField("tmp", tmp)   //  4 bytes
