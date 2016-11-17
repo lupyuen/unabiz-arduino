@@ -87,7 +87,7 @@ class Akeru
     void setEchoPort(Print *port);  //  Set the port for sending echo output.
     bool isReady();
     bool sendMessage(const String payload);  //  Send the payload of hex digits to the network, max 12 bytes.
-    bool sendString(const String str);  //  Sending a text string, max 12 characters allowed.
+		bool sendString(const String str);  //  Sending a text string, max 12 characters allowed.
     bool receive(String &data);  //  Receive a message.
     bool enterCommandMode() {}  //  Enter Command Mode for sending module commands, not data.
     bool exitCommandMode() {}  //  Exit Command Mode so we can send data.

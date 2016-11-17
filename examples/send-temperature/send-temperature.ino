@@ -108,6 +108,8 @@ void setup()
   ////////////////////////////////////////////////////////////
 }
 
+#ifndef CLION
+
 void loop()
 {
   ////////////////////////////////////////////////////////////
@@ -160,7 +162,7 @@ void loop()
   delay(10000);
 }
 
-#ifdef NOTUSED
+#else // CLION
 
 void loop()
 {
@@ -212,7 +214,7 @@ void loop()
   delay(10000);
 }
 
-#endif  //  NOTUSED
+#endif  //  CLION
 
 /*
 Expected output:
