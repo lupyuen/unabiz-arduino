@@ -1,12 +1,12 @@
-//  Send sample SIGFOX messages with UnaBiz UnaKit development kit.
+//  Send sample SIGFOX messages with UnaBiz UnaShield development kit.
 //  Based on https://github.com/Snootlab/Akeru
 
 #include "SIGFOX.h"
 
 //  IMPORTANT: Check these settings with UnaBiz to use the right SIGFOX library.
-const bool useEmulator = true;  //  Set to true if using UnaBiz Emulator.
-Akeru transceiver;  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
-//  Radiocrafts transceiver;  //  Uncomment this for UnaBiz Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
+const bool useEmulator = false;  //  Set to true if using UnaBiz Emulator.
+//  Akeru transceiver;  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
+Radiocrafts transceiver;  //  Uncomment this for UnaBiz Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 
 void setup() {
   //  Initialize console serial communication at 9600 bits per second:
