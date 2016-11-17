@@ -176,7 +176,7 @@ void loop()
   // Check if returns are valid, if they are NaN (not a number) then something went wrong!
   if (isnan(tmp) || isnan(hmd)) {
     Serial.println("Failed to read from sensor");
-    msg = "error";
+    msg.addField("err", 1);   //  4 bytes
   } else {
     Serial.println("Temperature:");
     Serial.println(tmp);
