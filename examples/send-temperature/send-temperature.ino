@@ -160,6 +160,60 @@ void loop()
   delay(10000);
 }
 
+#ifdef NOTUSED
+
+void loop()
+{
+  ////////////////////////////////////////////////////////////
+  //  Begin Sensor Loop
+
+  // Reading temperature or humidity takes about 250 milliseconds!
+  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+  float tmp = dht.readTemperature();
+  float hmd = dht.readHumidity();
+  String msg = "";  //  Will contain the sensor data.
+
+  // Check if returns are valid, if they are NaN (not a number) then something went wrong!
+  if (isnan(tmp) || isnan(hmd)) {
+    Serial.println("Failed to read from sensor");
+    msg = "error";
+  } else {
+    Serial.println("Temperature:");
+    Serial.println(tmp);
+
+    Serial.println("Humidity:");
+    Serial.println(hmd);
+
+    //  Convert the numeric temperature and humidity to integer binary fields.
+    //  Field names must have 3 letters, no digits.  Field names occupy 2 bytes.
+    //  Numeric fields occupy 2 bytes, with 1 decimal place.
+    msg.addField("tmp", tmp)   //  4 bytes
+       .addField("hmd", hmd);  //  4 bytes
+    //  Total 8 bytes out of 12 bytes used.
+  }
+
+  //  End Sensor Loop
+  ////////////////////////////////////////////////////////////
+
+  ////////////////////////////////////////////////////////////
+  //  Begin SIGFOX Module Loop
+
+  //  Send sensor data.
+  if (transceiver.sendMessage(msg)) {
+    Serial.println("Message sent");
+  } else {
+    Serial.println("Message not sent");
+  }
+
+  //  End SIGFOX Module Loop
+  ////////////////////////////////////////////////////////////
+
+  //  Wait a while before looping. 10000 milliseconds = 10 seconds.
+  delay(10000);
+}
+
+#endif  //  NOTUSED
+
 /*
 Expected output:
 
