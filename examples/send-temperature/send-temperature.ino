@@ -171,7 +171,7 @@ void loop()
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
   float tmp = dht.readTemperature();
   float hmd = dht.readHumidity();
-  String msg = "";  //  Will contain the sensor data.
+  Message msg(transceiver);  //  Will contain the structured sensor data.
 
   // Check if returns are valid, if they are NaN (not a number) then something went wrong!
   if (isnan(tmp) || isnan(hmd)) {
