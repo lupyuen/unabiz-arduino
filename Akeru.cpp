@@ -21,7 +21,7 @@
 #include "SIGFOX.h"
 #include "Akeru.h"
 
-static NullPort nullPort;
+static NullPort nullPort2;
 
 Akeru::Akeru(): Akeru(AKERU_RX, AKERU_TX) {}  //  Forward to constructor below.
 
@@ -31,7 +31,7 @@ Akeru::Akeru(unsigned int rx, unsigned int tx)
   //  Default to no echo.
   //Serial.begin(9600); Serial.print(String(F("Akeru.Akeru: (rx,tx)=")) + rx + ',' + tx + '\n');
   serialPort = new SoftwareSerial(rx, tx);
-  echoPort = &nullPort;
+  echoPort = &nullPort2;
   lastEchoPort = &Serial;
   _lastSend = 0;
 }
@@ -47,13 +47,18 @@ void Akeru::echoOff()
 {
   //  Stop echoing commands and responses to the echo port.
   lastEchoPort = echoPort;
-  echoPort = &nullPort;
+  echoPort = &nullPort2;
 }
 
 void Akeru::setEchoPort(Print *port) {
   //  Set the port for sending echo output.
   lastEchoPort = echoPort;
   echoPort = port;
+}
+
+void Akeru::echo(String msg) {
+  //  Echo debug message to the echo port.
+  echoPort->println(msg);
 }
 
 bool Akeru::begin()

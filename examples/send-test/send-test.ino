@@ -89,8 +89,14 @@ void loop()
   ////////////////////////////////////////////////////////////
   //  Begin Sensor Loop
 
-  //  Prepare sensor data.  Must not exceed 12 characters.
-  String msg = "t:0,h:0";
+  //  Prepare sample sensor data.  Must not exceed 12 characters.
+  //  Convert the numeric temperature and humidity to binary fields.
+  //  Field names must have 3 letters, no digits.  Field names occupy 2 bytes.
+  //  Numeric fields occupy 2 bytes, with 1 decimal place.
+  Message msg(transceiver);  //  Will contain the structured sensor data.
+  msg.addField("tmp", 30.1);  //  4 bytes
+  msg.addField("hmd", 98.7);  //  4 bytes
+  //  Total 8 bytes out of 12 bytes used.
 
   //  End Sensor Loop
   ////////////////////////////////////////////////////////////
@@ -99,10 +105,12 @@ void loop()
   //  Begin SIGFOX Module Loop
 
   //  Send sensor data.
-  if (transceiver.sendString(msg)) {
-    Serial.println("Message sent");
+  //  Send the message.
+  Serial.print(F("\n>> Device sending message ")); Serial.print(msg.getEncodedMessage() + "...");
+  if (msg.send()) {
+    Serial.println(F("Message sent"));
   } else {
-    Serial.println("Message not sent");
+    Serial.println(F("Message not sent"));
   }
 
   //  End SIGFOX Module Loop

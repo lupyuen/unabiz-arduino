@@ -15,14 +15,11 @@
 //  Begin Sensor Declaration
 
 #include "DHT.h"  //  From https://github.com/Seeed-Studio/Grove_Temperature_And_Humidity_Sensor
-
-#define DHTPIN 2     // UnaBiz: what pin we're connected to. 2 means Port D2.
-
+#define DHTPIN 2  // What pin we're connected to. 2 means Port D2.
 // Uncomment whatever type you're using!
 #define DHTTYPE DHT11   // DHT 11
 //#define DHTTYPE DHT22   // DHT 22  (AM2302)
 //#define DHTTYPE DHT21   // DHT 21 (AM2301)
-
 DHT dht(DHTPIN, DHTTYPE);
 
 //  End Sensor Declaration
@@ -108,62 +105,6 @@ void setup()
   ////////////////////////////////////////////////////////////
 }
 
-#ifndef CLION
-
-void loop()
-{
-  ////////////////////////////////////////////////////////////
-  //  Begin Sensor Loop
-
-  // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float t = dht.readTemperature();
-  float h = dht.readHumidity();
-  String msg = "";  //  Will contain the sensor data.
-
-  // Check if returns are valid, if they are NaN (not a number) then something went wrong!
-  if (isnan(t) || isnan(h)) {
-    Serial.println("Failed to read from sensor");
-    msg = "error";
-  } else {
-    Serial.println("Temperature:");
-    Serial.println(t);
-
-    Serial.println("Humidity:");
-    Serial.println(h);
-
-    //  Convert the numeric temperature and humidity to text strings, 0 decimal places.
-    //  Concatenate them with field names, separated by comma.  e.g.:
-    //  t:28,h:44
-    msg =
-        "t:" + String(t, 0) + "," +
-        "h:" + String(h, 0);
-  }
-  Serial.println("msg:");
-  Serial.println(msg);
-
-  //  End Sensor Loop
-  ////////////////////////////////////////////////////////////
-
-  ////////////////////////////////////////////////////////////
-  //  Begin SIGFOX Module Loop
-
-  //  Send sensor data.
-  if (transceiver.sendString(msg)) {
-    Serial.println("Message sent");
-  } else {
-    Serial.println("Message not sent");
-  }
-
-  //  End SIGFOX Module Loop
-  ////////////////////////////////////////////////////////////
-
-  //  Wait a while before looping. 10000 milliseconds = 10 seconds.
-  delay(10000);
-}
-
-#else // CLION
-
 void loop()
 {
   ////////////////////////////////////////////////////////////
@@ -177,20 +118,17 @@ void loop()
 
   // Check if returns are valid, if they are NaN (not a number) then something went wrong!
   if (isnan(tmp) || isnan(hmd)) {
-    Serial.println("Failed to read from sensor");
+    Serial.println(F("Failed to read from sensor"));
     msg.addField("err", 1);   //  4 bytes
   } else {
-    Serial.println("Temperature:");
-    Serial.println(tmp);
-
-    Serial.println("Humidity:");
-    Serial.println(hmd);
+    Serial.print(F("Temperature: ")); Serial.println(tmp);
+    Serial.print(F("Humidity:")); Serial.println(hmd);
 
     //  Convert the numeric temperature and humidity to binary fields.
     //  Field names must have 3 letters, no digits.  Field names occupy 2 bytes.
     //  Numeric fields occupy 2 bytes, with 1 decimal place.
-    msg.addField("tmp", tmp)   //  4 bytes
-       .addField("hmd", hmd);  //  4 bytes
+    msg.addField("tmp", tmp);   //  4 bytes
+    msg.addField("hmd", hmd);   //  4 bytes
     //  Total 8 bytes out of 12 bytes used.
   }
 
@@ -200,11 +138,13 @@ void loop()
   ////////////////////////////////////////////////////////////
   //  Begin SIGFOX Module Loop
 
-  //  Send sensor data.
-  if (transceiver.sendMessage(msg)) {
-    Serial.println("Message sent");
+  //  Send the message.
+  Serial.print(F("\n>> Device sending message ")); Serial.print(msg.getEncodedMessage() + "...");
+  transceiver.echoOn();
+  if (msg.send()) {
+    Serial.println(F("Message sent"));
   } else {
-    Serial.println("Message not sent");
+    Serial.println(F("Message not sent"));
   }
 
   //  End SIGFOX Module Loop
@@ -213,8 +153,6 @@ void loop()
   //  Wait a while before looping. 10000 milliseconds = 10 seconds.
   delay(10000);
 }
-
-#endif  //  CLION
 
 /*
 Expected output:

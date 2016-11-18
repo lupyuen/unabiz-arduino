@@ -389,6 +389,11 @@ void Radiocrafts::setEchoPort(Print *port) {
   echoPort = port;
 }
 
+void Radiocrafts::echo(String msg) {
+  //  Echo debug message to the echo port.
+  echoPort->println(msg);
+}
+
 bool Radiocrafts::receive(String &data) {
   //  TODO
   echoPort->println(F("Radiocrafts.receive: ERROR - Not implemented"));

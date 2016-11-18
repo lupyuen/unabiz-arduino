@@ -95,19 +95,23 @@ void loop() {
     transceiver.getVoltage(voltage);
     transceiver.exitCommandMode();
 
-    //  Convert to hex and combine them.
-    String temp = transceiver.toHex(temperature);
-    String volt = transceiver.toHex(voltage);
-    String msg = transceiver.toHex((char) i) + temp + volt;
+    //  Convert the numeric temperature and voltage to binary fields.
+    //  Field names must have 3 letters, no digits.  Field names occupy 2 bytes.
+    //  Numeric fields occupy 2 bytes, with 1 decimal place.
+    Message msg(transceiver);  //  Will contain the structured sensor data.
+    msg.addField("tmp", temperature);  //  4 bytes
+    msg.addField("vlt", voltage);  //  4 bytes
+    //  Total 8 bytes out of 12 bytes used.
 
-    Serial.print(F("\n>> Device sending message ")); Serial.print(msg + "...");
+    //  Send the message.
+    Serial.print(F("\n>> Device sending message ")); Serial.print(msg.getEncodedMessage() + "...");
     transceiver.echoOn();
-    if (transceiver.sendMessage(msg)) {
-      //  Serial.println(F("Message sent!"));
+    if (msg.send()) {
+      Serial.println(F("Message sent!"));
     } else {
       Serial.println(F("Message not sent!"));
     }
-    delay(6000);
+    delay(10000);  //  10 seconds.
   }
 
   //  End of tests.  Loop forever.

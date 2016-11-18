@@ -33,6 +33,7 @@ public:
   void echoOn();  //  Turn on send/receive echo.
   void echoOff();  //  Turn off send/receive echo.
   void setEchoPort(Print *port);  //  Set the port for sending echo output.
+  void echo(String msg);  //  Echo the debug message.
   bool isReady();
   bool sendMessage(const String payload);  //  Send the payload of hex digits to the network, max 12 bytes.
   bool sendString(const String str);  //  Sending a text string, max 12 characters allowed.
