@@ -1,11 +1,16 @@
+# Manually classify the file types so that GitHub will label this as an Arduino project.
 *.ino linguist-language=Arduino
 *.cpp linguist-language=Arduino
 *.h linguist-language=Arduino
 *.cmake linguist-language=Arduino
 docs/* linguist-documentation
 
-# Auto detect text files and perform LF normalization
-* text=auto
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
 
 # Custom for Visual Studio
 *.cs     diff=csharp
