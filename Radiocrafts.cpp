@@ -218,13 +218,14 @@ bool Radiocrafts::getID(String &id, String &pac) {
 }
 
 bool Radiocrafts::getTemperature(int &temperature) {
+  //  Returns the temperature of the SIGFOX module.
   if (!sendCommand(toHex('U'), 1, data, markers)) return false;
   if (data.length() != 2) {
     echoPort->println(String(F("Radiocrafts.getTemperature: Unknown response: ")) + data);
     return false;
   }
   temperature = hexDigitToDecimal(data.charAt(0)) * 16 +
-                   hexDigitToDecimal(data.charAt(1));
+                   hexDigitToDecimal(data.charAt(1)) - 128;
   echoPort->print(F("Radiocrafts.getTemperature: returned "));  echoPort->println(temperature);
   return true;
 }
@@ -236,8 +237,8 @@ bool Radiocrafts::getVoltage(float &voltage) {
     echoPort->println(String(F("Radiocrafts.getVoltage: Unknown response: ")) + data);
     return false;
   }
-  voltage = hexDigitToDecimal(data.charAt(0)) * 16 +
-                hexDigitToDecimal(data.charAt(1));
+  voltage = 0.030 * (hexDigitToDecimal(data.charAt(0)) * 16 +
+                hexDigitToDecimal(data.charAt(1)));
   echoPort->print(F("Radiocrafts.getVoltage: returned "));  echoPort->println(voltage);
   return true;
 }
