@@ -1,12 +1,13 @@
 //  Send sample SIGFOX messages with UnaBiz UnaKit Arduino Shield.
 #include "SIGFOX.h"
 
-//  IMPORTANT: Check these settings with UnaBiz to use the right SIGFOX library.
-static const Country country = COUNTRY_SG;  //  Set this to your country to configure the SIGFOX transmission frequencies.
+//  IMPORTANT: Check these settings with UnaBiz to use the SIGFOX library correctly.
+static const String device = "g88pi";  //  Set this to your device name if you're using UnaBiz Emulator.
 static const bool useEmulator = true;  //  Set to true if using UnaBiz Emulator.
 static const bool echo = true;  //  Set to true if the SIGFOX library should display the executed commands.
-Radiocrafts transceiver(country, useEmulator, echo);  //  Uncomment this for UnaBiz UnaKit Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
-//  Akeru transceiver(country, useEmulator, echo);  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
+static const Country country = COUNTRY_SG;  //  Set this to your country to configure the SIGFOX transmission frequencies.
+Radiocrafts transceiver(country, useEmulator, device, echo);  //  Uncomment this for UnaBiz UnaKit Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
+//  Akeru transceiver(country, useEmulator, device, echo);  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
 
 void setup() {  //  Will be called only once.
   //  Initialize console so we can see debug messages (9600 bits per second).

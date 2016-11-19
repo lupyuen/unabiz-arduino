@@ -27,8 +27,8 @@ const int END_OF_RESPONSE = '>';  //  Character '>' marks the end of response.
 class Radiocrafts
 {
 public:
-  Radiocrafts(Country country, bool useEmulator, bool echo);
-  Radiocrafts(Country country, bool useEmulator, bool echo, unsigned int rx, unsigned int tx);
+  Radiocrafts(Country country, bool useEmulator, const String device, bool echo);
+  Radiocrafts(Country country, bool useEmulator, const String device, bool echo, unsigned int rx, unsigned int tx);
   bool begin();
   void echoOn();  //  Turn on send/receive echo.
   void echoOff();  //  Turn off send/receive echo.
@@ -86,6 +86,7 @@ private:
 
   Country country;   //  Country to be set for SIGFOX transmission frequencies.
   bool useEmulator;  //  Set to true if using UnaBiz Emulator.
+  String device;  //  Name of device if using UnaBiz Emulator.
   SoftwareSerial *serialPort;  //  Serial port for the SIGFOX module.
   Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
   Print *lastEchoPort;  //  Last port used for sending echo output.

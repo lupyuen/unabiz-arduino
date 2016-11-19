@@ -21,15 +21,16 @@ static int markers = 0;
   transceiver.getParameter(0x30, result);
 */
 
-Radiocrafts::Radiocrafts(Country country0, bool useEmulator0, bool echo):
-    Radiocrafts(country0, useEmulator0, echo, RADIOCRAFTS_RX, RADIOCRAFTS_TX) {}  //  Forward to constructor below.
+Radiocrafts::Radiocrafts(Country country0, bool useEmulator0, const String device0, bool echo):
+    Radiocrafts(country0, useEmulator0, device0, echo, RADIOCRAFTS_RX, RADIOCRAFTS_TX) {}  //  Forward to constructor below.
 
-Radiocrafts::Radiocrafts(Country country0, bool useEmulator0, bool echo,
+Radiocrafts::Radiocrafts(Country country0, bool useEmulator0, const String device0, bool echo,
                          unsigned int rx, unsigned int tx) {
   //  Init the module with the specified transmit and receive pins.
   //  Default to no echo.
   country = country0;
   useEmulator = useEmulator0;
+  device = device0;
   serialPort = new SoftwareSerial(rx, tx);
   if (echo) echoPort = &Serial;
   else echoPort = &nullPort;
@@ -87,7 +88,7 @@ bool Radiocrafts::sendMessage(const String payload) {
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
   //  valid payload and this causes string truncation in C libraries.
-  echoPort->print(String(F(" - Radiocrafts.sendPayload: ")) + payload + '\n');
+  echoPort->print(String(F(" - Radiocrafts.sendMessage: ")) + device + ',' + payload + '\n');
   if (!isReady()) return false;  //  Prevent user from sending too many messages.
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return false;
