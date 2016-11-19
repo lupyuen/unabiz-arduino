@@ -13,7 +13,7 @@ void setup() {  //  Will be called only once.
   //  Initialize console so we can see debug messages (9600 bits per second).
   Serial.begin(9600);  Serial.println(F("Running setup..."));
   //  Check whether the SIGFOX module is functioning.
-  if (!transceiver.begin()) for(;;) {}  //  Loop forever because we can't continue.
+  if (!transceiver.begin()) stop(F("Unable to init SIGFOX module, may be missing"));  //  Will never return.
 }
 
 void loop() {  //  Will be called repeatedly.
@@ -44,9 +44,8 @@ void loop() {  //  Will be called repeatedly.
   //  Send only 10 messages.
   if (counter >= 10) {
     //  If more than 10 times, display the results and hang here forever.
-    Serial.println(String(F("Messages sent successfully: ")) + successCount +
-                   F(", failed: ") + failCount);
-    for(;;) {}  //  Finished, hang here forever.
+    stop(String(F("Messages sent successfully: ")) + successCount +
+                   F(", failed: ") + failCount);  //  Will never return.
   }
 
   //  Delay 10 seconds before sending next message.

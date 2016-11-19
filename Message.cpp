@@ -187,3 +187,8 @@ void Message::echo(String msg) {
   else akeru->echo(msg);
 }
 
+void stop(const String msg) {
+  //  Call this function if we need to stop.  This informs the emulator to stop listening.
+  Serial.println(String("STOPSTOPSTOP: ") + msg);
+  for (;;) {}  //  Loop forever since we can't continue.
+}

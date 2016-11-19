@@ -33,4 +33,7 @@ class NullPort: public Print {
   virtual size_t write(uint8_t) {}
 };
 
+//  Call this function if we need to stop.  This informs the emulator to stop listening.
+void stop(const String msg);
+
 #endif  //  UNABIZ_ARDUINO_SIGFOX_H
