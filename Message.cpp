@@ -43,18 +43,21 @@ Message::Message(Akeru &transceiver) {
 
 bool Message::addField(const String name, int value) {
   //  Add an integer field scaled by 10.  2 bytes.
+  echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
   int val = value * 10;
   return addIntField(name, val);
 }
 
 bool Message::addField(const String name, float value) {
   //  Add a float field with 1 decimal place.  2 bytes.
+  echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
   int val = value * 10;
   return addIntField(name, val);
 }
 
 bool Message::addField(const String name, double value) {
   //  Add a double field with 1 decimal place.  2 bytes.
+  echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
   int val = value * 10;
   return addIntField(name, val);
 }
@@ -76,6 +79,7 @@ bool Message::addIntField(const String name, int value) {
 
 bool Message::addField(const String name, const String value) {
   //  Add a string field with max 3 chars.  2 bytes for name, 2 bytes for value.
+  echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
   if (encodedMessage.length() + (4 * 2) > MAX_BYTES_PER_MESSAGE * 2) {
     String err = String("****ERROR: Message too long, already ") + (encodedMessage.length() / 2) +
       " bytes";
@@ -177,3 +181,9 @@ String Message::decodeMessage(String msg) {
   result.concat("}");
   return result;
 }
+
+void Message::echo(String msg) {
+  if (radiocrafts) radiocrafts->echo(msg);
+  else akeru->echo(msg);
+}
+

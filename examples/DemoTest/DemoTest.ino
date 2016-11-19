@@ -2,14 +2,14 @@
 #include "SIGFOX.h"
 
 //  IMPORTANT: Check these settings with UnaBiz to use the right SIGFOX library.
-const Country country = COUNTRY_SG;  //  Set this to your country to configure the SIGFOX transmission frequencies.
-const bool useEmulator = true;  //  Set to true if using UnaBiz Emulator.
-const bool echo = true;  //  Set to true if the SIGFOX library should display the executed commands.
+static const Country country = COUNTRY_SG;  //  Set this to your country to configure the SIGFOX transmission frequencies.
+static const bool useEmulator = true;  //  Set to true if using UnaBiz Emulator.
+static const bool echo = true;  //  Set to true if the SIGFOX library should display the executed commands.
 Radiocrafts transceiver(country, useEmulator, echo);  //  Uncomment this for UnaBiz UnaKit Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 //  Akeru transceiver(country, useEmulator, echo);  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
 
 void setup() {  //  Will be called only once.
-  //  Initialize console serial communications at 9600 bits per second.
+  //  Initialize console so we can see debug messages (9600 bits per second).
   Serial.begin(9600);  Serial.println(F("Running setup..."));
   //  Check whether the SIGFOX module is functioning.
   if (!transceiver.begin()) for(;;) {}  //  Loop forever because we can't continue.
@@ -25,7 +25,7 @@ void loop() {  //  Will be called repeatedly.
   transceiver.getTemperature(temperature);
   transceiver.getVoltage(voltage);
 
-  //  Convert the numeric temperature and voltage to compact binary fields.
+  //  Convert the numeric counter, temperature and voltage into a compact message with binary fields.
   Message msg(transceiver);  //  Will contain the structured sensor data.
   msg.addField("ctr", counter);  //  4 bytes for the counter.
   msg.addField("tmp", temperature);  //  4 bytes for the temperature.

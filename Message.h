@@ -28,6 +28,7 @@ public:
 private:
   bool addIntField(const String name, int value);  //  Add an integer field already scaled.
   bool addName(const String name);  //  Encode and add the 3-letter name.
+  void echo(String msg);
   String encodedMessage;  //  Encoded message.
   Radiocrafts *radiocrafts = 0;  //  Reference to Radiocrafts transceiver.
   Akeru *akeru = 0;  //  Reference to Akeru transceiver.

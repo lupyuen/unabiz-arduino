@@ -1,6 +1,7 @@
 //  Library for sending and receiving SIGFOX messages with Arduino shield based on Radiocrafts RC1692HP-SIG.
 #include <stdlib.h>
 #include "SIGFOX.h"
+#include "VSync.h"
 #include "Radiocrafts.h"
 
 static const char *CMD_READ_MEMORY = "59";  //  'Y' to read memory.
@@ -443,7 +444,7 @@ void Radiocrafts::setEchoPort(Print *port) {
 
 void Radiocrafts::echo(String msg) {
   //  Echo debug message to the echo port.
-  echoPort->println(msg);
+  echoPort->print(String(F(" - ")) + msg);
 }
 
 bool Radiocrafts::receive(String &data) {
