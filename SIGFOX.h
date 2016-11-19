@@ -4,8 +4,18 @@
 
 //  According to regulation, messages should be sent only every 10 minutes.
 const unsigned long SEND_DELAY = (unsigned long) 10 * 60 * 1000;
-const unsigned int COMMAND_TIMEOUT = 3000;
 const unsigned int MAX_BYTES_PER_MESSAGE = 12;  //  Only 12 bytes per message.
+const unsigned int COMMAND_TIMEOUT = 3000;  //  Wait up to 3 seconds for response from SIGFOX module.
+
+//  Define the countries that are supported.
+enum Country {
+  COUNTRY_AU = 'A' << 8 + 'U',  //  Australia
+  COUNTRY_BR = 'B' << 8 + 'R',  //  Brazil
+  COUNTRY_NZ = 'N' << 8 + 'Z',  //  New Zealand
+  COUNTRY_SG = 'S' << 8 + 'G',  //  Singapore
+  COUNTRY_US = 'U' << 8 + 'S',  //  USA
+  COUNTRY_TW = 'T' << 8 + 'W',  //  Taiwan
+};
 
 //  Newer UnaBiz / Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 #include "Radiocrafts.h"

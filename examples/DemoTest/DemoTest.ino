@@ -4,123 +4,56 @@
 #include "SIGFOX.h"
 
 //  IMPORTANT: Check these settings with UnaBiz to use the right SIGFOX library.
+const Country country = COUNTRY_SG;  //  Set this to your country to configure the SIGFOX transmission frequencies.
 const bool useEmulator = false;  //  Set to true if using UnaBiz Emulator.
-//  Akeru transceiver;  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
-Radiocrafts transceiver;  //  Uncomment this for UnaBiz Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
+const bool echo = true;  //  Set to true if the SIGFOX library should display the executed commands.
+//  Akeru transceiver(country, useEmulator, echo);  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
+Radiocrafts transceiver(country, useEmulator, echo);  //  Uncomment this for UnaBiz Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 
 void setup() {
-  //  Initialize console serial communication at 9600 bits per second:
-  Serial.begin(9600);
-  Serial.println(F("Demo sketch for sending data to SIGFOX cloud :)"));
-
-  transceiver.echoOn();  //  Comment this line to hide the echoing of commands.
+  //  Initialize console serial communications at 9600 bits per second.
+  Serial.begin(9600);  Serial.println(F("Running setup..."));
   //  Check whether the SIGFOX module is functioning.
-  if (!transceiver.begin()) {
-    Serial.println(F("Error: SIGFOX Module KO!"));
-    for(;;) {}  //  Loop forever because we can't continue.
-  }
+  if (!transceiver.begin()) for(;;) {}  //  Loop forever because we can't continue.
 }
 
 void loop() {
-  String result = "";
-  //  Enter command mode.
-  Serial.println(F("\nEntering command mode..."));
-  transceiver.enterCommandMode();
+  //  Send message counter, temperature and voltage as a SIGFOX message, up to 10 times.
+  static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
 
-  if (useEmulator) {
-    //  Emulation mode.
-    transceiver.enableEmulator(result);
+  //  Get temperature and voltage of the SIGFOX module.
+  int temperature;  float voltage;
+  transceiver.getTemperature(temperature);
+  transceiver.getVoltage(voltage);
+
+  //  Convert the numeric temperature and voltage to compact binary fields.
+  Message msg(transceiver);  //  Will contain the structured sensor data.
+  msg.addField("ctr", counter);  //  4 bytes for the counter.
+  msg.addField("tmp", temperature);  //  4 bytes for the temperature.
+  msg.addField("vlt", voltage);  //  4 bytes for the voltage.
+  //  Total 12 bytes out of 12 bytes used.
+
+  //  Send the message.
+  if (msg.send()) {
+    successCount++;  //  If successful, count the message sent successfully.
   } else {
-    //  Disable emulation mode.
-    Serial.println(F("\nDisabling emulation mode..."));
-    transceiver.disableEmulator(result);
-
-    //  Check whether emulator is used for transmission.
-    Serial.println(F("\nChecking emulation mode (expecting 0)...")); int emulator = 0;
-    transceiver.getEmulator(emulator);
+    failCount++;  //  If failed, count the message that could not be sent.
   }
 
-  //  Set the frequency of SIGFOX module to SG/TW.
-  Serial.println(F("\nSetting frequency..."));  result = "";
-  transceiver.setFrequencySG(result);
-  Serial.print(F("Set frequency result = "));  Serial.println(result);
-
-  //  Get and display the frequency used by the SIGFOX module.  Should return 3 for RCZ4 (SG/TW).
-  Serial.println(F("\nGetting frequency (expecting 3)..."));  String frequency = "";
-  transceiver.getFrequency(frequency);
-  Serial.print(F("Frequency (expecting 3) = "));  Serial.println(frequency);
-
-  //  Read module temperature.
-  Serial.println(F("\nGetting temperature..."));  int temperature = 0;
-  if (transceiver.getTemperature(temperature)) {
-    Serial.print(F("Temperature = "));  Serial.print(temperature);  Serial.println(F(" C"));
-  } else {
-    Serial.println(F("Temperature KO"));
+  //  Send only 10 messages.
+  if (counter >= 10) {
+    //  If more than 10 times, display the results and hang here forever.
+    Serial.println(String(F("Messages sent successfully: ")) + successCount +
+                   F(", failed: ") + failCount);
+    for(;;) {}  //  Finished, hang here forever.
   }
+  counter++;
 
-  //  Read module supply voltage.
-  Serial.println(F("\nGetting voltage..."));  float voltage = 0.0;
-  if (transceiver.getVoltage(voltage)) {
-    Serial.print(F("Supply voltage = "));  Serial.print(voltage);  Serial.println(F(" V"));
-  } else {
-    Serial.println(F("Supply voltage KO"));
-  }
-
-  //  Read SIGFOX ID and PAC from module.
-  Serial.println(F("\nGetting SIGFOX ID..."));  String id = "", pac = "";
-  if (transceiver.getID(id, pac)) {
-    Serial.print(F("SIGFOX ID = "));  Serial.println(id);
-    Serial.print(F("PAC = "));  Serial.println(pac);
-  } else {
-    Serial.println(F("ID KO"));
-  }
-
-  //  Read power.
-  Serial.println(F("\nGetting power..."));  int power = 0;
-  if (transceiver.getPower(power)) {
-    Serial.print(F("Power level = "));  Serial.print(power);  Serial.println(F(" dB"));
-  } else {
-    Serial.println(F("Power level KO"));
-  }
-
-  //  Exit command mode and prepare to send message.
-  transceiver.exitCommandMode();
-
-  //  Send counter, temperature and voltage as a SIGFOX message.  Convert to hexadecimal before sending.
-  for (int i = 0; i < 10; i++) {  //  Send 10 times.
-    //  Get temperature and voltage.
-    transceiver.echoOff();
-    transceiver.enterCommandMode();
-    transceiver.getTemperature(temperature);
-    transceiver.getVoltage(voltage);
-    transceiver.exitCommandMode();
-
-    //  Convert the numeric temperature and voltage to binary fields.
-    //  Field names must have 3 letters, no digits.  Field names occupy 2 bytes.
-    //  Numeric fields occupy 2 bytes, with 1 decimal place.
-    Message msg(transceiver);  //  Will contain the structured sensor data.
-    msg.addField("tmp", temperature);  //  4 bytes
-    msg.addField("vlt", voltage);  //  4 bytes
-    //  Total 8 bytes out of 12 bytes used.
-
-    //  Send the message.
-    Serial.print(F("\n>> Device sending message ")); Serial.print(msg.getEncodedMessage() + "...");
-    transceiver.echoOn();
-    if (msg.send()) {
-      Serial.println(F("Message sent!"));
-    } else {
-      Serial.println(F("Message not sent!"));
-    }
-    delay(10000);  //  10 seconds.
-  }
-
-  //  End of tests.  Loop forever.
-  for(;;) {}
+  //  Delay 10 seconds before sending next message.
+  delay(10000);
 }
 
 /* Expected output for Akene Dev Kit with UnaBiz Emulator:
-
-
 Demo sketch for SIGFOX transceiver library :)
 
 >> AT

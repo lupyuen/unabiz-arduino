@@ -27,8 +27,8 @@ const int END_OF_RESPONSE = '>';  //  Character '>' marks the end of response.
 class Radiocrafts
 {
 public:
-  Radiocrafts();
-  Radiocrafts(unsigned int rx, unsigned int tx);
+  Radiocrafts(Country country, bool useEmulator, bool echo);
+  Radiocrafts(Country country, bool useEmulator, bool echo, unsigned int rx, unsigned int tx);
   bool begin();
   void echoOn();  //  Turn on send/receive echo.
   void echoOff();  //  Turn off send/receive echo.
@@ -79,15 +79,17 @@ public:
 private:
   bool sendCommand(const String cmd, const int expectedMarkers,
                    String &result, int &actualMarkers);
-  bool sendCommand(const String command, const int timeout, const int expectedMarkers,
-                   String &dataOut, int &actualMarkers);
+  bool sendBuffer(const String buffer, const int timeout, const int expectedMarkers,
+                  String &dataOut, int &actualMarkers);
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
 
+  Country country;   //  Country to be set for SIGFOX transmission frequencies.
+  bool useEmulator;  //  Set to true if using UnaBiz Emulator.
   SoftwareSerial *serialPort;  //  Serial port for the SIGFOX module.
   Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
   Print *lastEchoPort;  //  Last port used for sending echo output.
-  unsigned long _lastSend;  //  Timestamp of last send.
+  unsigned long lastSend;  //  Timestamp of last send.
 };
 
 #endif // UNABIZ_ARDUINO_RADIOCRAFTS_H

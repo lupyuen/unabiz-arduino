@@ -10,16 +10,14 @@ message("CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
 # Arduino Options - See https://github.com/queezythegreat/arduino-cmake
 # Change this to the Arduino port.
 #if(WIN32)
-#set(${PROJECT_NAME}_PORT COM4)
+set(${PROJECT_NAME}_PORT COM4)
 #else()
-set(${PROJECT_NAME}_PORT /dev/tty.usbmodem1421)
+#set(${PROJECT_NAME}_PORT /dev/tty.usbmodem1421)
 #endif()
 
 # Build the library.
-set(${PROJECT_LIB}_SRCS Radiocrafts.cpp)
-set(${PROJECT_LIB}_HDRS Radiocrafts.h)
-set(${PROJECT_LIB}_SRCS Akeru.cpp)
-set(${PROJECT_LIB}_HDRS Akeru.h)
+set(${PROJECT_LIB}_SRCS Akeru.cpp Message.cpp Radiocrafts.cpp)
+set(${PROJECT_LIB}_HDRS Akeru.h Message.h Radiocrafts.h SIGFOX.h)
 generate_arduino_library(${PROJECT_LIB})
 
 # Build the application.
