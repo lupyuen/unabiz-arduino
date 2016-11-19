@@ -11,12 +11,12 @@ const unsigned int COMMAND_TIMEOUT = 3000;  //  Wait up to 3 seconds for respons
 
 //  Define the countries that are supported.
 enum Country {
-  COUNTRY_AU = (int16_t) ((int16_t) 'A') << 8 + 'U',  //  Australia
-  COUNTRY_BR = (int16_t) ((int16_t) 'B') << 8 + 'R',  //  Brazil
-  COUNTRY_NZ = (int16_t) ((int16_t) 'N') << 8 + 'Z',  //  New Zealand
-  COUNTRY_SG = (int16_t) ((int16_t) 'S') << 8 + 'G',  //  Singapore
-  COUNTRY_US = (int16_t) ((int16_t) 'U') << 8 + 'S',  //  USA
-  COUNTRY_TW = (int16_t) ((int16_t) 'T') << 8 + 'W',  //  Taiwan
+  COUNTRY_AU = 'A'+'U' << 8,  //  Australia
+  COUNTRY_BR = 'B'+'R' << 8,  //  Brazil
+  COUNTRY_NZ = 'N'+'Z' << 8,  //  New Zealand
+  COUNTRY_SG = 'S'+'G' << 8,  //  Singapore
+  COUNTRY_US = 'U'+'S' << 8,  //  USA
+  COUNTRY_TW = 'T'+'W' << 8,  //  Taiwan
 };
 
 //  Newer UnaBiz / Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.

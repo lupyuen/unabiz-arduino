@@ -48,22 +48,22 @@ bool Radiocrafts::begin() {
     if (!enableEmulator(result)) return false;
   } else {
     //  Disable emulation mode.
-    echoPort->println(F("\nDisabling emulation mode..."));
+    echoPort->println(F("Disabling emulation mode..."));
     if (!disableEmulator(result)) return false;
 
     //  Check whether emulator is used for transmission.
-    echoPort->println(F("\nChecking emulation mode (expecting 0)...")); int emulator = 0;
+    echoPort->println(F("Checking emulation mode (expecting 0)...")); int emulator = 0;
     if (!getEmulator(emulator)) return false;
   }
 
   //  Read SIGFOX ID and PAC from module.
-  echoPort->println(F("\nGetting SIGFOX ID..."));  String id = "", pac = "";
+  echoPort->println(F("Getting SIGFOX ID..."));  String id = "", pac = "";
   if (!getID(id, pac)) return false;
   echoPort->print(F("SIGFOX ID = "));  Serial.println(id);
   echoPort->print(F("PAC = "));  Serial.println(pac);
 
   //  Set the frequency of SIGFOX module.
-  echoPort->println(F("\nSetting frequency..."));  result = "";
+  echoPort->println(String(F("Setting frequency for country ")) + (int) country);  result = "";
   if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
     if (!setFrequencyUS(result)) return false;
   } else { //  Rest of the world runs on RCZ4.
@@ -72,7 +72,7 @@ bool Radiocrafts::begin() {
   echoPort->print(F("Set frequency result = "));  echoPort->println(result);
 
   //  Get and display the frequency used by the SIGFOX module.  Should return 3 for RCZ4 (SG/TW).
-  echoPort->println(F("\nGetting frequency (expecting 3)..."));  String frequency = "";
+  echoPort->println(F("Getting frequency (expecting 3)..."));  String frequency = "";
   if (!getFrequency(frequency)) return false;
   echoPort->print(F("Frequency (expecting 3) = "));  echoPort->println(frequency);
 
@@ -238,7 +238,7 @@ static String data = "";
 bool Radiocrafts::enterCommandMode() {
   //  Enter Command Mode for sending module commands, not data.
   //  TODO: Confirm response = '>'
-  echoPort->println(F("\nEntering command mode..."));
+  echoPort->println(F("Entering command mode..."));
   if (!sendBuffer("00", COMMAND_TIMEOUT, 1, data, markers)) return false;
   echoPort->println(F("Radiocrafts.enterCommandMode: OK "));
   return true;

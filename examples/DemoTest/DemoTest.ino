@@ -39,13 +39,13 @@ void loop() {
   }
 
   //  Send only 10 messages.
+  counter++;
   if (counter >= 10) {
     //  If more than 10 times, display the results and hang here forever.
     Serial.println(String(F("Messages sent successfully: ")) + successCount +
                    F(", failed: ") + failCount);
     for(;;) {}  //  Finished, hang here forever.
   }
-  counter++;
 
   //  Delay 10 seconds before sending next message.
   delay(10000);
