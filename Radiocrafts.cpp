@@ -76,7 +76,7 @@ bool Radiocrafts::begin() {
   if (!getFrequency(frequency)) return false;
   echoPort->print(F("Frequency (expecting 3) = "));  echoPort->println(frequency);
 
-  echoPort->println(F("Error: SIGFOX module did not respond, may be missing"));
+  // echoPort->println(F("Error: SIGFOX module did not respond, may be missing"));
 
   return true;
 }
@@ -124,6 +124,8 @@ bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
   //  expectedMarkerCount is the number of end-of-command markers '>' we
   //  expect to see.  actualMarkerCount contains the actual number seen.
   echoPort->print(String(F("Radiocrafts.sendBuffer: ")) + buffer + '\n');
+  if (useEmulator) return true;
+
   actualMarkerCount = 0;
   //  Start serial interface.
   serialPort->begin(MODEM_BITS_PER_SECOND);
@@ -254,6 +256,7 @@ bool Radiocrafts::getID(String &id, String &pac) {
   if (!sendCommand(toHex('9'), 1, data, markers)) return false;
   //  Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
   if (data.length() != 12 * 2) {
+    if (useEmulator) { id = "EMUL"; return true; }
     echoPort->println(String(F("Radiocrafts.getID: Unknown response: ")) + data);
     return false;
   }
@@ -267,6 +270,7 @@ bool Radiocrafts::getTemperature(int &temperature) {
   //  Returns the temperature of the SIGFOX module.
   if (!sendCommand(toHex('U'), 1, data, markers)) return false;
   if (data.length() != 2) {
+    if (useEmulator) { temperature = 36; return true; }
     echoPort->println(String(F("Radiocrafts.getTemperature: Unknown response: ")) + data);
     return false;
   }
@@ -280,6 +284,7 @@ bool Radiocrafts::getVoltage(float &voltage) {
   //  Returns one byte indicating the power supply voltage.
   if (!sendCommand(toHex('V'), 1, data, markers)) return false;
   if (data.length() != 2) {
+    if (useEmulator) { voltage = 12.3; return true; }
     echoPort->println(String(F("Radiocrafts.getVoltage: Unknown response: ")) + data);
     return false;
   }

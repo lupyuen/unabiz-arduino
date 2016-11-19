@@ -119,7 +119,7 @@ bool Message::send() {
     radiocrafts ? radiocrafts->echo(err) : akeru->echo(err);
     return false;
   }
-  if (msg.length() >= MAX_BYTES_PER_MESSAGE * 2) {
+  if (msg.length() > MAX_BYTES_PER_MESSAGE * 2) {
     String err = String("****ERROR: Message too long, already ") + (encodedMessage.length() / 2) + " bytes";
     radiocrafts ? radiocrafts->echo(err) : akeru->echo(err);
     return false;
