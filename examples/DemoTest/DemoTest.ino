@@ -8,16 +8,17 @@ const bool echo = true;  //  Set to true if the SIGFOX library should display th
 Radiocrafts transceiver(country, useEmulator, echo);  //  Uncomment this for UnaBiz UnaKit Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
 //  Akeru transceiver(country, useEmulator, echo);  //  Uncomment this for UnaBiz Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
 
-void setup() {
+void setup() {  //  Will be called only once.
   //  Initialize console serial communications at 9600 bits per second.
   Serial.begin(9600);  Serial.println(F("Running setup..."));
   //  Check whether the SIGFOX module is functioning.
   if (!transceiver.begin()) for(;;) {}  //  Loop forever because we can't continue.
 }
 
-void loop() {
+void loop() {  //  Will be called repeatedly.
   //  Send message counter, temperature and voltage as a SIGFOX message, up to 10 times.
   static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
+  Serial.print(F("\nRunning loop #")); Serial.println(counter);
 
   //  Get temperature and voltage of the SIGFOX module.
   int temperature;  float voltage;
@@ -37,9 +38,9 @@ void loop() {
   } else {
     failCount++;  //  If failed, count the message that could not be sent.
   }
+  counter++;
 
   //  Send only 10 messages.
-  counter++;
   if (counter >= 10) {
     //  If more than 10 times, display the results and hang here forever.
     Serial.println(String(F("Messages sent successfully: ")) + successCount +
