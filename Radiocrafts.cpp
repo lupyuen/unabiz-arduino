@@ -7,6 +7,7 @@
 static const char *CMD_READ_MEMORY = "59";  //  'Y' to read memory.
 static const char *CMD_ENTER_CONFIG = "4d";  //  'M' to enter config mode.
 static const char *CMD_EXIT_CONFIG = "ff";  //  Exit config mode.
+static const String EMULATOR_ID = "EMUL";  //  Default device ID for emulator.
 
 static NullPort nullPort;
 static int markers = 0;
@@ -258,12 +259,13 @@ bool Radiocrafts::getID(String &id, String &pac) {
   if (!sendCommand(toHex('9'), 1, data, markers)) return false;
   //  Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
   if (data.length() != 12 * 2) {
-    if (useEmulator) { id = "EMUL"; return true; }
+    if (useEmulator) { id = device; return true; }
     echoPort->println(String(F(" - Radiocrafts.getID: Unknown response: ")) + data);
     return false;
   }
   id = data.substring(6, 8) + data.substring(4, 6) + data.substring(2, 4) + data.substring(0, 2);
   pac = data.substring(8, 8 + 16);
+  device = id;
   echoPort->println(String(F(" - Radiocrafts.getID: returned id=")) + id + ", pac=" + pac);
   return true;
 }
