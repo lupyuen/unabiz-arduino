@@ -52,6 +52,362 @@ void loop() {  //  Will be called repeatedly.
   delay(10000);
 }
 
+/* Expected output for Radiocrafts Dev Kit without emulation:
+
+ - Running setup...
+ - Disabling emulation mode...
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 4d2800
+>> 4d 28 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.sendBuffer: ff
+>> ff
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Checking emulation mode (expecting 0)...
+ - Radiocrafts.getParameter: address=0x28
+ - Radiocrafts.sendBuffer: 5928
+>> 59 28
+<< 3e 00 3e
+ - Radiocrafts.sendBuffer: response: 00
+ - Radiocrafts.getParameter: address=0x28 returned 00
+ - Getting SIGFOX ID...
+ - Radiocrafts.sendBuffer: 39
+>> 39
+<< 5d 86 1c 00 22 db 59 b3 f1 c1 18 1f 3e
+ - Radiocrafts.sendBuffer: response: 5d861c0022db59b3f1c1181f
+ - Radiocrafts.getID: returned id=001c865d, pac=22db59b3f1c1181f
+ - SIGFOX ID = 001c865d
+ - PAC = 22db59b3f1c1181f
+ - Setting frequency for country -26112
+ - Radiocrafts.setFrequencySG
+ - Radiocrafts.sendBuffer: 4d0003
+>> 4d 00 03
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.sendBuffer: ff
+>> ff
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Set frequency result =
+ - Getting frequency (expecting 3)...
+ - Radiocrafts.sendBuffer: 5900
+>> 59 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Frequency (expecting 3) =
+
+Running loop #0
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=0
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e0000b051180194592300
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e0000b051180194592300
+>> 0c 92 0e 00 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #1
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=1
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e0a00b051180194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e0a00b051180194592300
+>> 0c 92 0e 0a 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #2
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=2
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e1400b051180194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e1400b051180194592300
+>> 0c 92 0e 14 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #3
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=3
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e1e00b051180194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e1e00b051180194592300
+>> 0c 92 0e 1e 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #4
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=4
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e2800b051180194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e2800b051180194592300
+>> 0c 92 0e 28 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #5
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=5
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e3200b051180194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e3200b051180194592300
+>> 0c 92 0e 32 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #6
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=6
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e3c00b051180194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e3c00b051180194592300
+>> 0c 92 0e 3c 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #7
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=7
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e4600b051180194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e4600b051180194592300
+>> 0c 92 0e 46 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #8
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9d 3e
+ - Radiocrafts.sendBuffer: response: 9d
+ - Radiocrafts.getTemperature: returned 29
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=8
+ - Message.addField: tmp=29
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e5000b051220194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e5000b051220194592300
+>> 0c 92 0e 50 00 b0 51 22 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+
+Running loop #9
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3e
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 9c 3e
+ - Radiocrafts.sendBuffer: response: 9c
+ - Radiocrafts.getTemperature: returned 28
+ - Radiocrafts.sendBuffer: 56
+>> 56
+<< 75 3e
+ - Radiocrafts.sendBuffer: response: 75
+ - Radiocrafts.getVoltage: returned 3.51
+ - Message.addField: ctr=9
+ - Message.addField: tmp=28
+ - Message.addField: vlt=3.51
+ - Radiocrafts.sendMessage: 001c865d,920e5a00b051180194592300
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e5a00b051180194592300
+>> 0c 92 0e 5a 00 b0 51 18 01 94 59 23 00
+ - Radiocrafts.sendBuffer: response:
+
+STOPSTOPSTOP: Messages sent successfully: 10, failed: 0
+*/
+
 /* Expected output for Akene Dev Kit with UnaBiz Emulator:
 Demo sketch for SIGFOX transceiver library :)
 
@@ -142,377 +498,3 @@ Message not sent!
 
 */
 
-/* Expected output for Radiocrafts Dev Kit without emulation:
-
-Demo sketch for SIGFOX transceiver library :)
-Radiocrafts.echoOn
-
-Entering command mode (expecting '>')...
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-
-Disabling emulation mode...
-Radiocrafts.sendCommand: 4d2800
->> 4d 28 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.sendCommand: ff
->> ff
-<< 3e
-Radiocrafts.sendCommand: response:
-
-Checking emulation mode (expecting 0)...
-Radiocrafts.getParameter: address=0x28
-Radiocrafts.sendCommand: 5928
->> 59 28
-<< 3e 00 3e
-Radiocrafts.sendCommand: response: 00
-Radiocrafts.getParameter: address=0x28 returned 00
-
-Getting network mode (expecting 0)...
-Radiocrafts.getParameter: address=0x3b
-Radiocrafts.sendCommand: 593b
->> 59 3b
-<< 3e 00 3e
-Radiocrafts.sendCommand: response: 00
-Radiocrafts.getParameter: address=0x3b returned 00
-
-Getting baud rate (expecting 5)...
-Radiocrafts.getParameter: address=0x30
-Radiocrafts.sendCommand: 5930
->> 59 30
-<< 3e 05 3e
-Radiocrafts.sendCommand: response: 05
-Radiocrafts.getParameter: address=0x30 returned 05
-
-Setting frequency...
-Radiocrafts.setFrequencySG
-Radiocrafts.sendCommand: 4d0003
->> 4d 00 03
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.sendCommand: ff
->> ff
-<< 3e
-Radiocrafts.sendCommand: response:
-Set frequency result =
-
-Getting frequency (expecting 3)...
-Radiocrafts.sendCommand: 5900
->> 59 00
-<< 3e 03 3e
-Radiocrafts.sendCommand: response: 03
-Frequency (expecting 3) = 03
-
-Getting temperature...
-Radiocrafts.sendCommand: 55
->> 55
-<< a1 3e
-Radiocrafts.sendCommand: response: a1
-Radiocrafts.getTemperature: returned 161
-Temperature = 161 C
-
-Getting voltage...
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Supply voltage = 115.00 V
-
-Getting SIGFOX ID...
-Radiocrafts.sendCommand: 39
->> 39
-<< 68 86 1c 00 95 22 6f 82 2b cd 7d 3c 3e
-Radiocrafts.sendCommand: response: 68861c0095226f822bcd7d3c
-Radiocrafts.getID: returned id=001c8668, pac=95226f822bcd7d3c
-SIGFOX ID = 001c8668
-PAC = 95226f822bcd7d3c
-
-Getting power...
-Radiocrafts.getParameter: address=0x01
-Radiocrafts.sendCommand: 5901
->> 59 01
-<< 3e 00 3e
-Radiocrafts.sendCommand: response: 00
-Radiocrafts.getParameter: address=0x01 returned 00
-Radiocrafts.getPower: returned 0
-Power level = 0 dB
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a2 3e
-Radiocrafts.sendCommand: response: a2
-Radiocrafts.getTemperature: returned 162
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 00a2000000e642
-Radiocrafts.sendCommand: 0700a2000000e642
->> 07 00 a2 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a2 3e
-Radiocrafts.sendCommand: response: a2
-Radiocrafts.getTemperature: returned 162
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 01a2000000e642
-Radiocrafts.sendCommand: 0701a2000000e642
->> 07 01 a2 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a2 3e
-Radiocrafts.sendCommand: response: a2
-Radiocrafts.getTemperature: returned 162
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 02a2000000e642
-Radiocrafts.sendCommand: 0702a2000000e642
->> 07 02 a2 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a3 3e
-Radiocrafts.sendCommand: response: a3
-Radiocrafts.getTemperature: returned 163
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 03a3000000e642
-Radiocrafts.sendCommand: 0703a3000000e642
->> 07 03 a3 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a3 3e
-Radiocrafts.sendCommand: response: a3
-Radiocrafts.getTemperature: returned 163
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 04a3000000e642
-Radiocrafts.sendCommand: 0704a3000000e642
->> 07 04 a3 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a3 3e
-Radiocrafts.sendCommand: response: a3
-Radiocrafts.getTemperature: returned 163
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 05a3000000e642
-Radiocrafts.sendCommand: 0705a3000000e642
->> 07 05 a3 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a3 3e
-Radiocrafts.sendCommand: response: a3
-Radiocrafts.getTemperature: returned 163
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 06a3000000e642
-Radiocrafts.sendCommand: 0706a3000000e642
->> 07 06 a3 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a3 3e
-Radiocrafts.sendCommand: response: a3
-Radiocrafts.getTemperature: returned 163
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 07a3000000e642
-Radiocrafts.sendCommand: 0707a3000000e642
->> 07 07 a3 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a4 3e
-Radiocrafts.sendCommand: response: a4
-Radiocrafts.getTemperature: returned 164
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 08a4000000e642
-Radiocrafts.sendCommand: 0708a4000000e642
->> 07 08 a4 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-Radiocrafts.sendCommand: 00
->> 00
-<< 3e
-Radiocrafts.sendCommand: response:
-Radiocrafts.enterCommandMode: OK
-Radiocrafts.sendCommand: 55
->> 55
-<< a4 3e
-Radiocrafts.sendCommand: response: a4
-Radiocrafts.getTemperature: returned 164
-Radiocrafts.sendCommand: 56
->> 56
-<< 73 3e
-Radiocrafts.sendCommand: response: 73
-Radiocrafts.getVoltage: returned 115.00
-Radiocrafts.sendCommand: 58
->> 58
-Radiocrafts.sendCommand: response:
-Radiocrafts.exitCommandMode: OK
-
-Sending message...
-Radiocrafts.sendPayload: 09a4000000e642
-Radiocrafts.sendCommand: 0709a4000000e642
->> 07 09 a4 00 00 00 e6 42
-Radiocrafts.sendCommand: response:
-
-Message sent!
-*/
