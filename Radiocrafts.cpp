@@ -69,6 +69,8 @@ bool Radiocrafts::begin() {
   echoPort->println(String(F(" - Setting frequency for country ")) + (int) country);  result = "";
   if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
     if (!setFrequencyUS(result)) return false;
+  } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).
+    if (!setFrequencyETSI(result)) return false;
   } else { //  Rest of the world runs on RCZ4.
     if (!setFrequencySG(result)) return false;
   }

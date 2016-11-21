@@ -13,6 +13,7 @@ const unsigned int COMMAND_TIMEOUT = 3000;  //  Wait up to 3 seconds for respons
 enum Country {
   COUNTRY_AU = 'A'+'U' << 8,  //  Australia
   COUNTRY_BR = 'B'+'R' << 8,  //  Brazil
+  COUNTRY_FR = 'F'+'R' << 8,  //  France
   COUNTRY_NZ = 'N'+'Z' << 8,  //  New Zealand
   COUNTRY_SG = 'S'+'G' << 8,  //  Singapore
   COUNTRY_US = 'U'+'S' << 8,  //  USA
