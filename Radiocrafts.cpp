@@ -1,7 +1,6 @@
 //  Library for sending and receiving SIGFOX messages with Arduino shield based on Radiocrafts RC1692HP-SIG.
 #include <stdlib.h>
 #include "SIGFOX.h"
-#include "VSync.h"
 #include "Radiocrafts.h"
 
 static const char *CMD_READ_MEMORY = "59";  //  'Y' to read memory.
@@ -29,6 +28,7 @@ Radiocrafts::Radiocrafts(Country country0, bool useEmulator0, const String devic
                          unsigned int rx, unsigned int tx) {
   //  Init the module with the specified transmit and receive pins.
   //  Default to no echo.
+  mode = SEND_MODE;
   country = country0;
   useEmulator = useEmulator0;
   device = device0;
@@ -241,15 +241,19 @@ static String data = "";
 bool Radiocrafts::enterCommandMode() {
   //  Enter Command Mode for sending module commands, not data.
   //  TODO: Confirm response = '>'
+  if (mode == COMMAND_MODE) return true;
   echoPort->println(F(" - Entering command mode..."));
   if (!sendBuffer("00", COMMAND_TIMEOUT, 1, data, markers)) return false;
+  mode = COMMAND_MODE;
   echoPort->println(F(" - Radiocrafts.enterCommandMode: OK "));
   return true;
 }
 
 bool Radiocrafts::exitCommandMode() {
   //  Exit Command Mode so we can send data.
+  if (mode == SEND_MODE) return true;
   if (!sendBuffer(toHex('X'), COMMAND_TIMEOUT, 0, data, markers)) return false;
+  mode = SEND_MODE;
   echoPort->println(F(" - Radiocrafts.exitCommandMode: OK "));
   return true;
 }

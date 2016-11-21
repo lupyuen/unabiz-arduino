@@ -24,6 +24,11 @@ const unsigned int RADIOCRAFTS_RX = 5;  //  Receive port for UnaBiz / Radiocraft
 const int MODEM_BITS_PER_SECOND = 19200;
 const int END_OF_RESPONSE = '>';  //  Character '>' marks the end of response.
 
+enum Mode {
+  SEND_MODE = 0,
+  COMMAND_MODE = 1,
+};
+
 class Radiocrafts
 {
 public:
@@ -84,6 +89,7 @@ private:
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
 
+  Mode mode;  //  Current mode: command or send mode.
   Country country;   //  Country to be set for SIGFOX transmission frequencies.
   bool useEmulator;  //  Set to true if using UnaBiz Emulator.
   String device;  //  Name of device if using UnaBiz Emulator.
