@@ -408,6 +408,184 @@ Warning: Should wait 10 mins before sending the next message
 STOPSTOPSTOP: Messages sent successfully: 10, failed: 0
 */
 
+/* Expected output for Radiocrafts Dev Kit with emulation:
+Running setup...
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 4d2801
+ - Radiocrafts.sendBuffer: ff
+ - Getting SIGFOX ID...
+ - Radiocrafts.sendBuffer: 39
+ - SIGFOX ID = g88pi
+ - PAC =
+ - Setting frequency for country -26112
+ - Radiocrafts.setFrequencySG
+ - Radiocrafts.sendBuffer: 4d0003
+ - Radiocrafts.sendBuffer: ff
+ - Set frequency result =
+ - Getting frequency (expecting 3)...
+ - Radiocrafts.sendBuffer: 5900
+ - Frequency (expecting 3) =
+
+Running loop #0
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=0
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e0000b051680194597b00
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e0000b051680194597b00
+
+
+Running loop #1
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=1
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e0a00b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e0a00b051680194597b00
+
+
+Running loop #2
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=2
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e1400b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e1400b051680194597b00
+
+
+Running loop #3
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=3
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e1e00b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e1e00b051680194597b00
+
+
+Running loop #4
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=4
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e2800b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e2800b051680194597b00
+
+
+Running loop #5
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=5
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e3200b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e3200b051680194597b00
+
+
+Running loop #6
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=6
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e3c00b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e3c00b051680194597b00
+
+
+Running loop #7
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=7
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e4600b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e4600b051680194597b00
+
+
+Running loop #8
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=8
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e5000b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e5000b051680194597b00
+
+
+Running loop #9
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Radiocrafts.sendBuffer: 56
+ - Message.addField: ctr=9
+ - Message.addField: tmp=36
+ - Message.addField: vlt=12.30
+ - Radiocrafts.sendMessage: g88pi,920e5a00b051680194597b00
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e5a00b051680194597b00
+
+STOPSTOPSTOP: Messages sent successfully: 10, failed: 0
+ */
+
 /* Expected output for Akene Dev Kit with UnaBiz Emulator:
 Demo sketch for SIGFOX transceiver library :)
 
