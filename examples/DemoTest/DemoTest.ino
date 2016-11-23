@@ -49,6 +49,7 @@ void loop() {  //  Will be called repeatedly.
   }
 
   //  Delay 10 seconds before sending next message.
+  Serial.println("Waiting 10 seconds...");
   delay(10000);
 }
 

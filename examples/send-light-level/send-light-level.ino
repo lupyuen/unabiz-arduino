@@ -1,4 +1,4 @@
-//  Read data from the light sensor.
+//  Send sensor data from the light sensor as SIGFOX messages with UnaBiz UnaShield Arduino Shield.
 //  This code assumes that you are using the Grove Light Sensor v1.1:
 //  http://wiki.seeed.cc/Grove-Light_Sensor/
 //
@@ -21,11 +21,20 @@
 ////////////////////////////////////////////////////////////
 //  Begin SIGFOX Module Declaration
 
+#include "SIGFOX.h"
+
+//  IMPORTANT: Check these settings with UnaBiz to use the SIGFOX library correctly.
+static const String device = "g88pi";  //  Set this to your device name if you're using UnaBiz Emulator.
+static const bool useEmulator = true;  //  Set to true if using UnaBiz Emulator.
+static const bool echo = true;  //  Set to true if the SIGFOX library should display the executed commands.
+static const Country country = COUNTRY_SG;  //  Set this to your country to configure the SIGFOX transmission frequencies.
+static Radiocrafts transceiver(country, useEmulator, device, echo);  //  Uncomment this for UnaBiz UnaShield Dev Kit with Radiocrafts module.
+//  static Akeru transceiver(country, useEmulator, device, echo);  //  Uncomment this for UnaBiz Akene Dev Kit.
+
 //  End SIGFOX Module Declaration
 ////////////////////////////////////////////////////////////
 
-void setup()
-{
+void setup() {  //  Will be called only once.
   ////////////////////////////////////////////////////////////
   //  Begin General Setup
 
@@ -46,12 +55,14 @@ void setup()
   ////////////////////////////////////////////////////////////
   //  Begin SIGFOX Module Setup
 
+  //  Check whether the SIGFOX module is functioning.
+  if (!transceiver.begin()) stop(F("Unable to init SIGFOX module, may be missing"));  //  Will never return.
+
   //  End SIGFOX Module Setup
   ////////////////////////////////////////////////////////////
 }
 
-void loop()
-{
+void loop() {  //  Will be called repeatedly.
   ////////////////////////////////////////////////////////////
   //  Begin Sensor Loop
 
@@ -65,6 +76,34 @@ void loop()
   ////////////////////////////////////////////////////////////
   //  Begin SIGFOX Module Loop
 
+  //  Send message counter, light level and temperature as a SIGFOX message.
+  static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
+  Serial.print(F("\nRunning loop #")); Serial.println(counter);
+
+  //  Get temperature of the SIGFOX module.
+  int temperature;  transceiver.getTemperature(temperature);
+
+  //  Convert the numeric counter, light level and temperature into a compact message with binary fields.
+  Message msg(transceiver);  //  Will contain the structured sensor data.
+  msg.addField("ctr", counter);  //  4 bytes for the counter.
+  msg.addField("lig", light_level);  //  4 bytes for the light level.
+  msg.addField("tmp", temperature);  //  4 bytes for the temperature.
+  //  Total 12 bytes out of 12 bytes used.
+
+  //  Send the message.
+  if (msg.send()) {
+    successCount++;  //  If successful, count the message sent successfully.
+  } else {
+    failCount++;  //  If failed, count the message that could not be sent.
+  }
+  counter++;
+
+  //  Show updates every 10 messages.
+  if (counter % 10 == 0) {
+    Serial.println(String(F("Messages sent successfully: ")) + successCount +
+         F(", failed: ") + failCount);
+  }
+
   //  End SIGFOX Module Loop
   ////////////////////////////////////////////////////////////
 
@@ -77,16 +116,85 @@ void loop()
 Expected output:
 
 Running setup...
-light_level=51
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 4d2801
+ - Radiocrafts.sendBuffer: ff
+ - Getting SIGFOX ID...
+ - Radiocrafts.sendBuffer: 39
+ - SIGFOX ID = g88pi
+ - PAC =
+ - Setting frequency for country -26112
+ - Radiocrafts.setFrequencySG
+ - Radiocrafts.sendBuffer: 4d0003
+ - Radiocrafts.sendBuffer: ff
+ - Set frequency result =
+ - Getting frequency (expecting 3)...
+ - Radiocrafts.sendBuffer: 5900
+ - Frequency (expecting 3) =
+light_level=54
+
+Running loop #0
+ - Radiocrafts.sendBuffer: 55
+ - Message.addField: ctr=0
+ - Message.addField: lig=54
+ - Message.addField: tmp=36
+ - Radiocrafts.sendMessage: g88pi,920e000027311c02b0516801
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e000027311c02b0516801
+
 Waiting 10 seconds...
-light_level=50
+light_level=53
+
+Running loop #1
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Message.addField: ctr=1
+ - Message.addField: lig=53
+ - Message.addField: tmp=36
+ - Radiocrafts.sendMessage: g88pi,920e0a0027311202b0516801
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e0a0027311202b0516801
+
 Waiting 10 seconds...
 light_level=780
+
+Running loop #2
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Message.addField: ctr=2
+ - Message.addField: lig=780
+ - Message.addField: tmp=36
+ - Radiocrafts.sendMessage: g88pi,920e14002731781eb0516801
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e14002731781eb0516801
+
 Waiting 10 seconds...
 light_level=781
-Waiting 10 seconds...
-light_level=50
-Waiting 10 seconds...
-light_level=50
+
+Running loop #3
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+ - Message.addField: ctr=3
+ - Message.addField: lig=781
+ - Message.addField: tmp=36
+ - Radiocrafts.sendMessage: g88pi,920e1e002731821eb0516801
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e1e002731821eb0516801
+
 Waiting 10 seconds...
 */
