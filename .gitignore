@@ -34,3 +34,5 @@ test/.idea/*
 *.out
 *.app
 
+# This is needed for CLion compiler but causes problems for Arduino IDE.
+/unabiz-arduino.ino
