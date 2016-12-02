@@ -186,7 +186,19 @@ bool Akeru::getVoltage(float &voltage)
 	String data = "";
 	if (sendATCommand(ATVOLTAGE, ATCOMMAND_TIMEOUT, data))
 	{
-		voltage = data.toFloat();
+    //  Returns the response "3.28".
+		//  voltage = data.toFloat();
+    //  Since Bean+ doesn't support toFloat(), we convert to int and divide by the decimal place.
+    int dotPos = data.indexOf('.');
+    int divisor = 0;
+    if (dotPos >= 0) {  //  Expect 1.
+      divisor = data.length() - dotPos - 1;
+      data = data.substring(0, (unsigned int) dotPos) + data.substring((unsigned int) dotPos + 1);
+    }
+    voltage = data.toInt();
+    for (int i = 0; i < divisor; i++) {
+      voltage = voltage / 10.0;
+    }
 		return true;
 	}
 	else

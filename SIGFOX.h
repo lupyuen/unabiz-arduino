@@ -37,4 +37,9 @@ class NullPort: public Print {
 //  Call this function if we need to stop.  This informs the emulator to stop listening.
 void stop(const String msg);
 
+//  Flash strings not supported with Bean+
+#ifdef BEAN_BEAN_BEAN_H
+#define F(x) x
+#endif  //  BEAN_BEAN_BEAN_H
+
 #endif  //  UNABIZ_ARDUINO_SIGFOX_H

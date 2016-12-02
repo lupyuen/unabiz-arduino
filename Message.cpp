@@ -31,6 +31,13 @@ static char decodeLetter(uint8_t code) {
   return 0;
 }
 
+static String doubleToString(double d) {
+  //  Convert double to string, since Bean+ doesn't support double in Strings.
+  //  Assume 1 decimal place.
+  String result = String((int) (d * 10.0)) + '.' + String(((int) (d * 10.0)) % 10);
+  return result;
+}
+
 Message::Message(Radiocrafts &transceiver) {
   //  Construct a message for Radiocrafts.
   radiocrafts = &transceiver;
@@ -43,22 +50,22 @@ Message::Message(Akeru &transceiver) {
 
 bool Message::addField(const String name, int value) {
   //  Add an integer field scaled by 10.  2 bytes.
-  echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
+  echo(String(F("Message.addField: ")) + name + '=' + value + '\n');
   int val = value * 10;
   return addIntField(name, val);
 }
 
 bool Message::addField(const String name, float value) {
   //  Add a float field with 1 decimal place.  2 bytes.
-  echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
-  int val = value * 10;
+  echo(String(F("Message.addField: ")) + name + '=' + doubleToString(value) + '\n');
+  int val = (int) (value * 10.0);
   return addIntField(name, val);
 }
 
 bool Message::addField(const String name, double value) {
   //  Add a double field with 1 decimal place.  2 bytes.
-  echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
-  int val = value * 10;
+  echo(String(F("Message.addField: ")) + name + '=' + doubleToString(value) + '\n');
+  int val = (int) (value * 10.0);
   return addIntField(name, val);
 }
 
