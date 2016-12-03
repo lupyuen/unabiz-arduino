@@ -205,6 +205,9 @@ void Message::echo(String msg) {
 
 void stop(const String msg) {
   //  Call this function if we need to stop.  This informs the emulator to stop listening.
-  Serial.println(String("STOPSTOPSTOP: ") + msg);
-  for (;;) {}  //  Loop forever since we can't continue.
+  for (;;) {
+    Serial.println(String("STOPSTOPSTOP: ") + msg);
+    delay(10000);
+    //  Loop forever since we can't continue
+  }
 }
