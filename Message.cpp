@@ -1,5 +1,5 @@
 //  Library for sending and receiving structured SIGFOX messages
-#include <stdlib.h>
+#include <Arduino.h>
 #include "SIGFOX.h"
 #include "Message.h"
 

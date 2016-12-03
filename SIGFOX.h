@@ -2,8 +2,6 @@
 #ifndef UNABIZ_ARDUINO_SIGFOX_H
 #define UNABIZ_ARDUINO_SIGFOX_H
 
-#include <stdint.h>
-
 //  According to regulation, messages should be sent only every 10 minutes.
 const unsigned long SEND_DELAY = (unsigned long) 10 * 60 * 1000;
 const unsigned int MAX_BYTES_PER_MESSAGE = 12;  //  Only 12 bytes per message.

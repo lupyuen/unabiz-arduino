@@ -18,8 +18,9 @@
  *   - Data conversion in hexadecimal
  */
 
-#include "SIGFOX.h"
+#include <Arduino.h>
 #ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
+#include "SIGFOX.h"
 #include "Akeru.h"
 
 static NullPort nullPort2;
