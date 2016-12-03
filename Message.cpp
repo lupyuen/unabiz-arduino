@@ -3,11 +3,6 @@
 #include "SIGFOX.h"
 #include "Message.h"
 
-//  TODO: Flash strings not supported with String class in Bean+
-#ifdef BEAN_BEAN_BEAN_H
-#define F(x) (x)
-#endif  //  BEAN_BEAN_BEAN_H
-
 //  Encode each letter (lowercase only) in 5 bits:
 //  0 = End of name/value or can't be encoded.
 //  1 = a, 2 = b, ..., 26 = z,
@@ -43,6 +38,17 @@ static String doubleToString(double d) {
   return result;
 }
 
+void Message::echo(String msg) {
+  if (radiocrafts) radiocrafts->echo(msg);
+#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
+  if (akeru) akeru->echo(msg);
+#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
+}
+
+#ifdef BEAN_BEAN_BEAN_H  //  Disable echo on Bean+
+#define echo(x) {}
+#endif // BEAN_BEAN_BEAN_H
+
 Message::Message(Radiocrafts &transceiver) {
   //  Construct a message for Radiocrafts.
   radiocrafts = &transceiver;
@@ -55,23 +61,27 @@ Message::Message(Akeru &transceiver) {
 }
 #endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 
+//  TODO: Move these messages to Flash memory.
+static String addFieldHeader = "Message.addField: ";
+static String tooLong = "****ERROR: Message too long, already ";
+
 bool Message::addField(const String name, int value) {
   //  Add an integer field scaled by 10.  2 bytes.
-  echo(String(F("Message.addField: ")) + name + '=' + value + '\n');
+  echo(addFieldHeader + name + '=' + value);
   int val = value * 10;
   return addIntField(name, val);
 }
 
 bool Message::addField(const String name, float value) {
   //  Add a float field with 1 decimal place.  2 bytes.
-  echo(String(F("Message.addField: ")) + name + '=' + doubleToString(value) + '\n');
+  echo(addFieldHeader + name + '=' + doubleToString(value));
   int val = (int) (value * 10.0);
   return addIntField(name, val);
 }
 
 bool Message::addField(const String name, double value) {
   //  Add a double field with 1 decimal place.  2 bytes.
-  echo(String(F("Message.addField: ")) + name + '=' + doubleToString(value) + '\n');
+  echo(addFieldHeader + name + '=' + doubleToString(value));
   int val = (int) (value * 10.0);
   return addIntField(name, val);
 }
@@ -79,9 +89,7 @@ bool Message::addField(const String name, double value) {
 bool Message::addIntField(const String name, int value) {
   //  Add an int field that is already scaled.  2 bytes for name, 2 bytes for value.
   if (encodedMessage.length() + (4 * 2) > MAX_BYTES_PER_MESSAGE * 2) {
-    String err = String(F("****ERROR: Message too long, already ")) + (encodedMessage.length() / 2) +
-      F(" bytes");
-    echo(err);
+    echo(tooLong + (encodedMessage.length() / 2) + " bytes");
     return false;
   }
   addName(name);
@@ -94,11 +102,9 @@ bool Message::addIntField(const String name, int value) {
 
 bool Message::addField(const String name, const String value) {
   //  Add a string field with max 3 chars.  2 bytes for name, 2 bytes for value.
-  echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
+  echo(addFieldHeader + name + '=' + value);
   if (encodedMessage.length() + (4 * 2) > MAX_BYTES_PER_MESSAGE * 2) {
-    String err = String(F("****ERROR: Message too long, already ")) + (encodedMessage.length() / 2) +
-      F(" bytes");
-    echo(err);
+    echo(tooLong + (encodedMessage.length() / 2) + " bytes");
     return false;
   }
   addName(name);
@@ -135,13 +141,11 @@ bool Message::send() {
   //  Send the encoded message to SIGFOX.
   String msg = getEncodedMessage();
   if (msg.length() == 0) {
-    String err = F("****ERROR: Nothing to send");
-    echo(err);
+    echo("****ERROR: Nothing to send");  //  TODO: Move to Flash.
     return false;
   }
   if (msg.length() > MAX_BYTES_PER_MESSAGE * 2) {
-    String err = String(F("****ERROR: Message too long, already ")) + (encodedMessage.length() / 2) + F(" bytes");
-    echo(err);
+    echo(tooLong + (encodedMessage.length() / 2) + " bytes");
     return false;
   }
   if (radiocrafts) return radiocrafts->sendMessage(msg);
@@ -201,17 +205,11 @@ String Message::decodeMessage(String msg) {
   return result;
 }
 
-void Message::echo(String msg) {
-  if (radiocrafts) radiocrafts->echo(msg);
-#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-  if (akeru) akeru->echo(msg);
-#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-}
-
 void stop(const String msg) {
   //  Call this function if we need to stop.  This informs the emulator to stop listening.
   for (;;) {
-    Serial.println(String("STOPSTOPSTOP: ") + msg);
+    Serial.print(F("STOPSTOPSTOP: "));
+    Serial.println(msg);
     delay(10000);
     //  Loop forever since we can't continue
   }
