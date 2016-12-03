@@ -3,6 +3,11 @@
 #include "SIGFOX.h"
 #include "Radiocrafts.h"
 
+//  TODO: Flash strings not supported with String class in Bean+
+#ifdef BEAN_BEAN_BEAN_H
+#define F(x) (x)
+#endif  //  BEAN_BEAN_BEAN_H
+
 static const char *CMD_READ_MEMORY = "59";  //  'Y' to read memory.
 static const char *CMD_ENTER_CONFIG = "4d";  //  'M' to enter config mode.
 static const char *CMD_EXIT_CONFIG = "ff";  //  Exit config mode.
@@ -45,7 +50,7 @@ bool Radiocrafts::begin() {
   lastSend = 0;
   delay(2000);
 
-  String result = "";
+  String result;
   if (useEmulator) {
     //  Emulation mode.
     if (!enableEmulator(result)) return false;
@@ -60,13 +65,13 @@ bool Radiocrafts::begin() {
   }
 
   //  Read SIGFOX ID and PAC from module.
-  echoPort->println(F(" - Getting SIGFOX ID..."));  String id = "", pac = "";
+  echoPort->println(F(" - Getting SIGFOX ID..."));  String id, pac;
   if (!getID(id, pac)) return false;
   echoPort->print(F(" - SIGFOX ID = "));  Serial.println(id);
   echoPort->print(F(" - PAC = "));  Serial.println(pac);
 
   //  Set the frequency of SIGFOX module.
-  echoPort->println(String(F(" - Setting frequency for country ")) + (int) country);  result = "";
+  echoPort->println(String(F(" - Setting frequency for country ")) + (int) country);  result;
   if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
     if (!setFrequencyUS(result)) return false;
   } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).
@@ -77,7 +82,7 @@ bool Radiocrafts::begin() {
   echoPort->print(F(" - Set frequency result = "));  echoPort->println(result);
 
   //  Get and display the frequency used by the SIGFOX module.  Should return 3 for RCZ4 (SG/TW).
-  echoPort->println(F(" - Getting frequency (expecting 3)..."));  String frequency = "";
+  echoPort->println(F(" - Getting frequency (expecting 3)..."));  String frequency;
   if (!getFrequency(frequency)) return false;
   echoPort->print(F(" - Frequency (expecting 3) = "));  echoPort->println(frequency);
 
@@ -98,7 +103,7 @@ bool Radiocrafts::sendMessage(const String payload) {
 
   //  Decode and send the data.
   //  First byte is payload length, followed by rest of payload.
-  String message = toHex((char) (payload.length() / 2)) + payload, data = "";
+  String message = toHex((char) (payload.length() / 2)) + payload, data;
   if (sendBuffer(message, COMMAND_TIMEOUT, 0, data, markers)) {  //  No markers expected.
     echoPort->println(data);
     lastSend = millis();
@@ -111,7 +116,7 @@ bool Radiocrafts::sendCommand(const String cmd, int expectedMarkerCount,
                               String &result, int &actualMarkerCount) {
   //  cmd contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
-  String data = "";
+  String data;
   //  Enter command mode.
   if (!enterCommandMode()) return false;
   if (!sendBuffer(cmd, COMMAND_TIMEOUT, expectedMarkerCount,
@@ -142,7 +147,7 @@ bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
   const char *rawBuffer = buffer.c_str();
   //  Send buffer and read response.  Loop until timeout or we see the end of response marker.
   const unsigned long startTime = millis(); int i = 0;
-  String response = "", echoSend = "", echoReceive = "";
+  String response, echoSend, echoReceive;
   for (;;) {
     //  If there is data to send, send it.
     if (i < buffer.length()) {
@@ -194,7 +199,7 @@ bool Radiocrafts::sendString(const String str) {
   //  For convenience, allow sending of a text string with automatic encoding into bytes.  Max 12 characters allowed.
   //  Convert each character into 2 bytes.
   echoPort->print(F(" - Radiocrafts.sendString: "));  echoPort->println(str);
-  String payload = "";
+  String payload;
   for (unsigned i = 0; i < str.length(); i++) {
     char ch = str.charAt(i);
     payload.concat(toHex(ch));
@@ -238,7 +243,7 @@ bool Radiocrafts::isReady()
   return true;
 }
 
-static String data = "";
+static String data;
 
 bool Radiocrafts::enterCommandMode() {
   //  Enter Command Mode for sending module commands, not data.
@@ -464,9 +469,9 @@ bool Radiocrafts::receive(String &data) {
 
 String Radiocrafts::toHex(int i) {
   byte * b = (byte*) & i;
-  String bytes = "";
+  String bytes;
   for (int j=0; j<2; j++) {
-    if (b[j] <= 0xF) bytes.concat("0");
+    if (b[j] <= 0xF) bytes.concat('0');
     bytes.concat(String(b[j], 16));
   }
   return bytes;
@@ -474,9 +479,9 @@ String Radiocrafts::toHex(int i) {
 
 String Radiocrafts::toHex(unsigned int ui) {
   byte * b = (byte*) & ui;
-  String bytes = "";
+  String bytes;
   for (int i=0; i<2; i++) {
-    if (b[i] <= 0xF) bytes.concat("0");
+    if (b[i] <= 0xF) bytes.concat('0');
     bytes.concat(String(b[i], 16));
   }
   return bytes;
@@ -484,9 +489,9 @@ String Radiocrafts::toHex(unsigned int ui) {
 
 String Radiocrafts::toHex(long l) {
   byte * b = (byte*) & l;
-  String bytes = "";
+  String bytes;
   for (int i=0; i<4; i++) {
-    if (b[i] <= 0xF) bytes.concat("0");
+    if (b[i] <= 0xF) bytes.concat('0');
     bytes.concat(String(b[i], 16));
   }
   return bytes;
@@ -494,9 +499,9 @@ String Radiocrafts::toHex(long l) {
 
 String Radiocrafts::toHex(unsigned long ul) {
   byte * b = (byte*) & ul;
-  String bytes = "";
+  String bytes;
   for (int i=0; i<4; i++) {
-    if (b[i] <= 0xF) bytes.concat("0");
+    if (b[i] <= 0xF) bytes.concat('0');
     bytes.concat(String(b[i], 16));
   }
   return bytes;
@@ -504,9 +509,9 @@ String Radiocrafts::toHex(unsigned long ul) {
 
 String Radiocrafts::toHex(float f) {
   byte * b = (byte*) & f;
-  String bytes = "";
+  String bytes;
   for (int i=0; i<4; i++) {
-    if (b[i] <= 0xF) bytes.concat("0");
+    if (b[i] <= 0xF) bytes.concat('0');
     bytes.concat(String(b[i], 16));
   }
   return bytes;
@@ -514,9 +519,9 @@ String Radiocrafts::toHex(float f) {
 
 String Radiocrafts::toHex(double d) {
   byte * b = (byte*) & d;
-  String bytes = "";
+  String bytes;
   for (int i=0; i<4; i++) {
-    if (b[i] <= 0xF) bytes.concat("0");
+    if (b[i] <= 0xF) bytes.concat('0');
     bytes.concat(String(b[i], 16));
   }
   return bytes;
@@ -524,17 +529,17 @@ String Radiocrafts::toHex(double d) {
 
 String Radiocrafts::toHex(char c) {
   byte *b = (byte*) & c;
-  String bytes = "";
-  if (b[0] <= 0xF) bytes.concat("0");
+  String bytes;
+  if (b[0] <= 0xF) bytes.concat('0');
   bytes.concat(String(b[0], 16));
   return bytes;
 }
 
 String Radiocrafts::toHex(char *c, int length) {
   byte * b = (byte*) c;
-  String bytes = "";
+  String bytes;
   for (int i=0; i<length; i++) {
-    if (b[i] <= 0xF) bytes.concat("0");
+    if (b[i] <= 0xF) bytes.concat('0');
     bytes.concat(String(b[i], 16));
   }
   return bytes;

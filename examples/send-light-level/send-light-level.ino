@@ -56,7 +56,7 @@ void setup() {  //  Will be called only once.
   //  Begin SIGFOX Module Setup
 
   //  Check whether the SIGFOX module is functioning.
-  if (!transceiver.begin()) stop(F("Unable to init SIGFOX module, may be missing"));  //  Will never return.
+  if (!transceiver.begin()) stop("Unable to init SIGFOX module, may be missing");  //  Will never return.
 
   //  End SIGFOX Module Setup
   ////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ void loop() {  //  Will be called repeatedly.
 
   //  Read the light sensor from the analog port.
   int light_level = analogRead(LIGHT_SENSOR);
-  Serial.print("light_level=");  Serial.println(light_level);
+  Serial.print(F("light_level="));  Serial.println(light_level);
 
   //  End Sensor Loop
   ////////////////////////////////////////////////////////////
@@ -100,15 +100,15 @@ void loop() {  //  Will be called repeatedly.
 
   //  Show updates every 10 messages.
   if (counter % 10 == 0) {
-    Serial.println(String(F("Messages sent successfully: ")) + successCount +
-         F(", failed: ") + failCount);
+    Serial.print(F("Messages sent successfully: "));   Serial.print(successCount);
+    Serial.print(F(", failed: "));  Serial.println(failCount);
   }
 
   //  End SIGFOX Module Loop
   ////////////////////////////////////////////////////////////
 
   //  Wait a while before looping. 10000 milliseconds = 10 seconds.
-  Serial.println("Waiting 10 seconds...");
+  Serial.println(F("Waiting 10 seconds..."));
   delay(10000);
 }
 

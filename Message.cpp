@@ -3,6 +3,11 @@
 #include "SIGFOX.h"
 #include "Message.h"
 
+//  TODO: Flash strings not supported with String class in Bean+
+#ifdef BEAN_BEAN_BEAN_H
+#define F(x) (x)
+#endif  //  BEAN_BEAN_BEAN_H
+
 //  Encode each letter (lowercase only) in 5 bits:
 //  0 = End of name/value or can't be encoded.
 //  1 = a, 2 = b, ..., 26 = z,
@@ -74,8 +79,8 @@ bool Message::addField(const String name, double value) {
 bool Message::addIntField(const String name, int value) {
   //  Add an int field that is already scaled.  2 bytes for name, 2 bytes for value.
   if (encodedMessage.length() + (4 * 2) > MAX_BYTES_PER_MESSAGE * 2) {
-    String err = String("****ERROR: Message too long, already ") + (encodedMessage.length() / 2) +
-      " bytes";
+    String err = String(F("****ERROR: Message too long, already ")) + (encodedMessage.length() / 2) +
+      F(" bytes");
     echo(err);
     return false;
   }
@@ -91,8 +96,8 @@ bool Message::addField(const String name, const String value) {
   //  Add a string field with max 3 chars.  2 bytes for name, 2 bytes for value.
   echo(String(F("Message.addField: ")) + name + "=" + value + '\n');
   if (encodedMessage.length() + (4 * 2) > MAX_BYTES_PER_MESSAGE * 2) {
-    String err = String("****ERROR: Message too long, already ") + (encodedMessage.length() / 2) +
-      " bytes";
+    String err = String(F("****ERROR: Message too long, already ")) + (encodedMessage.length() / 2) +
+      F(" bytes");
     echo(err);
     return false;
   }
@@ -130,12 +135,12 @@ bool Message::send() {
   //  Send the encoded message to SIGFOX.
   String msg = getEncodedMessage();
   if (msg.length() == 0) {
-    String err = "****ERROR: Nothing to send";
+    String err = F("****ERROR: Nothing to send");
     echo(err);
     return false;
   }
   if (msg.length() > MAX_BYTES_PER_MESSAGE * 2) {
-    String err = String("****ERROR: Message too long, already ") + (encodedMessage.length() / 2) + " bytes";
+    String err = String(F("****ERROR: Message too long, already ")) + (encodedMessage.length() / 2) + F(" bytes");
     echo(err);
     return false;
   }
@@ -190,9 +195,9 @@ String Message::decodeMessage(String msg) {
     result.concat(name3);
     //  Decode value.
     result.concat("\":"); result.concat((int)(val2 / 10));
-    result.concat("."); result.concat((int)(val2 % 10));
+    result.concat('.'); result.concat((int)(val2 % 10));
   }
-  result.concat("}");
+  result.concat('}');
   return result;
 }
 

@@ -55,7 +55,7 @@ void loop() {  //  Will be called repeatedly.
 
   //  Read the light sensor from the analog port.
   int light_level = analogRead(LIGHT_SENSOR);
-  Serial.print("light_level=");  Serial.println(light_level);
+  Serial.print(F("light_level="));  Serial.println(light_level);
 
   //  End Sensor Loop
   ////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ void loop() {  //  Will be called repeatedly.
   ////////////////////////////////////////////////////////////
 
   //  Wait a while before looping. 10000 milliseconds = 10 seconds.
-  Serial.println("Waiting 10 seconds...");
+  Serial.println(F("Waiting 10 seconds..."));
   delay(10000);
 }
 
