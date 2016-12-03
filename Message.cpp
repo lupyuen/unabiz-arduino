@@ -43,10 +43,12 @@ Message::Message(Radiocrafts &transceiver) {
   radiocrafts = &transceiver;
 }
 
+#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 Message::Message(Akeru &transceiver) {
   //  Construct a message for Akeru.
   akeru = &transceiver;
 }
+#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 
 bool Message::addField(const String name, int value) {
   //  Add an integer field scaled by 10.  2 bytes.
@@ -74,13 +76,14 @@ bool Message::addIntField(const String name, int value) {
   if (encodedMessage.length() + (4 * 2) > MAX_BYTES_PER_MESSAGE * 2) {
     String err = String("****ERROR: Message too long, already ") + (encodedMessage.length() / 2) +
       " bytes";
-    radiocrafts ? radiocrafts->echo(err) : akeru->echo(err);
+    echo(err);
     return false;
   }
   addName(name);
-  encodedMessage.concat(radiocrafts ?
-    radiocrafts->toHex(value) :
-    akeru->toHex(value));
+  if (radiocrafts) encodedMessage.concat(radiocrafts->toHex(value));
+#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
+  if (akeru) encodedMessage.concat(akeru->toHex(value));
+#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
   return true;
 }
 
@@ -90,7 +93,7 @@ bool Message::addField(const String name, const String value) {
   if (encodedMessage.length() + (4 * 2) > MAX_BYTES_PER_MESSAGE * 2) {
     String err = String("****ERROR: Message too long, already ") + (encodedMessage.length() / 2) +
       " bytes";
-    radiocrafts ? radiocrafts->echo(err) : akeru->echo(err);
+    echo(err);
     return false;
   }
   addName(name);
@@ -116,9 +119,10 @@ bool Message::addName(const String name) {
       (buffer[0] << 10) +
       (buffer[1] << 5) +
       (buffer[2]);
-  encodedMessage.concat(radiocrafts ?
-                        radiocrafts->toHex(result) :
-                        akeru->toHex(result));
+  if (radiocrafts) encodedMessage.concat(radiocrafts->toHex(result));
+#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
+  if (akeru) encodedMessage.concat(akeru->toHex(result));
+#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
   return true;
 }
 
@@ -127,16 +131,19 @@ bool Message::send() {
   String msg = getEncodedMessage();
   if (msg.length() == 0) {
     String err = "****ERROR: Nothing to send";
-    radiocrafts ? radiocrafts->echo(err) : akeru->echo(err);
+    echo(err);
     return false;
   }
   if (msg.length() > MAX_BYTES_PER_MESSAGE * 2) {
     String err = String("****ERROR: Message too long, already ") + (encodedMessage.length() / 2) + " bytes";
-    radiocrafts ? radiocrafts->echo(err) : akeru->echo(err);
+    echo(err);
     return false;
   }
-  return radiocrafts ? radiocrafts->sendMessage(msg) :
-      akeru->sendMessage(msg);
+  if (radiocrafts) return radiocrafts->sendMessage(msg);
+#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
+  if (akeru) return akeru->sendMessage(msg);
+#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
+  return false;
 }
 
 String Message::getEncodedMessage() {
@@ -191,7 +198,9 @@ String Message::decodeMessage(String msg) {
 
 void Message::echo(String msg) {
   if (radiocrafts) radiocrafts->echo(msg);
-  else akeru->echo(msg);
+#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
+  if (akeru) akeru->echo(msg);
+#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 }
 
 void stop(const String msg) {

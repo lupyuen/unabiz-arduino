@@ -19,6 +19,7 @@
  */
 
 #include "SIGFOX.h"
+#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 #include "Akeru.h"
 
 static NullPort nullPort2;
@@ -788,6 +789,8 @@ bool Akeru::sendString(const String str)
 	//  Send the encoded payload.
 	return sendMessage(payload);
 }
+
+#endif  //  BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 
 /*
 Demo sketch for Akeru library :)

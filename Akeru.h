@@ -18,6 +18,7 @@
  *   - Data conversion in hexadecimal
  */
 
+#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 #ifndef AKERU_H
 #define AKERU_H
 
@@ -163,3 +164,4 @@ private:
 };
 
 #endif // AKERU_H
+#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
