@@ -13,7 +13,11 @@
 //  Don't use ports D0, D1: Reserved for viewing debug output through Arduino Serial Monitor
 //  Don't use ports D4, D5: Reserved for serial comms with the SIGFOX module.
 
-#define LIGHT_SENSOR A0  //  Grove Light Sensor is connected to A0 of Arduino.
+#ifdef BEAN_BEAN_BEAN_H
+  #define LIGHT_SENSOR A2  //  For Bean+, Grove Light Sensor is connected to port A2.
+#else
+  #define LIGHT_SENSOR A0  //  Else Grove Light Sensor is connected to port A0.
+#endif //  BEAN_BEAN_BEAN_H
 
 //  End Sensor Declaration
 ////////////////////////////////////////////////////////////

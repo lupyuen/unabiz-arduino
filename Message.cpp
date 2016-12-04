@@ -61,7 +61,7 @@ void Message::echo(String msg) {
 }
 
 #ifdef BEAN_BEAN_BEAN_H  //  Disable echo on Bean+
-#define echo(x) {}
+//define echo(x) {}
 #endif // BEAN_BEAN_BEAN_H
 
 Message::Message(Radiocrafts &transceiver) {

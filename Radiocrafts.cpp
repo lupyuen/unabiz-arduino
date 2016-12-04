@@ -148,7 +148,7 @@ static uint8_t markerPos[markerPosMax];
 bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
                              uint8_t expectedMarkerCount, String &response,
                              uint8_t &actualMarkerCount) {
-  //  command contains a string of hex digits, up to 24 digits / 12 bytes.
+  //  buffer contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
   //  valid payload and this causes string truncation in C libraries.
@@ -170,17 +170,16 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
   //  Send buffer and read response.  Loop until timeout or we see the end of response marker.
   const unsigned long startTime = millis(); int i = 0;
   //  Previous code for verifying that data was sent correctly.
-  //  static String echoSend = "", echoReceive = "";
+  //static String echoSend = "", echoReceive = "";
   for (;;) {
     //  If there is data to send, send it.
     if (i < buffer.length()) {
       //  Convert 2 hex digits to 1 char and send.
       uint8_t txChar = hexDigitToDecimal(rawBuffer[i]) * 16 +
                        hexDigitToDecimal(rawBuffer[i + 1]);
-      //  echoSend.concat(toHex((char) txChar) + ' ');
-#ifdef ARDUINO
+      //echoSend.concat(toHex((char) txChar) + ' ');
       serialPort->write(txChar);
-#endif
+      delay(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
       i = i + 2;
     }
     //  If timeout, quit.
@@ -206,7 +205,7 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
   }
   serialPort->end();
   //  Log the actual bytes sent and received.
-  //  log2(F(">> "), echoSend);
+  //log2(F(">> "), echoSend);
   //  if (echoReceive.length() > 0) { log2(F("<< "), echoReceive); }
   logBuffer(F(">> "), rawBuffer, 0, 0);
   logBuffer(F("<< "), response.c_str(), markerPos, actualMarkerCount);
