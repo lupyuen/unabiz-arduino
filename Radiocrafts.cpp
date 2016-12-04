@@ -3,11 +3,6 @@
 #include "SIGFOX.h"
 #include "Radiocrafts.h"
 
-#ifdef BEAN_BEAN_BEAN_H  //  Disable messages on Bean+
-static String nullMsg = "?";
-#define F(x) nullMsg
-#endif // BEAN_BEAN_BEAN_H
-
 //  Use a macro for logging because Flash strings not supported with String class in Bean+
 #define log1(x) { echoPort->println(x); }
 #define log2(x, y) { echoPort->print(x); echoPort->println(y); }
