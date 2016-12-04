@@ -180,8 +180,7 @@ bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
     if (currentTime - startTime > timeout) break;
 
     //  If data is available to receive, receive it.
-    if (serialPort->available() > 0)
-    {
+    if (serialPort->available() > 0) {
       int rxChar = serialPort->read();
       ////echoReceive.concat(toHex((char) rxChar) + ' ');
       if (rxChar == -1) continue;
@@ -206,7 +205,6 @@ bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
     return false;
   }
   log2(F(" - Radiocrafts.sendBuffer: response: "), response);
-
   //  TODO: Parse the downlink response.
   return true;
 }
@@ -422,23 +420,23 @@ bool Radiocrafts::setFrequency(int zone, String &result) {
   return true;
 }
 
-//  Set the frequency for the SIGFOX module to Singapore frequency (RCZ4).
 bool Radiocrafts::setFrequencySG(String &result) {
+  //  Set the frequency for the SIGFOX module to Singapore frequency (RCZ4).
   log1(F(" - Radiocrafts.setFrequencySG"));
   return setFrequency(4, result); }
 
-//  Set the frequency for the SIGFOX module to Taiwan frequency (RCZ4).
 bool Radiocrafts::setFrequencyTW(String &result) {
+  //  Set the frequency for the SIGFOX module to Taiwan frequency (RCZ4).
   log1(F(" - Radiocrafts.setFrequencyTW"));
   return setFrequency(4, result); }
 
-//  Set the frequency for the SIGFOX module to ETSI frequency for Europe (RCZ1).
 bool Radiocrafts::setFrequencyETSI(String &result) {
+  //  Set the frequency for the SIGFOX module to ETSI frequency for Europe (RCZ1).
   log1(F(" - Radiocrafts.setFrequencyETSI"));
   return setFrequency(1, result); }
 
-//  Set the frequency for the SIGFOX module to US frequency (RCZ2).
 bool Radiocrafts::setFrequencyUS(String &result) {
+  //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
   log1(F(" - Radiocrafts.setFrequencyUS"));
   return setFrequency(2, result); }
 
@@ -454,14 +452,14 @@ bool Radiocrafts::reboot(String &result) {
   return true;
 }
 
-//  Echo commands and responses to the echo port.
 void Radiocrafts::echoOn() {
+  //  Echo commands and responses to the echo port.
   echoPort = lastEchoPort;
   log1(F(" - Radiocrafts.echoOn"));
 }
 
-//  Stop echoing commands and responses to the echo port.
 void Radiocrafts::echoOff() {
+  //  Stop echoing commands and responses to the echo port.
   lastEchoPort = echoPort; echoPort = &nullPort;
 }
 
@@ -483,7 +481,8 @@ bool Radiocrafts::receive(String &data) {
 }
 
 String Radiocrafts::toHex(int i) {
-  byte * b = (byte*) & i;
+  //  Convert the integer to a string of 4 hex digits.
+  byte *b = (byte *) &i;
   String bytes;
   for (int j=0; j<2; j++) {
     if (b[j] <= 0xF) bytes.concat('0');
@@ -493,7 +492,8 @@ String Radiocrafts::toHex(int i) {
 }
 
 String Radiocrafts::toHex(unsigned int ui) {
-  byte * b = (byte*) & ui;
+  //  Convert the integer to a string of 4 hex digits.
+  byte *b = (byte *) &ui;
   String bytes;
   for (int i=0; i<2; i++) {
     if (b[i] <= 0xF) bytes.concat('0');
@@ -503,7 +503,8 @@ String Radiocrafts::toHex(unsigned int ui) {
 }
 
 String Radiocrafts::toHex(long l) {
-  byte * b = (byte*) & l;
+  //  Convert the long to a string of 8 hex digits.
+  byte *b = (byte *) &l;
   String bytes;
   for (int i=0; i<4; i++) {
     if (b[i] <= 0xF) bytes.concat('0');
@@ -513,7 +514,8 @@ String Radiocrafts::toHex(long l) {
 }
 
 String Radiocrafts::toHex(unsigned long ul) {
-  byte * b = (byte*) & ul;
+  //  Convert the long to a string of 8 hex digits.
+  byte * b = (byte *) &ul;
   String bytes;
   for (int i=0; i<4; i++) {
     if (b[i] <= 0xF) bytes.concat('0');
@@ -523,7 +525,8 @@ String Radiocrafts::toHex(unsigned long ul) {
 }
 
 String Radiocrafts::toHex(float f) {
-  byte * b = (byte*) & f;
+  //  Convert the float to a string of 8 hex digits.
+  byte *b = (byte *) &f;
   String bytes;
   for (int i=0; i<4; i++) {
     if (b[i] <= 0xF) bytes.concat('0');
@@ -533,7 +536,8 @@ String Radiocrafts::toHex(float f) {
 }
 
 String Radiocrafts::toHex(double d) {
-  byte * b = (byte*) & d;
+  //  Convert the double to a string of 8 hex digits.
+  byte *b = (byte *) &d;
   String bytes;
   for (int i=0; i<4; i++) {
     if (b[i] <= 0xF) bytes.concat('0');
@@ -543,7 +547,8 @@ String Radiocrafts::toHex(double d) {
 }
 
 String Radiocrafts::toHex(char c) {
-  byte *b = (byte*) & c;
+  //  Convert the char to a string of 2 hex digits.
+  byte *b = (byte *) &c;
   String bytes;
   if (b[0] <= 0xF) bytes.concat('0');
   bytes.concat(String(b[0], 16));
@@ -551,7 +556,8 @@ String Radiocrafts::toHex(char c) {
 }
 
 String Radiocrafts::toHex(char *c, int length) {
-  byte * b = (byte*) c;
+  //  Convert the string to a string of hex digits.
+  byte *b = (byte *) c;
   String bytes;
   for (int i=0; i<length; i++) {
     if (b[i] <= 0xF) bytes.concat('0');
