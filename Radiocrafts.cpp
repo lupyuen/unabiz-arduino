@@ -1,5 +1,20 @@
 //  Library for sending and receiving SIGFOX messages with Arduino shield based on Radiocrafts RC1692HP-SIG.
-#include <Arduino.h>
+#ifdef ARDUINO
+#if (ARDUINO >= 100)
+    #include <Arduino.h>
+  #else  //  ARDUINO >= 100
+    #include <WProgram.h>
+  #endif  //  ARDUINO  >= 100
+
+  #ifdef CLION
+    #include <src/SoftwareSerial.h>
+  #else  //  CLION
+    #include <SoftwareSerial.h>
+  #endif  //  CLION
+
+#else  //  ARDUINO
+#endif  //  ARDUINO
+
 #include "SIGFOX.h"
 #include "Radiocrafts.h"
 

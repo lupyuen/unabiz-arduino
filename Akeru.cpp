@@ -18,7 +18,22 @@
  *   - Data conversion in hexadecimal
  */
 
-#include <Arduino.h>
+#ifdef ARDUINO
+#if (ARDUINO >= 100)
+    #include <Arduino.h>
+  #else  //  ARDUINO >= 100
+    #include <WProgram.h>
+  #endif  //  ARDUINO  >= 100
+
+  #ifdef CLION
+    #include <src/SoftwareSerial.h>
+  #else  //  CLION
+    #include <SoftwareSerial.h>
+  #endif  //  CLION
+
+#else  //  ARDUINO
+#endif  //  ARDUINO
+
 #ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 #include "SIGFOX.h"
 #include "Akeru.h"
