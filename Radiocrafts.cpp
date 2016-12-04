@@ -131,14 +131,15 @@ bool Radiocrafts::sendCommand(const String cmd, int expectedMarkerCount,
 }
 
 bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
-                             const int expectedMarkerCount, String &dataOut, int &actualMarkerCount) {
+                             const int expectedMarkerCount, String &response, int &actualMarkerCount) {
   //  command contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
   //  valid payload and this causes string truncation in C libraries.
   //  expectedMarkerCount is the number of end-of-command markers '>' we
   //  expect to see.  actualMarkerCount contains the actual number seen.
-  log2(F(" - Radiocrafts.sendBuffer: "), buffer);
+  ////log2(F(" - Radiocrafts.sendBuffer: "), buffer);
+  response = "";
   if (useEmulator) return true;
 
   actualMarkerCount = 0;
@@ -152,14 +153,14 @@ bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
   const char *rawBuffer = buffer.c_str();
   //  Send buffer and read response.  Loop until timeout or we see the end of response marker.
   const unsigned long startTime = millis(); int i = 0;
-  String response, echoSend, echoReceive;
+  //// static String echoSend = "", echoReceive = "";
   for (;;) {
     //  If there is data to send, send it.
     if (i < buffer.length()) {
       //  Convert 2 hex digits to 1 char and send.
       uint8_t txChar = hexDigitToDecimal(rawBuffer[i]) * 16 +
                        hexDigitToDecimal(rawBuffer[i + 1]);
-      echoSend.concat(toHex((char) txChar) + ' ');
+      ////echoSend.concat(toHex((char) txChar) + ' ');
       serialPort->write(txChar);
       i = i + 2;
     }
@@ -172,7 +173,7 @@ bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
     if (serialPort->available() > 0)
     {
       int rxChar = serialPort->read();
-      echoReceive.concat(toHex((char) rxChar) + ' ');
+      ////echoReceive.concat(toHex((char) rxChar) + ' ');
       if (rxChar == -1) continue;
       if (rxChar == END_OF_RESPONSE) {
         actualMarkerCount++;  //  Count the number of end markers.
@@ -183,8 +184,8 @@ bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
     }
   }
   serialPort->end();
-  log2(F(">> "), echoSend);
-  if (echoReceive.length() > 0) { log2(F("<< "), echoReceive); }
+  ////log2(F(">> "), echoSend);
+  ////if (echoReceive.length() > 0) { log2(F("<< "), echoReceive); }
   //  If we did not see the terminating '>', something is wrong.
   if (actualMarkerCount < expectedMarkerCount) {
     if (response.length() == 0) {
@@ -195,7 +196,6 @@ bool Radiocrafts::sendBuffer(const String buffer, const int timeout,
     return false;
   }
   log2(F(" - Radiocrafts.sendBuffer: response: "), response);
-  dataOut = response;
 
   //  TODO: Parse the downlink response.
   return true;
