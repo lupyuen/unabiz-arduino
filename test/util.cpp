@@ -175,7 +175,7 @@ public:
   void println(float f) { printf("%f\n", f); }
   void flush() {}
   void listen() {}
-  void write(uint8_t ch) {}
+  void write(uint8_t ch) { putchar(ch); }
   int read() { return -1; }
   bool available() { return false; }
   void end() {}

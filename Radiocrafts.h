@@ -18,11 +18,8 @@
 #else  //  ARDUINO
 #endif  //  ARDUINO
 
-const unsigned int RADIOCRAFTS_TX = 4;  //  Transmit port for For UnaBiz / Radiocrafts Dev Kit
-const unsigned int RADIOCRAFTS_RX = 5;  //  Receive port for UnaBiz / Radiocrafts Dev Kit
-
-const int MODEM_BITS_PER_SECOND = 19200;
-const int END_OF_RESPONSE = '>';  //  Character '>' marks the end of response.
+const uint8_t RADIOCRAFTS_TX = 4;  //  Transmit port for For UnaBiz / Radiocrafts Dev Kit
+const uint8_t RADIOCRAFTS_RX = 5;  //  Receive port for UnaBiz / Radiocrafts Dev Kit
 
 enum Mode {
   SEND_MODE = 0,
@@ -33,15 +30,16 @@ class Radiocrafts
 {
 public:
   Radiocrafts(Country country, bool useEmulator, const String device, bool echo);
-  Radiocrafts(Country country, bool useEmulator, const String device, bool echo, unsigned int rx, unsigned int tx);
+  Radiocrafts(Country country, bool useEmulator, const String device, bool echo,
+              uint8_t rx, uint8_t tx);
   bool begin();
   void echoOn();  //  Turn on send/receive echo.
   void echoOff();  //  Turn off send/receive echo.
   void setEchoPort(Print *port);  //  Set the port for sending echo output.
-  void echo(String msg);  //  Echo the debug message.
+  void echo(const String &msg);  //  Echo the debug message.
   bool isReady();
-  bool sendMessage(const String payload);  //  Send the payload of hex digits to the network, max 12 bytes.
-  bool sendString(const String str);  //  Sending a text string, max 12 characters allowed.
+  bool sendMessage(const String &payload);  //  Send the payload of hex digits to the network, max 12 bytes.
+  bool sendString(const String &str);  //  Sending a text string, max 12 characters allowed.
   bool receive(String &data);  //  Receive a message.
   bool enterCommandMode();  //  Enter Command Mode for sending module commands, not data.
   bool exitCommandMode();  //  Exit Command Mode so we can send data.
@@ -82,12 +80,14 @@ public:
   String toHex(char *c, int length);
 
 private:
-  bool sendCommand(const String cmd, const int expectedMarkers,
-                   String &result, int &actualMarkers);
-  bool sendBuffer(const String buffer, const int timeout, const int expectedMarkers,
-                  String &dataOut, int &actualMarkers);
+  bool sendCommand(const String &cmd, uint8_t expectedMarkers,
+                   String &result, uint8_t &actualMarkers);
+  bool sendBuffer(const String &buffer, int timeout, uint8_t expectedMarkers,
+                  String &dataOut, uint8_t &actualMarkers);
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
+  void logBuffer(const __FlashStringHelper *prefix, const char *buffer,
+                 uint8_t markerPos[], uint8_t markerCount);
 
   Mode mode;  //  Current mode: command or send mode.
   Country country;   //  Country to be set for SIGFOX transmission frequencies.
