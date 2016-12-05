@@ -117,7 +117,174 @@ void loop() {  //  Will be called repeatedly.
 }
 
 /*
-Expected output:
+Expected output for Non-Emulation Mode:
+
+ Running setup...
+ - Disabling emulation mode...
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 4d2800
+>> 4d 28 00
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.sendBuffer: ff
+>> ff
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Checking emulation mode (expecting 0)...
+ - Radiocrafts.getParameter: address=0x28
+ - Radiocrafts.sendBuffer: 5928
+>> 59 28
+<< 3E 00 3E
+ - Radiocrafts.sendBuffer: response: 00
+ - Radiocrafts.getParameter: address=0x28 returned 00
+ - Getting SIGFOX ID...
+ - Radiocrafts.sendBuffer: 39
+>> 39
+<< 52 86 1c 00 c5 81 90 5c 81 2b a6 81 3E
+ - Radiocrafts.sendBuffer: response: 52861c00c581905c812ba681
+ - Radiocrafts.getID: returned id=001c8652, pac=c581905c812ba681
+ - SIGFOX ID = 001c8652
+ - PAC = c581905c812ba681
+ - Setting frequency for country -26112
+ - Radiocrafts.setFrequencySG
+ - Radiocrafts.sendBuffer: 4d0003
+>> 4d 00 03
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.sendBuffer: ff
+>> ff
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Set frequency result =
+ - Getting frequency (expecting 3)...
+ - Radiocrafts.sendBuffer: 5900
+>> 59 00
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Frequency (expecting 3) =
+light_level=512
+
+Running loop #0
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 00 3E
+ - Radiocrafts.sendBuffer: response: 00
+ - Radiocrafts.getTemperature: returned -128
+ - Message.addField: ctr=0
+ - Message.addField: lig=512
+ - Message.addField: tmp=-128
+ - Radiocrafts.sendMessage: 001c8652,920e000027310014b05100fb
+ - Radiocrafts.sendBuffer: 58
+>> 58
+<<
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e000027310014b05100fb
+>> 0c 92 0e 00 00 27 31 00 14 b0 51 00 fb
+<<
+ - Radiocrafts.sendBuffer: response:
+
+Waiting 10 seconds...
+light_level=285
+
+Running loop #1
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 98 3E
+ - Radiocrafts.sendBuffer: response: 98
+ - Radiocrafts.getTemperature: returned 24
+ - Message.addField: ctr=1
+ - Message.addField: lig=285
+ - Message.addField: tmp=24
+ - Radiocrafts.sendMessage: 001c8652,920e0a002731220bb051f000
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+<<
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e0a002731220bb051f000
+>> 0c 92 0e 0a 00 27 31 22 0b b0 51 f0 00
+<<
+ - Radiocrafts.sendBuffer: response:
+
+Waiting 10 seconds...
+light_level=328
+
+Running loop #2
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 98 3E
+ - Radiocrafts.sendBuffer: response: 98
+ - Radiocrafts.getTemperature: returned 24
+ - Message.addField: ctr=2
+ - Message.addField: lig=328
+ - Message.addField: tmp=24
+ - Radiocrafts.sendMessage: 001c8652,920e14002731d00cb051f000
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+<<
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e14002731d00cb051f000
+>> 0c 92 0e 14 00 27 31 d0 0c b0 51 f0 00
+<<
+ - Radiocrafts.sendBuffer: response:
+
+Waiting 10 seconds...
+light_level=288
+
+Running loop #3
+ - Entering command mode...
+ - Radiocrafts.sendBuffer: 00
+>> 00
+<< 3E
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.enterCommandMode: OK
+ - Radiocrafts.sendBuffer: 55
+>> 55
+<< 98 3E
+ - Radiocrafts.sendBuffer: response: 98
+ - Radiocrafts.getTemperature: returned 24
+ - Message.addField: ctr=3
+ - Message.addField: lig=288
+ - Message.addField: tmp=24
+ - Radiocrafts.sendMessage: 001c8652,920e1e002731400bb051f000
+Warning: Should wait 10 mins before sending the next message
+ - Radiocrafts.sendBuffer: 58
+>> 58
+<<
+ - Radiocrafts.sendBuffer: response:
+ - Radiocrafts.exitCommandMode: OK
+ - Radiocrafts.sendBuffer: 0c920e1e002731400bb051f000
+>> 0c 92 0e 1e 00 27 31 40 0b b0 51 f0 00
+<<
+ - Radiocrafts.sendBuffer: response:
+
+Waiting 10 seconds...
+light_level=325
+*/
+
+/*
+Expected output for Emulation Mode:
 
 Running setup...
  - Entering command mode...

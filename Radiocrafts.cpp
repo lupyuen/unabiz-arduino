@@ -592,7 +592,7 @@ uint8_t Radiocrafts::hexDigitToDecimal(char ch) {
 }
 
 //  Convert nibble to hex digit.
-static const char nibbleToHex[] = "0123456789ABCDEF";
+static const char nibbleToHex[] = "0123456789abcdef";
 
 void Radiocrafts::logBuffer(const __FlashStringHelper *prefix, const char *buffer,
                             uint8_t *markerPos, uint8_t markerCount) {
