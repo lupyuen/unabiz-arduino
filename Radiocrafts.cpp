@@ -168,7 +168,7 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
   //  Send the buffer: need to write/read char by char because of echo.
   const char *rawBuffer = buffer.c_str();
   //  Send buffer and read response.  Loop until timeout or we see the end of response marker.
-  const unsigned long startTime = millis(); int i = 0;
+  unsigned long startTime = millis(); int i = 0;
   //  Previous code for verifying that data was sent correctly.
   //static String echoSend = "", echoReceive = "";
   for (;;) {
@@ -179,13 +179,10 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
                        hexDigitToDecimal(rawBuffer[i + 1]);
       //echoSend.concat(toHex((char) txChar) + ' ');
       serialPort->write(txChar);
-      delay(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
+      delay(100);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
       i = i + 2;
+      startTime = millis();  //  Start the timer only when all data has been sent.
     }
-    //  If timeout, quit.
-    const unsigned long currentTime = millis();
-    if (currentTime - startTime > timeout) break;
-
     //  If data is available to receive, receive it.
     if (serialPort->available() > 0) {
       int rxChar = serialPort->read();
@@ -202,6 +199,10 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
     }
 
     //  TODO: Check for downlink response.
+
+    //  If timeout, quit.
+    const unsigned long currentTime = millis();
+    if (currentTime - startTime > timeout) break;
   }
   serialPort->end();
   //  Log the actual bytes sent and received.
@@ -598,8 +599,8 @@ void Radiocrafts::logBuffer(const __FlashStringHelper *prefix, const char *buffe
   //  Log the send/receive buffer for debugging.  markerPos is an array of positions in buffer
   //  where the '>' marker was seen and removed.
   echoPort->print(prefix);
-  int m = 0;
-  for (int i = 0; i < strlen(buffer); i = i + 2) {
+  int m = 0, i = 0;
+  for (i = 0; i < strlen(buffer); i = i + 2) {
     if (m < markerCount && markerPos[m] == i) {
       echoPort->write((uint8_t) nibbleToHex[END_OF_RESPONSE / 16]);
       echoPort->write((uint8_t) nibbleToHex[END_OF_RESPONSE % 16]);
@@ -609,6 +610,12 @@ void Radiocrafts::logBuffer(const __FlashStringHelper *prefix, const char *buffe
     echoPort->write((uint8_t) buffer[i]);
     echoPort->write((uint8_t) buffer[i + 1]);
     echoPort->write(' ');
+  }
+  if (m < markerCount && markerPos[m] == i) {
+    echoPort->write((uint8_t) nibbleToHex[END_OF_RESPONSE / 16]);
+    echoPort->write((uint8_t) nibbleToHex[END_OF_RESPONSE % 16]);
+    echoPort->write(' ');
+    m++;
   }
   echoPort->write('\n');
 }
