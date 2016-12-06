@@ -8,8 +8,6 @@
   #else  //  ARDUINO >= 100
     #include <WProgram.h>
   #endif  //  ARDUINO  >= 100
-
-#else  //  ARDUINO
 #endif  //  ARDUINO
 
 class Message

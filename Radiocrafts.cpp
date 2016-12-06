@@ -1,18 +1,10 @@
 //  Library for sending and receiving SIGFOX messages with Arduino shield based on Radiocrafts RC1692HP-SIG.
 #ifdef ARDUINO
-#if (ARDUINO >= 100)
+  #if (ARDUINO >= 100)
     #include <Arduino.h>
   #else  //  ARDUINO >= 100
     #include <WProgram.h>
   #endif  //  ARDUINO  >= 100
-
-  #ifdef CLION
-    #include <src/SoftwareSerial.h>
-  #else  //  CLION
-    #include <SoftwareSerial.h>
-  #endif  //  CLION
-
-#else  //  ARDUINO
 #endif  //  ARDUINO
 
 #include "SIGFOX.h"
@@ -54,6 +46,9 @@ Radiocrafts::Radiocrafts(Country country0, bool useEmulator0, const String devic
   country = country0;
   useEmulator = useEmulator0;
   device = device0;
+  //  Bean+ firmware 0.6.1 can't receive serial data properly. We provide
+  //  an alternative class BeanSoftwareSerial to work around this.
+  //  For Bean, SoftwareSerial is a #define alias for BeanSoftwareSerial.
   serialPort = new SoftwareSerial(rx, tx);
   if (echo) echoPort = &Serial;
   else echoPort = &nullPort;
