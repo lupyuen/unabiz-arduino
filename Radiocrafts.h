@@ -12,7 +12,12 @@
   #ifdef CLION
     #include <src/SoftwareSerial.h>
   #else  //  CLION
-    #include <SoftwareSerial.h>
+    #ifndef BEAN_BEAN_BEAN_H
+      //  Bean+ firmware 0.6.1 can't receive serial data properly. We provide
+      //  an alternative class BeanSoftwareSerial to work around this.
+      //  See SIGFOX.h.
+      #include <SoftwareSerial.h>
+    #endif // BEAN_BEAN_BEAN_H
   #endif  //  CLION
 
 #else  //  ARDUINO

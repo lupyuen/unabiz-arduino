@@ -1,3 +1,7 @@
+//  Bean+ firmware 0.6.1 can't receive serial data properly. We provide
+//  an alternative class BeanSoftwareSerial to work around this.
+//  Fixes the interrupt handlers used by SoftwareSerial. Based on
+//  http://beantalk.punchthrough.com/t/rfidd-bean-pronounced-refried-bean/1776
 /*
 SoftwareSerial.h (formerly NewSoftSerial.h) - 
 Multi-instance software serial library for Arduino/Wiring
@@ -29,10 +33,10 @@ The latest version of this library can always be found at
 http://arduiniana.org.
 */
 
-#ifdef NOTUSED_BEAN_BEAN_BEAN_H  //  Only used by Bean to fix Serial receive issue.
+#ifdef BEAN_BEAN_BEAN_H  //  Only used by Bean to fix Serial receive issue.
 
-#ifndef SoftwareSerial_h
-#define SoftwareSerial_h
+#ifndef BeanSoftwareSerial_h
+#define BeanSoftwareSerial_h
 
 #include <inttypes.h>
 #include <Stream.h>
@@ -71,7 +75,7 @@ private:
   static char _receive_buffer[_SS_MAX_RX_BUFF]; 
   static volatile uint8_t _receive_buffer_tail;
   static volatile uint8_t _receive_buffer_head;
-  static SoftwareSerial *active_object;
+  static BeanSoftwareSerial *active_object;
 
   // private methods
   void recv() __attribute__((__always_inline__));

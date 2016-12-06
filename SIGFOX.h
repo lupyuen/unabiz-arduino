@@ -1,4 +1,5 @@
-//  Declare all Arduino-based SIGFOX transceivers.
+//  Declare all Arduino-based SIGFOX transceivers here so that
+//  we may switch tranceivers easily.
 #ifndef UNABIZ_ARDUINO_SIGFOX_H
 #define UNABIZ_ARDUINO_SIGFOX_H
 
@@ -18,10 +19,17 @@ enum Country {
   COUNTRY_TW = 'T'+'W' << 8,  //  Taiwan
 };
 
-//  Newer UnaBiz / Radiocrafts Dev Kit. Default to pin D4 for transmit, pin D5 for receive.
+#ifdef BEAN_BEAN_BEAN_H
+  //  Bean+ firmware 0.6.1 can't receive serial data properly. We provide
+  //  an alternative class BeanSoftwareSerial to work around this.
+  #define SoftwareSerial BeanSoftwareSerial
+  #include "BeanSoftwareSerial.h"
+#endif // BEAN_BEAN_BEAN_H
+
+//  Library for UnaShield SIGFOX Shield by UnaBiz. Uses pin D4 for transmit, pin D5 for receive.
 #include "Radiocrafts.h"
 
-//  Older UnaBiz / Akene Dev Kit. Default to pin D4 for receive, pin D5 for transmit.
+//  Library for Akene SIGFOX Shield by Snootlabs. Uses pin D4 for receive, pin D5 for transmit.
 #include "Akeru.h"
 
 //  Send structured messages to SIGFOX cloud.

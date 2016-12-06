@@ -1,3 +1,9 @@
+//  Bean+ firmware 0.6.1 can't receive serial data properly. We provide
+//  an alternative class BeanSoftwareSerial to work around this.
+//  With the standard SoftwareSerial, Bean+ can send data but no data
+//  will be received.  This class fixes the interrupt handlers used by
+//  SoftwareSerial. Based on
+//  http://beantalk.punchthrough.com/t/rfidd-bean-pronounced-refried-bean/1776
 /*
 SoftwareSerial.cpp (formerly NewSoftSerial.cpp) - 
 Multi-instance software serial library for Arduino/Wiring
@@ -42,7 +48,7 @@ http://arduiniana.org.
 #include <avr/pgmspace.h>
 #include <Arduino.h>
 
-#ifdef NOTUSED_BEAN_BEAN_BEAN_H  //  Only used by Bean to fix Serial receive issue.
+#ifdef BEAN_BEAN_BEAN_H  //  Only used by Bean to fix Serial receive issue.
 
 #include "BeanSoftwareSerial.h"
 #include <util/delay_basic.h>
@@ -50,10 +56,10 @@ http://arduiniana.org.
 //
 // Statics
 //
-SoftwareSerial *SoftwareSerial::active_object = 0;
-char SoftwareSerial::_receive_buffer[_SS_MAX_RX_BUFF]; 
-volatile uint8_t SoftwareSerial::_receive_buffer_tail = 0;
-volatile uint8_t SoftwareSerial::_receive_buffer_head = 0;
+BeanSoftwareSerial *BeanSoftwareSerial::active_object = 0;
+char BeanSoftwareSerial::_receive_buffer[_SS_MAX_RX_BUFF];
+volatile uint8_t BeanSoftwareSerial::_receive_buffer_tail = 0;
+volatile uint8_t BeanSoftwareSerial::_receive_buffer_head = 0;
 
 //
 // Debugging
@@ -207,7 +213,7 @@ void BeanSoftwareSerial::recv()
 #endif
 }
 
-uint8_t SoftwareSerial::rx_pin_read()
+uint8_t BeanSoftwareSerial::rx_pin_read()
 {
   return *_receivePortRegister & _receiveBitMask;
 }
@@ -224,6 +230,11 @@ inline void BeanSoftwareSerial::handle_interrupt()
     active_object->recv();
   }
 }
+
+#if defined(BEAN_BEAN_BEAN_H)
+  //  For Bean we hook the interrupt in the constructor.
+  #include "PinChangeInt.h"
+#else   //  BEAN_BEAN_BEAN_H
 
 #if defined(PCINT0_vect)
 ISR(PCINT0_vect)
@@ -244,6 +255,8 @@ ISR(PCINT2_vect, ISR_ALIASOF(PCINT0_vect));
 ISR(PCINT3_vect, ISR_ALIASOF(PCINT0_vect));
 #endif
 
+#endif  //  BEAN_BEAN_BEAN_H
+
 //
 // Constructor
 //
@@ -257,6 +270,13 @@ BeanSoftwareSerial::BeanSoftwareSerial(uint8_t receivePin, uint8_t transmitPin, 
 {
   setTX(transmitPin);
   setRX(receivePin);
+
+#if defined(BEAN_BEAN_BEAN_H)
+  //  For Bean we use PinChangeInt library to set the interrupt handler.
+  //  With the standard SoftwareSerial, Bean+ can send data but no data
+  //  will be received.  This code change fixes the data receiving.
+  attachPinChangeInterrupt(receivePin, BeanSoftwareSerial::handle_interrupt, CHANGE);
+#endif  //  BEAN_BEAN_BEAN_H
 }
 
 //
