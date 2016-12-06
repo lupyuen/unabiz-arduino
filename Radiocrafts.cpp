@@ -8,7 +8,6 @@
 #endif  //  ARDUINO
 
 #include "SIGFOX.h"
-#include "Radiocrafts.h"
 
 //  Use a macro for logging because Flash strings not supported with String class in Bean+
 #define log1(x) { echoPort->println(x); }
@@ -59,50 +58,51 @@ bool Radiocrafts::begin() {
   //  Wait for the module to power up, configure transmission frequency.
   //  Return true if module is ready to send.
   lastSend = 0;
+  for (int i = 0; i < 5; i++) {
+    //  Retry 5 times.
 #ifdef BEAN_BEAN_BEAN_H
-  delay(7000);  //  For Bean, delay longer to allow Bluetooth debug console to connect.
+    delay(7000);  //  For Bean, delay longer to allow Bluetooth debug console to connect.
 #else  // BEAN_BEAN_BEAN_H
-  delay(2000);
+    delay(2000);
 #endif // BEAN_BEAN_BEAN_H
+    String result;
+    if (useEmulator) {
+      //  Emulation mode.
+      if (!enableEmulator(result)) continue;
+    } else {
+      //  Disable emulation mode.
+      log1(F(" - Disabling emulation mode..."));
+      if (!disableEmulator(result)) continue;
 
-  String result;
-  if (useEmulator) {
-    //  Emulation mode.
-    if (!enableEmulator(result)) return false;
-  } else {
-    //  Disable emulation mode.
-    log1(F(" - Disabling emulation mode (a)..."));
-    if (!disableEmulator(result)) return false;
+      //  Check whether emulator is used for transmission.
+      log1(F(" - Checking emulation mode (expecting 0)...")); int emulator = 0;
+      if (!getEmulator(emulator)) continue;
+    }
 
-    //  Check whether emulator is used for transmission.
-    log1(F(" - Checking emulation mode (expecting 0)...")); int emulator = 0;
-    if (!getEmulator(emulator)) return false;
+    //  Read SIGFOX ID and PAC from module.
+    log1(F(" - Getting SIGFOX ID..."));  String id, pac;
+    if (!getID(id, pac)) continue;
+    echoPort->print(F(" - SIGFOX ID = "));  Serial.println(id);
+    echoPort->print(F(" - PAC = "));  Serial.println(pac);
+
+    //  Set the frequency of SIGFOX module.
+    log2(F(" - Setting frequency for country "), (int) country);
+    if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
+      if (!setFrequencyUS(result)) continue;
+    } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).
+      if (!setFrequencyETSI(result)) continue;
+    } else { //  Rest of the world runs on RCZ4.
+      if (!setFrequencySG(result)) continue;
+    }
+    log2(F(" - Set frequency result = "), result);
+
+    //  Get and display the frequency used by the SIGFOX module.  Should return 3 for RCZ4 (SG/TW).
+    log1(F(" - Getting frequency (expecting 3)..."));  String frequency;
+    if (!getFrequency(frequency)) continue;
+    log2(F(" - Frequency (expecting 3) = "), frequency);
+    return true;  //  Init module succeeded.
   }
-
-  //  Read SIGFOX ID and PAC from module.
-  log1(F(" - Getting SIGFOX ID..."));  String id, pac;
-  if (!getID(id, pac)) return false;
-  echoPort->print(F(" - SIGFOX ID = "));  Serial.println(id);
-  echoPort->print(F(" - PAC = "));  Serial.println(pac);
-
-  //  Set the frequency of SIGFOX module.
-  log2(F(" - Setting frequency for country "), (int) country);
-  if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
-    if (!setFrequencyUS(result)) return false;
-  } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).
-    if (!setFrequencyETSI(result)) return false;
-  } else { //  Rest of the world runs on RCZ4.
-    if (!setFrequencySG(result)) return false;
-  }
-  log2(F(" - Set frequency result = "), result);
-
-  //  Get and display the frequency used by the SIGFOX module.  Should return 3 for RCZ4 (SG/TW).
-  log1(F(" - Getting frequency (expecting 3)..."));  String frequency;
-  if (!getFrequency(frequency)) return false;
-  log2(F(" - Frequency (expecting 3) = "), frequency);
-
-  // log1(F("Error: SIGFOX module did not respond, may be missing"));
-  return true;
+  return false;  //  Failed to init module.
 }
 
 bool Radiocrafts::sendMessage(const String &payload) {
