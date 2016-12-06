@@ -60,7 +60,7 @@ void setup() {  //  Will be called only once.
   //  Begin SIGFOX Module Setup
 
   //  Check whether the SIGFOX module is functioning.
-  if (!transceiver.begin()) stop("Unable to init SIGFOX module, may be missing");  //  Will never return.
+  while (!transceiver.begin()) Serial.println(F("Unable to init SIGFOX module, may be missing"));  //  Will never return.
 
   //  End SIGFOX Module Setup
   ////////////////////////////////////////////////////////////

@@ -179,10 +179,15 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
                        hexDigitToDecimal(rawBuffer[i + 1]);
       //echoSend.concat(toHex((char) txChar) + ' ');
       serialPort->write(txChar);
-      delay(100);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
+      delay(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
       i = i + 2;
       startTime = millis();  //  Start the timer only when all data has been sent.
     }
+
+    //  If timeout, quit.
+    const unsigned long currentTime = millis();
+    if (currentTime - startTime > timeout) break;
+
     //  If data is available to receive, receive it.
     if (serialPort->available() > 0) {
       int rxChar = serialPort->read();
@@ -200,9 +205,6 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
 
     //  TODO: Check for downlink response.
 
-    //  If timeout, quit.
-    const unsigned long currentTime = millis();
-    if (currentTime - startTime > timeout) break;
   }
   serialPort->end();
   //  Log the actual bytes sent and received.

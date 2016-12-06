@@ -2,18 +2,18 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" buildAllGenerated="true">
     <generated>
-      <config projectName="unabiz-arduino" targetName="unabiz-arduino" />
-      <config projectName="unabiz_arduino" targetName="uno_CORE" />
-      <config projectName="unabiz_arduino" targetName="uno_SoftwareSerial" />
       <config projectName="unabiz-arduino" targetName="unabiz-arduino-size" />
+      <config projectName="unabiz_arduino" targetName="uno_SoftwareSerial" />
+      <config projectName="unabiz-arduino" targetName="unabiz-arduino-serial" />
       <config projectName="unabiz-arduino" targetName="Radiocrafts_lib" />
-      <config projectName="unabiz_arduino" targetName="unabiz_arduino-size" />
-      <config projectName="test1" targetName="test1" />
-      <config projectName="unabiz-arduino" targetName="upload" />
+      <config projectName="unabiz-arduino" targetName="unabiz-arduino" />
       <config projectName="unabiz-arduino" targetName="unabiz-arduino_lib" />
       <config projectName="unabiz_arduino" targetName="unabiz_arduino" />
+      <config projectName="unabiz_arduino" targetName="unabiz_arduino-size" />
+      <config projectName="test1" targetName="test1" />
+      <config projectName="unabiz_arduino" targetName="uno_CORE" />
       <config projectName="unabiz-arduino" targetName="unabiz-arduino-upload" />
-      <config projectName="unabiz-arduino" targetName="unabiz-arduino-serial" />
+      <config projectName="unabiz-arduino" targetName="upload" />
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -22,16 +22,18 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebffe880-3357-410a-a5f5-319df22970a3" name="Default" comment="Adding integration to Processing">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Radiocrafts.cpp" afterPath="$PROJECT_DIR$/Radiocrafts.cpp" />
-    </list>
-    <list id="ad55bd70-da1c-4d53-95c1-ed41b622fb2d" name="New changelist" comment="">
+    <list default="true" id="ebffe880-3357-410a-a5f5-319df22970a3" name="Default" comment="Refactored to reduce memory footprint for Bean+">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/BeanSoftwareSerial.cpp" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/BeanSoftwareSerial.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Message.cpp" afterPath="$PROJECT_DIR$/Message.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Radiocrafts.cpp" afterPath="$PROJECT_DIR$/Radiocrafts.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/send-light-level/send-light-level.ino" afterPath="$PROJECT_DIR$/examples/send-light-level/send-light-level.ino" />
     </list>
+    <list id="ad55bd70-da1c-4d53-95c1-ed41b622fb2d" name="New changelist" comment="" />
     <ignored path="unabiz-arduino.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <file path="$PROJECT_DIR$/.idea/workspace.xml" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,7 +52,7 @@
       <file leaf-file-name="DemoTest.ino" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/DemoTest/DemoTest.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
+            <state relative-caret-position="180">
               <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
               <folding />
             </state>
@@ -90,8 +92,8 @@
       <file leaf-file-name="Radiocrafts.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Radiocrafts.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1602">
-              <caret line="89" column="37" lean-forward="false" selection-start-line="89" selection-start-column="37" selection-end-line="89" selection-end-column="37" />
+            <state relative-caret-position="594">
+              <caret line="33" column="14" lean-forward="false" selection-start-line="33" selection-start-column="14" selection-end-line="33" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -100,8 +102,8 @@
       <file leaf-file-name="Message.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Message.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="918">
-              <caret line="66" column="0" lean-forward="false" selection-start-line="66" selection-start-column="0" selection-end-line="66" selection-end-column="0" />
+            <state relative-caret-position="486">
+              <caret line="27" column="37" lean-forward="true" selection-start-line="27" selection-start-column="37" selection-end-line="27" selection-end-column="37" />
               <folding>
                 <element signature="e#158#179#0" expanded="true" />
                 <element signature="e#285#312#0" expanded="true" />
@@ -111,11 +113,36 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="send-light-level.ino" pinned="false" current-in-tab="true">
+      <file leaf-file-name="send-light-level.ino" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/send-light-level/send-light-level.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="11" column="28" lean-forward="true" selection-start-line="11" selection-start-column="28" selection-end-line="11" selection-end-column="28" />
+            <state relative-caret-position="558">
+              <caret line="46" column="0" lean-forward="true" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BeanSoftwareSerial.cpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="558">
+              <caret line="31" column="0" lean-forward="false" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+              <folding>
+                <element signature="e#2288#2470#0" expanded="true" />
+                <element signature="e#5951#5994#0" expanded="true" />
+                <element signature="e#8131#9593#0" expanded="true" />
+                <element signature="e#10635#10696#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BeanSoftwareSerial.h" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="558">
+              <caret line="31" column="0" lean-forward="false" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -124,14 +151,19 @@
       <file leaf-file-name="Radiocrafts.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1080">
-              <caret line="75" column="47" lean-forward="false" selection-start-line="75" selection-start-column="47" selection-end-line="75" selection-end-column="47" />
+            <state relative-caret-position="1962">
+              <caret line="110" column="74" lean-forward="true" selection-start-line="110" selection-start-column="74" selection-end-line="110" selection-end-column="74" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>'Y'</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="UPDATE_TYPE" value="MERGE" />
@@ -154,11 +186,14 @@
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/unabiz-arduino.ino" />
         <option value="$PROJECT_DIR$/Message.h" />
-        <option value="$PROJECT_DIR$/Radiocrafts.h" />
         <option value="$PROJECT_DIR$/SIGFOX.h" />
         <option value="$PROJECT_DIR$/examples/DemoTest/DemoTest.ino" />
-        <option value="$PROJECT_DIR$/Radiocrafts.cpp" />
+        <option value="$PROJECT_DIR$/Radiocrafts.h" />
         <option value="$PROJECT_DIR$/Message.cpp" />
+        <option value="$PROJECT_DIR$/Radiocrafts.cpp" />
+        <option value="$PROJECT_DIR$/examples/send-light-level/send-light-level.ino" />
+        <option value="$PROJECT_DIR$/BeanSoftwareSerial.cpp" />
+        <option value="$PROJECT_DIR$/BeanSoftwareSerial.h" />
       </list>
     </option>
   </component>
@@ -252,16 +287,11 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="false" />
           <option name="myId" value="UPDATED" />
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/.gitignore</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/Akeru.cpp</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/Akeru.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/CMakeLists.txt</PATH>
           <PATH vcs="Git" revision="">$PROJECT_DIR$/Message.cpp</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/Message.h</PATH>
           <PATH vcs="Git" revision="">$PROJECT_DIR$/Radiocrafts.cpp</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/Radiocrafts.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/SIGFOX.h</PATH>
           <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/DemoTest/DemoTest.ino</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/read-light-level/read-light-level.ino</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-light-level/send-light-level.ino</PATH>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Created" />
@@ -269,8 +299,6 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="false" />
           <option name="myId" value="CREATED" />
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/read-light-level/read-light-level.ino</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-light-level/send-light-level.ino</PATH>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Deleted" />
@@ -278,7 +306,6 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="true" />
           <option name="myId" value="REMOVED_FROM_REPOSITORY" />
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/unabiz-arduino.ino</PATH>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Restored" />
@@ -586,7 +613,8 @@
       <workItem from="1479816735232" duration="1031000" />
       <workItem from="1480837875989" duration="327000" />
       <workItem from="1480838349228" duration="26000" />
-      <workItem from="1480838390957" duration="3060000" />
+      <workItem from="1480838390957" duration="6406000" />
+      <workItem from="1481036677489" duration="2221000" />
     </task>
     <task id="LOCAL-00001" summary="Added test project">
       <created>1477931240357</created>
@@ -910,35 +938,42 @@
       <option name="project" value="LOCAL" />
       <updated>1479628236724</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="Refactored to reduce memory footprint for Bean+">
+      <created>1480854501810</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1480854501810</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="91972000" />
+    <option name="totallyTimeSpent" value="97539000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="8" y="31" width="938" height="992" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22444445" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22444445" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3277311" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24489796" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3277311" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Serial Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32893157" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39975992" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.39735895" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32893157" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39975992" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -976,7 +1011,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Added upload command" />
     <MESSAGE value="Added library build" />
     <MESSAGE value="Before testing new version" />
     <MESSAGE value="Works OK on Windows" />
@@ -1001,7 +1035,8 @@
     <MESSAGE value="Refactoring to simplify init" />
     <MESSAGE value="Before adding vsync" />
     <MESSAGE value="Adding integration to Processing" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding integration to Processing" />
+    <MESSAGE value="Refactored to reduce memory footprint for Bean+" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactored to reduce memory footprint for Bean+" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1016,20 +1051,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/cmake/ArduinoToolchain.cmake">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="594">
-          <caret line="33" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/unabiz-arduino.ino">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Radiocrafts.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="144">
@@ -1283,21 +1304,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/VSync.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="13" column="48" lean-forward="false" selection-start-line="13" selection-start-column="48" selection-end-line="13" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Radiocrafts.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1602">
-          <caret line="89" column="37" lean-forward="false" selection-start-line="89" selection-start-column="37" selection-end-line="89" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/VSync.h" />
     <entry file="file://$PROJECT_DIR$/examples/send-temperature/send-temperature.ino">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="838">
@@ -1314,7 +1321,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/DemoTest/DemoTest.ino">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="180">
           <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding />
         </state>
@@ -1328,26 +1335,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1080">
-          <caret line="75" column="47" lean-forward="false" selection-start-line="75" selection-start-column="47" selection-end-line="75" selection-end-column="47" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Message.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="918">
-          <caret line="66" column="0" lean-forward="false" selection-start-line="66" selection-start-column="0" selection-end-line="66" selection-end-column="0" />
-          <folding>
-            <element signature="e#158#179#0" expanded="true" />
-            <element signature="e#285#312#0" expanded="true" />
-            <element signature="e#374#393#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="116">
@@ -1356,10 +1343,59 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Radiocrafts.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="594">
+          <caret line="33" column="14" lean-forward="false" selection-start-line="33" selection-start-column="14" selection-end-line="33" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1962">
+          <caret line="110" column="74" lean-forward="true" selection-start-line="110" selection-start-column="74" selection-end-line="110" selection-end-column="74" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/examples/send-light-level/send-light-level.ino">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="11" column="28" lean-forward="true" selection-start-line="11" selection-start-column="28" selection-end-line="11" selection-end-column="28" />
+        <state relative-caret-position="558">
+          <caret line="46" column="0" lean-forward="true" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Message.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="27" column="37" lean-forward="true" selection-start-line="27" selection-start-column="37" selection-end-line="27" selection-end-column="37" />
+          <folding>
+            <element signature="e#158#179#0" expanded="true" />
+            <element signature="e#285#312#0" expanded="true" />
+            <element signature="e#374#393#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="558">
+          <caret line="31" column="0" lean-forward="false" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+          <folding>
+            <element signature="e#2288#2470#0" expanded="true" />
+            <element signature="e#5951#5994#0" expanded="true" />
+            <element signature="e#8131#9593#0" expanded="true" />
+            <element signature="e#10635#10696#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="558">
+          <caret line="31" column="0" lean-forward="false" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
           <folding />
         </state>
       </provider>

@@ -60,10 +60,6 @@ void Message::echo(String msg) {
 #endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 }
 
-#ifdef BEAN_BEAN_BEAN_H  //  Disable echo on Bean+
-//define echo(x) {}
-#endif // BEAN_BEAN_BEAN_H
-
 Message::Message(Radiocrafts &transceiver) {
   //  Construct a message for Radiocrafts.
   radiocrafts = &transceiver;
