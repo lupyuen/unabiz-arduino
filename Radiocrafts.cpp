@@ -68,7 +68,7 @@ bool Radiocrafts::begin() {
     if (!enableEmulator(result)) return false;
   } else {
     //  Disable emulation mode.
-    log1(F(" - Disabling emulation mode..."));
+    log1(F(" - Disabling emulation mode (a)..."));
     if (!disableEmulator(result)) return false;
 
     //  Check whether emulator is used for transmission.

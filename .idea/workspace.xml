@@ -24,8 +24,7 @@
   <component name="ChangeListManager">
     <list default="true" id="ebffe880-3357-410a-a5f5-319df22970a3" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Akeru.cpp" afterPath="$PROJECT_DIR$/Akeru.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Akeru.h" afterPath="$PROJECT_DIR$/Akeru.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Radiocrafts.cpp" afterPath="$PROJECT_DIR$/Radiocrafts.cpp" />
     </list>
     <list id="ad55bd70-da1c-4d53-95c1-ed41b622fb2d" name="New changelist" comment="" />
     <ignored path="unabiz-arduino.iws" />
@@ -84,8 +83,8 @@
       <file leaf-file-name="Message.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Message.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="8" column="0" lean-forward="true" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+            <state relative-caret-position="756">
+              <caret line="42" column="29" lean-forward="true" selection-start-line="42" selection-start-column="29" selection-end-line="42" selection-end-column="29" />
               <folding>
                 <element signature="e#158#179#0" expanded="true" />
                 <element signature="e#231#250#0" expanded="true" />
@@ -104,7 +103,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Akeru.h" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Akeru.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Akeru.h">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="756">
@@ -132,8 +131,8 @@
       <file leaf-file-name="BeanSoftwareSerial.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="237" column="0" lean-forward="true" selection-start-line="237" selection-start-column="0" selection-end-line="237" selection-end-column="0" />
+            <state relative-caret-position="360">
+              <caret line="53" column="29" lean-forward="true" selection-start-line="53" selection-start-column="29" selection-end-line="53" selection-end-column="29" />
               <folding>
                 <element signature="e#2122#2148#0" expanded="true" />
               </folding>
@@ -151,11 +150,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Radiocrafts.cpp" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Radiocrafts.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="738">
-              <caret line="65" column="20" lean-forward="true" selection-start-line="65" selection-start-column="20" selection-end-line="65" selection-end-column="20" />
+            <state relative-caret-position="558">
+              <caret line="70" column="0" lean-forward="false" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
               <folding>
                 <element signature="e#277#296#0" expanded="true" />
               </folding>
@@ -194,12 +193,12 @@
         <option value="$PROJECT_DIR$/Radiocrafts.h" />
         <option value="$PROJECT_DIR$/Message.cpp" />
         <option value="$PROJECT_DIR$/Message.h" />
-        <option value="$PROJECT_DIR$/Radiocrafts.cpp" />
         <option value="$PROJECT_DIR$/SIGFOX.h" />
         <option value="$PROJECT_DIR$/BeanSoftwareSerial.cpp" />
         <option value="$PROJECT_DIR$/BeanSoftwareSerial.h" />
         <option value="$PROJECT_DIR$/Akeru.cpp" />
         <option value="$PROJECT_DIR$/Akeru.h" />
+        <option value="$PROJECT_DIR$/Radiocrafts.cpp" />
       </list>
     </option>
   </component>
@@ -620,14 +619,7 @@
       <workItem from="1480837875989" duration="327000" />
       <workItem from="1480838349228" duration="26000" />
       <workItem from="1480838390957" duration="6406000" />
-      <workItem from="1481036677489" duration="6530000" />
-    </task>
-    <task id="LOCAL-00003" summary="Fixing Arduino build">
-      <created>1477934362797</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1477934362797</updated>
+      <workItem from="1481036677489" duration="8709000" />
     </task>
     <task id="LOCAL-00004" summary="Fixing Arduino build">
       <created>1477936426138</created>
@@ -965,11 +957,18 @@
       <option name="project" value="LOCAL" />
       <updated>1481043329205</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="Adding BeanSoftwareSerial to fix Bean serial receive issue">
+      <created>1481044499577</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1481044499577</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="101848000" />
+    <option name="totallyTimeSpent" value="104027000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="8" y="31" width="938" height="992" extended-state="0" />
@@ -1336,17 +1335,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Message.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="0" lean-forward="true" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding>
-            <element signature="e#158#179#0" expanded="true" />
-            <element signature="e#231#250#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Message.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="198">
@@ -1368,31 +1356,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="738">
-          <caret line="65" column="20" lean-forward="true" selection-start-line="65" selection-start-column="20" selection-end-line="65" selection-end-column="20" />
-          <folding>
-            <element signature="e#277#296#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/SIGFOX.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="319">
           <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="237" column="0" lean-forward="true" selection-start-line="237" selection-start-column="0" selection-end-line="237" selection-end-column="0" />
-          <folding>
-            <element signature="e#2122#2148#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1429,6 +1397,37 @@
           <caret line="48" column="25" lean-forward="true" selection-start-line="48" selection-start-column="25" selection-end-line="48" selection-end-column="25" />
           <folding>
             <element signature="e#957#1045#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="53" column="29" lean-forward="true" selection-start-line="53" selection-start-column="29" selection-end-line="53" selection-end-column="29" />
+          <folding>
+            <element signature="e#2122#2148#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Message.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="756">
+          <caret line="42" column="29" lean-forward="true" selection-start-line="42" selection-start-column="29" selection-end-line="42" selection-end-column="29" />
+          <folding>
+            <element signature="e#158#179#0" expanded="true" />
+            <element signature="e#231#250#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="558">
+          <caret line="70" column="0" lean-forward="false" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
+          <folding>
+            <element signature="e#277#296#0" expanded="true" />
           </folding>
         </state>
       </provider>
