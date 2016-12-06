@@ -32,7 +32,9 @@
   #ifdef CLION
     #include <src/SoftwareSerial.h>
   #else  //  CLION
-    #include <SoftwareSerial.h>
+		#ifndef BEAN_BEAN_BEAN_H
+    	#include <SoftwareSerial.h>
+		#endif  //  BEAN_BEAN_BEAN_H
   #endif  //  CLION
 
 #else  //  ARDUINO

@@ -19,7 +19,7 @@
  */
 
 #ifdef ARDUINO
-#if (ARDUINO >= 100)
+	#if (ARDUINO >= 100)
     #include <Arduino.h>
   #else  //  ARDUINO >= 100
     #include <WProgram.h>
@@ -28,10 +28,10 @@
   #ifdef CLION
     #include <src/SoftwareSerial.h>
   #else  //  CLION
-    #include <SoftwareSerial.h>
+		#ifndef BEAN_BEAN_BEAN_H
+    	#include <SoftwareSerial.h>
+		#endif  //  BEAN_BEAN_BEAN_H
   #endif  //  CLION
-
-#else  //  ARDUINO
 #endif  //  ARDUINO
 
 #ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+

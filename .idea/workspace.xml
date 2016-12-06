@@ -24,9 +24,8 @@
   <component name="ChangeListManager">
     <list default="true" id="ebffe880-3357-410a-a5f5-319df22970a3" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Message.cpp" afterPath="$PROJECT_DIR$/Message.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Message.h" afterPath="$PROJECT_DIR$/Message.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Radiocrafts.cpp" afterPath="$PROJECT_DIR$/Radiocrafts.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Akeru.cpp" afterPath="$PROJECT_DIR$/Akeru.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Akeru.h" afterPath="$PROJECT_DIR$/Akeru.h" />
     </list>
     <list id="ad55bd70-da1c-4d53-95c1-ed41b622fb2d" name="New changelist" comment="" />
     <ignored path="unabiz-arduino.iws" />
@@ -47,16 +46,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="DemoTest.ino" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/examples/DemoTest/DemoTest.ino">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Message.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Message.h">
           <provider selected="true" editor-type-id="text-editor">
@@ -72,11 +61,9 @@
       <file leaf-file-name="SIGFOX.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SIGFOX.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
-              <caret line="19" column="2" lean-forward="true" selection-start-line="19" selection-start-column="2" selection-end-line="19" selection-end-column="2" />
-              <folding>
-                <element signature="e#874#1090#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="319">
+              <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -110,18 +97,43 @@
       <file leaf-file-name="send-light-level.ino" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/send-light-level/send-light-level.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="558">
+            <state relative-caret-position="-144">
               <caret line="46" column="0" lean-forward="true" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BeanSoftwareSerial.cpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Akeru.h" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Akeru.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="756">
+              <caret line="48" column="25" lean-forward="true" selection-start-line="48" selection-start-column="25" selection-end-line="48" selection-end-column="25" />
+              <folding>
+                <element signature="e#957#1045#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Akeru.cpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Akeru.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="594">
+              <caret line="33" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
+              <folding>
+                <element signature="e#870#958#0" expanded="true" />
+                <element signature="e#1053#1072#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BeanSoftwareSerial.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="56" column="10" lean-forward="true" selection-start-line="56" selection-start-column="10" selection-end-line="56" selection-end-column="10" />
+            <state relative-caret-position="270">
+              <caret line="237" column="0" lean-forward="true" selection-start-line="237" selection-start-column="0" selection-end-line="237" selection-end-column="0" />
               <folding>
                 <element signature="e#2122#2148#0" expanded="true" />
               </folding>
@@ -132,20 +144,8 @@
       <file leaf-file-name="BeanSoftwareSerial.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="2" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-              <folding>
-                <element signature="e#1807#4309#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="unabiz-arduino.ino" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/unabiz-arduino.ino">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+            <state relative-caret-position="486">
+              <caret line="39" column="0" lean-forward="true" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -183,9 +183,7 @@
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/cmake/Platform/Arduino.cmake" />
         <option value="$PROJECT_DIR$/README.md" />
-        <option value="$PROJECT_DIR$/Akeru.cpp" />
         <option value="$PROJECT_DIR$/examples/read-temperature/read-temperature.ino" />
-        <option value="$PROJECT_DIR$/Akeru.h" />
         <option value="$PROJECT_DIR$/examples/send-test/send-test.ino" />
         <option value="$PROJECT_DIR$/examples/send-temperature/send-temperature.ino" />
         <option value="$PROJECT_DIR$/.gitattributes" />
@@ -193,13 +191,15 @@
         <option value="$PROJECT_DIR$/unabiz-arduino.ino" />
         <option value="$PROJECT_DIR$/examples/DemoTest/DemoTest.ino" />
         <option value="$PROJECT_DIR$/examples/send-light-level/send-light-level.ino" />
-        <option value="$PROJECT_DIR$/SIGFOX.h" />
         <option value="$PROJECT_DIR$/Radiocrafts.h" />
-        <option value="$PROJECT_DIR$/BeanSoftwareSerial.h" />
         <option value="$PROJECT_DIR$/Message.cpp" />
         <option value="$PROJECT_DIR$/Message.h" />
         <option value="$PROJECT_DIR$/Radiocrafts.cpp" />
+        <option value="$PROJECT_DIR$/SIGFOX.h" />
         <option value="$PROJECT_DIR$/BeanSoftwareSerial.cpp" />
+        <option value="$PROJECT_DIR$/BeanSoftwareSerial.h" />
+        <option value="$PROJECT_DIR$/Akeru.cpp" />
+        <option value="$PROJECT_DIR$/Akeru.h" />
       </list>
     </option>
   </component>
@@ -620,14 +620,7 @@
       <workItem from="1480837875989" duration="327000" />
       <workItem from="1480838349228" duration="26000" />
       <workItem from="1480838390957" duration="6406000" />
-      <workItem from="1481036677489" duration="5363000" />
-    </task>
-    <task id="LOCAL-00002" summary="Added Radiocrafts class">
-      <created>1477931928041</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1477931928041</updated>
+      <workItem from="1481036677489" duration="6530000" />
     </task>
     <task id="LOCAL-00003" summary="Fixing Arduino build">
       <created>1477934362797</created>
@@ -965,11 +958,18 @@
       <option name="project" value="LOCAL" />
       <updated>1481042891009</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="Adding BeanSoftwareSerial to fix Bean serial receive issue">
+      <created>1481043329205</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1481043329205</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="100681000" />
+    <option name="totallyTimeSpent" value="101848000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="8" y="31" width="938" height="992" extended-state="0" />
@@ -1249,13 +1249,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/README.md" />
-    <entry file="file://$PROJECT_DIR$/Akeru.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2268">
-          <caret line="126" column="0" lean-forward="false" selection-start-line="126" selection-start-column="0" selection-end-line="126" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/examples/sendSingleValue/sendSingleValue.ino" />
     <entry file="file://$PROJECT_DIR$/examples/sendMultipleValues/sendMultipleValues.ino" />
     <entry file="file://$PROJECT_DIR$/examples/read-temperature/read-temperature.ino">
@@ -1273,13 +1266,6 @@
     <entry file="file://$PROJECT_DIR$/images/unashield.jpg">
       <provider selected="true" editor-type-id="images">
         <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Akeru.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1602">
-          <caret line="98" column="0" lean-forward="false" selection-start-line="98" selection-start-column="0" selection-end-line="98" selection-end-column="0" />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/.gitattributes">
@@ -1342,29 +1328,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/examples/send-light-level/send-light-level.ino">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="558">
-          <caret line="46" column="0" lean-forward="true" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/unabiz-arduino.ino">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
           <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SIGFOX.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="19" column="2" lean-forward="true" selection-start-line="19" selection-start-column="2" selection-end-line="19" selection-end-column="2" />
-          <folding>
-            <element signature="e#874#1090#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1400,16 +1368,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding>
-            <element signature="e#1807#4309#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="738">
@@ -1420,12 +1378,57 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/SIGFOX.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="319">
+          <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="56" column="10" lean-forward="true" selection-start-line="56" selection-start-column="10" selection-end-line="56" selection-end-column="10" />
+        <state relative-caret-position="270">
+          <caret line="237" column="0" lean-forward="true" selection-start-line="237" selection-start-column="0" selection-end-line="237" selection-end-column="0" />
           <folding>
             <element signature="e#2122#2148#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/send-light-level/send-light-level.ino">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-144">
+          <caret line="46" column="0" lean-forward="true" selection-start-line="46" selection-start-column="0" selection-end-line="46" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BeanSoftwareSerial.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="39" column="0" lean-forward="true" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Akeru.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="594">
+          <caret line="33" column="0" lean-forward="false" selection-start-line="30" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
+          <folding>
+            <element signature="e#870#958#0" expanded="true" />
+            <element signature="e#1053#1072#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Akeru.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="756">
+          <caret line="48" column="25" lean-forward="true" selection-start-line="48" selection-start-column="25" selection-end-line="48" selection-end-column="25" />
+          <folding>
+            <element signature="e#957#1045#0" expanded="true" />
           </folding>
         </state>
       </provider>
