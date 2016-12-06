@@ -29,6 +29,8 @@ The latest version of this library can always be found at
 http://arduiniana.org.
 */
 
+#ifdef NOTUSED_BEAN_BEAN_BEAN_H  //  Only used by Bean to fix Serial receive issue.
+
 #ifndef SoftwareSerial_h
 #define SoftwareSerial_h
 
@@ -44,7 +46,7 @@ http://arduiniana.org.
 #define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #endif
 
-class SoftwareSerial : public Stream
+class BeanSoftwareSerial : public Stream
 {
 private:
   // per object data
@@ -87,8 +89,8 @@ private:
 
 public:
   // public methods
-  SoftwareSerial(uint8_t receivePin, uint8_t transmitPin, bool inverse_logic = false);
-  ~SoftwareSerial();
+  BeanSoftwareSerial(uint8_t receivePin, uint8_t transmitPin, bool inverse_logic = false);
+  ~BeanSoftwareSerial();
   void begin(long speed);
   bool listen();
   void end();
@@ -119,3 +121,5 @@ public:
 #undef round
 
 #endif
+
+#endif // BEAN_BEAN_BEAN_H

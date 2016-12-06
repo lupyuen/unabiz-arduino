@@ -41,7 +41,10 @@ http://arduiniana.org.
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <Arduino.h>
-#include <SoftwareSerial.h>
+
+#ifdef NOTUSED_BEAN_BEAN_BEAN_H  //  Only used by Bean to fix Serial receive issue.
+
+#include "BeanSoftwareSerial.h"
 #include <util/delay_basic.h>
 
 //
@@ -76,13 +79,13 @@ inline void DebugPulse(uint8_t pin, uint8_t count)
 //
 
 /* static */ 
-inline void SoftwareSerial::tunedDelay(uint16_t delay) { 
+inline void BeanSoftwareSerial::tunedDelay(uint16_t delay) {
   _delay_loop_2(delay);
 }
 
 // This function sets the current object as the "listening"
 // one and returns true if it replaces another 
-bool SoftwareSerial::listen()
+bool BeanSoftwareSerial::listen()
 {
   if (!_rx_delay_stopbit)
     return false;
@@ -104,7 +107,7 @@ bool SoftwareSerial::listen()
 }
 
 // Stop listening. Returns true if we were actually listening.
-bool SoftwareSerial::stopListening()
+bool BeanSoftwareSerial::stopListening()
 {
   if (active_object == this)
   {
@@ -118,7 +121,7 @@ bool SoftwareSerial::stopListening()
 //
 // The receive routine called by the interrupt handler
 //
-void SoftwareSerial::recv()
+void BeanSoftwareSerial::recv()
 {
 
 #if GCC_VERSION < 40302
@@ -214,7 +217,7 @@ uint8_t SoftwareSerial::rx_pin_read()
 //
 
 /* static */
-inline void SoftwareSerial::handle_interrupt()
+inline void BeanSoftwareSerial::handle_interrupt()
 {
   if (active_object)
   {
@@ -244,7 +247,7 @@ ISR(PCINT3_vect, ISR_ALIASOF(PCINT0_vect));
 //
 // Constructor
 //
-SoftwareSerial::SoftwareSerial(uint8_t receivePin, uint8_t transmitPin, bool inverse_logic /* = false */) : 
+BeanSoftwareSerial::BeanSoftwareSerial(uint8_t receivePin, uint8_t transmitPin, bool inverse_logic /* = false */) :
   _rx_delay_centering(0),
   _rx_delay_intrabit(0),
   _rx_delay_stopbit(0),
@@ -259,12 +262,12 @@ SoftwareSerial::SoftwareSerial(uint8_t receivePin, uint8_t transmitPin, bool inv
 //
 // Destructor
 //
-SoftwareSerial::~SoftwareSerial()
+BeanSoftwareSerial::~BeanSoftwareSerial()
 {
   end();
 }
 
-void SoftwareSerial::setTX(uint8_t tx)
+void BeanSoftwareSerial::setTX(uint8_t tx)
 {
   // First write, then set output. If we do this the other way around,
   // the pin would be output low for a short while before switching to
@@ -277,7 +280,7 @@ void SoftwareSerial::setTX(uint8_t tx)
   _transmitPortRegister = portOutputRegister(port);
 }
 
-void SoftwareSerial::setRX(uint8_t rx)
+void BeanSoftwareSerial::setRX(uint8_t rx)
 {
   pinMode(rx, INPUT);
   if (!_inverse_logic)
@@ -288,7 +291,7 @@ void SoftwareSerial::setRX(uint8_t rx)
   _receivePortRegister = portInputRegister(port);
 }
 
-uint16_t SoftwareSerial::subtract_cap(uint16_t num, uint16_t sub) {
+uint16_t BeanSoftwareSerial::subtract_cap(uint16_t num, uint16_t sub) {
   if (num > sub)
     return num - sub;
   else
@@ -299,7 +302,7 @@ uint16_t SoftwareSerial::subtract_cap(uint16_t num, uint16_t sub) {
 // Public methods
 //
 
-void SoftwareSerial::begin(long speed)
+void BeanSoftwareSerial::begin(long speed)
 {
   _rx_delay_centering = _rx_delay_intrabit = _rx_delay_stopbit = _tx_delay = 0;
 
@@ -372,7 +375,7 @@ void SoftwareSerial::begin(long speed)
   listen();
 }
 
-void SoftwareSerial::setRxIntMsk(bool enable)
+void BeanSoftwareSerial::setRxIntMsk(bool enable)
 {
     if (enable)
       *_pcint_maskreg |= _pcint_maskvalue;
@@ -380,14 +383,14 @@ void SoftwareSerial::setRxIntMsk(bool enable)
       *_pcint_maskreg &= ~_pcint_maskvalue;
 }
 
-void SoftwareSerial::end()
+void BeanSoftwareSerial::end()
 {
   stopListening();
 }
 
 
 // Read data from buffer
-int SoftwareSerial::read()
+int BeanSoftwareSerial::read()
 {
   if (!isListening())
     return -1;
@@ -402,7 +405,7 @@ int SoftwareSerial::read()
   return d;
 }
 
-int SoftwareSerial::available()
+int BeanSoftwareSerial::available()
 {
   if (!isListening())
     return 0;
@@ -410,7 +413,7 @@ int SoftwareSerial::available()
   return (_receive_buffer_tail + _SS_MAX_RX_BUFF - _receive_buffer_head) % _SS_MAX_RX_BUFF;
 }
 
-size_t SoftwareSerial::write(uint8_t b)
+size_t BeanSoftwareSerial::write(uint8_t b)
 {
   if (_tx_delay == 0) {
     setWriteError();
@@ -465,7 +468,7 @@ size_t SoftwareSerial::write(uint8_t b)
   return 1;
 }
 
-void SoftwareSerial::flush()
+void BeanSoftwareSerial::flush()
 {
   if (!isListening())
     return;
@@ -476,7 +479,7 @@ void SoftwareSerial::flush()
   SREG = oldSREG;
 }
 
-int SoftwareSerial::peek()
+int BeanSoftwareSerial::peek()
 {
   if (!isListening())
     return -1;
@@ -488,3 +491,5 @@ int SoftwareSerial::peek()
   // Read from "head"
   return _receive_buffer[_receive_buffer_head];
 }
+
+#endif // BEAN_BEAN_BEAN_H
