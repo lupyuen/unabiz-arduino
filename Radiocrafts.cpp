@@ -58,9 +58,12 @@ Radiocrafts::Radiocrafts(Country country0, bool useEmulator0, const String devic
 bool Radiocrafts::begin() {
   //  Wait for the module to power up, configure transmission frequency.
   //  Return true if module is ready to send.
-  //  TODO: Check communication with SIGFOX module.
   lastSend = 0;
+#ifdef BEAN_BEAN_BEAN_H
+  delay(7000);  //  For Bean, delay longer to allow Bluetooth debug console to connect.
+#else  // BEAN_BEAN_BEAN_H
   delay(2000);
+#endif // BEAN_BEAN_BEAN_H
 
   String result;
   if (useEmulator) {
