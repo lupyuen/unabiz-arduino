@@ -263,9 +263,9 @@ bool Radiocrafts::isReady()
   unsigned long currentTime = millis();
   if (lastSend == 0) return true;  //  First time sending.
   const unsigned long elapsedTime = currentTime - lastSend;
-  //  For development, allow sending every 5 seconds.
-  if (elapsedTime <= 5 * 1000) {
-    log1(F("Must wait 5 seconds before sending the next message"));
+  //  For development, allow sending every 2 seconds.
+  if (elapsedTime <= 2 * 1000) {
+    log1(F("Must wait 2 seconds before sending the next message"));
     return false;
   }  //  Wait before sending.
   if (elapsedTime <= SEND_DELAY)
