@@ -6,7 +6,7 @@
 //  According to regulation, messages should be sent only every 10 minutes.
 const unsigned long SEND_DELAY = (unsigned long) 10 * 60 * 1000;
 const unsigned int MAX_BYTES_PER_MESSAGE = 12;  //  Only 12 bytes per message.
-const unsigned int COMMAND_TIMEOUT = 3000;  //  Wait up to 3 seconds for response from SIGFOX module.
+const unsigned int COMMAND_TIMEOUT = 1000;  //  Wait up to 1 second for response from SIGFOX module.
 
 //  Define the countries that are supported.
 enum Country {
