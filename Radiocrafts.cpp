@@ -61,7 +61,7 @@ bool Radiocrafts::begin() {
   for (int i = 0; i < 5; i++) {
     //  Retry 5 times.
 #ifdef BEAN_BEAN_BEAN_H
-    delay(7000);  //  For Bean, delay longer to allow Bluetooth debug console to connect.
+    Bean.sleep(7000);  //  For Bean, delay longer to allow Bluetooth debug console to connect.
 #else  // BEAN_BEAN_BEAN_H
     delay(2000);
 #endif // BEAN_BEAN_BEAN_H
@@ -159,7 +159,11 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
   actualMarkerCount = 0;
   //  Start serial interface.
   serialPort->begin(MODEM_BITS_PER_SECOND);
+#ifdef BEAN_BEAN_BEAN_H
+  Bean.sleep(200);
+#else  // BEAN_BEAN_BEAN_H
   delay(200);
+#endif // BEAN_BEAN_BEAN_H
   serialPort->flush();
   serialPort->listen();
 
@@ -177,7 +181,11 @@ bool Radiocrafts::sendBuffer(const String &buffer, const int timeout,
                        hexDigitToDecimal(rawBuffer[i + 1]);
       //echoSend.concat(toHex((char) txChar) + ' ');
       serialPort->write(txChar);
+#ifdef BEAN_BEAN_BEAN_H
+      Bean.sleep(10);
+#else  // BEAN_BEAN_BEAN_H
       delay(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
+#endif // BEAN_BEAN_BEAN_H
       i = i + 2;
       startTime = millis();  //  Start the timer only when all data has been sent.
     }
