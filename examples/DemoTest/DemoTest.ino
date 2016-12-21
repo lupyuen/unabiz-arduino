@@ -1,4 +1,6 @@
 //  Send sample SIGFOX messages with UnaBiz UnaShield Arduino Shield.
+//  This sketch includes diagnostics functions in the UnaShield.
+//  For a simpler sample sketch, see examples/send-light-level.
 #include "SIGFOX.h"
 
 //  IMPORTANT: Check these settings with UnaBiz to use the SIGFOX library correctly.
