@@ -18,7 +18,8 @@
 #define MODEM_BITS_PER_SECOND 9600  //  Connect to modem at this bps.
 #define END_OF_RESPONSE '\r'  //  Character '\r' marks the end of response.
 #define CMD_OUTPUT_POWER_MAX "ATS302=15"  //  For RCZ1: Set output power to maximum power level.
-#define CMD_PRESEND "AT$GI?"  //  For RCZ2, 4: Send this command before sending messages.
+#define CMD_PRESEND "AT$GI?"  //  For RCZ2, 4: Send this command before sending messages.  Returns X,Y.
+#define CMD_PRESEND2 "AT$RC"  //  For RCZ2, 4: Send this command if presend returns X=0 or Y<3.
 #define CMD_SEND_MESSAGE "AT$SF="  //  Prefix to send a message to SIGFOX cloud.
 #define CMD_GET_ID "AT$I=10"  //  Get SIGFOX device ID.
 #define CMD_GET_PAC "AT$I=11"  //  Get SIGFOX device PAC, used for registering the device.
@@ -144,14 +145,20 @@ bool Wisol::sendMessage(const String &payload) {
 bool Wisol::setOutputPower() {
   //  Set the output power for the zone before sending a message.
   switch(zone) {
-    case 0:  //  RCZ1
+    case 1:  //  RCZ1
       if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers)) return false;
       break;
-    case 1:  //  RCZ2
-    case 3:  //  RCZ4
+    case 2:  //  RCZ2
+    case 4: {  //  RCZ4
       if (!sendCommand(String(CMD_PRESEND) + CMD_END, 1, data, markers)) return false;
+      //  Parse the returned X,Y.
+      int x = data.charAt(0) - '0';
+      int y = data.charAt(2) - '0';
+      log4("x,y=", String(x), ',', String(y));
+      if (x==0 || y<3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers);
       break;
-    case 2:  //  TODO: RCZ3
+    }
+    case 3:  //  TODO: RCZ3
       break;
     default:
       log2(F(" - Wisol.setOutputPower: Unknown zone "), zone);
@@ -266,7 +273,7 @@ bool Wisol::getFrequency(String &result) {
   //  1: US (RCZ2)
   //  3: SG, TW, AU, NZ (RCZ4)
   //  log1(F(" - Wisol.getFrequency: ERROR - Not implemented"));
-  result = zone + "0";
+  result = String(zone + '0');
   return true;
 }
 
@@ -331,7 +338,7 @@ Wisol::Wisol(Country country0, bool useEmulator0, const String device0, bool ech
                          uint8_t rx, uint8_t tx) {
   //  Init the module with the specified transmit and receive pins.
   //  Default to no echo.
-  zone = 3;  //  RCZ4
+  zone = 4;  //  RCZ4
   country = country0;
   useEmulator = useEmulator0;
   device = device0;
@@ -377,8 +384,8 @@ bool Wisol::begin() {
 
     //  Set the frequency of SIGFOX module.
     log1(F(" - Setting frequency for country "));
-    echoPort->write((uint8_t) 'A' + (country / 16));
-    echoPort->write((uint8_t) 'A' + (country % 16));
+    echoPort->write((uint8_t) (country / 8));
+    echoPort->write((uint8_t) (country % 8));
     if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
       if (!setFrequencyUS(result)) continue;
     } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).

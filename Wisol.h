@@ -90,7 +90,7 @@ private:
   void logBuffer(const __FlashStringHelper *prefix, const char *buffer,
                  uint8_t markerPos[], uint8_t markerCount);
 
-  int zone;  //  0 to 3 representing SIGFOX frequencies RCZ 1 to 4.
+  int zone;  //  1 to 4 representing SIGFOX frequencies RCZ 1 to 4.
   Country country;   //  Country to be set for SIGFOX transmission frequencies.
   bool useEmulator;  //  Set to true if using UnaBiz Emulator.
   String device;  //  Name of device if using UnaBiz Emulator.
