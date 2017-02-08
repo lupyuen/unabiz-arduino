@@ -16,8 +16,8 @@ set(${PROJECT_NAME}_PORT /dev/tty.usbmodem1411)
 #endif()
 
 # Build the library.
-set(${PROJECT_LIB}_SRCS Akeru.cpp Message.cpp Radiocrafts.cpp)
-set(${PROJECT_LIB}_HDRS Akeru.h Message.h Radiocrafts.h SIGFOX.h)
+set(${PROJECT_LIB}_SRCS Akeru.cpp Message.cpp Radiocrafts.cpp Wisol.cpp)
+set(${PROJECT_LIB}_HDRS Akeru.h Message.h Radiocrafts.h SIGFOX.h Wisol.h)
 generate_arduino_library(${PROJECT_LIB})
 
 # Build the application.

@@ -15,14 +15,280 @@
 #define log3(x, y, z) { echoPort->print(x); echoPort->print(y); echoPort->println(z); }
 #define log4(x, y, z, a) { echoPort->print(x); echoPort->print(y); echoPort->print(z); echoPort->println(a); }
 
-#define MODEM_BITS_PER_SECOND 19200
-#define END_OF_RESPONSE '>'  //  Character '>' marks the end of response.
+#define MODEM_BITS_PER_SECOND 9600  //  Connect to modem at this bps.
+#define END_OF_RESPONSE 'O'  //  Character 'O' marks the end of response (actually "OK" but we check only first byte).
 #define CMD_READ_MEMORY 'Y'  //  'Y' to read memory.
 #define CMD_ENTER_CONFIG 'M'  //  'M' to enter config mode.
 #define CMD_EXIT_CONFIG (char) 0xff  //  Exit config mode.
+#define CMD_SEND_MESSAGE "AT$SF="  //  Prefix to send a message to SIGFOX cloud.
+#define CMD_GET_ID "AT$I=10"  //  Get SIGFOX device ID.
+#define CMD_GET_PAC "AT$I=11"  //  Get SIGFOX device PAC, used for registering the device.
+#define CMD_GET_TEMPERATURE "AT$T?"  //  Get the module temperature.
+#define CMD_GET_VOLTAGE "AT$V?"  //  Get the module voltage.
+#define CMD_SLEEP "AT$P=1"  //  Switch to sleep mode : consumption is < 1.5uA
+#define CMD_WAKEUP "AT$P=0"  //  Switch back to normal mode : consumption is 0.5 mA
+#define CMD_END '\r'
 
 static NullPort nullPort;
 static uint8_t markers = 0;
+
+//  Remember where in response the '>' markers were seen.
+const uint8_t markerPosMax = 5;
+static uint8_t markerPos[markerPosMax];
+
+bool Wisol::sendBuffer(const String &buffer, const int timeout,
+                       uint8_t expectedMarkerCount, String &response,
+                       uint8_t &actualMarkerCount) {
+  //  buffer contains a string of ASCII chars to be sent to the modem.
+  //  We send the buffer to the modem.  Return true if successful.
+  //  expectedMarkerCount is the number of end-of-command markers 'O' (from "OK") we
+  //  expect to see.  actualMarkerCount contains the actual number seen.
+  log2(F(" - Wisol.sendBuffer: "), buffer);
+  response = "";
+  if (useEmulator) return true;
+
+  actualMarkerCount = 0;
+  //  Start serial interface.
+  serialPort->begin(MODEM_BITS_PER_SECOND);
+#ifdef BEAN_BEAN_BEAN_H
+  Bean.sleep(200);
+#else  // BEAN_BEAN_BEAN_H
+  delay(200);
+#endif // BEAN_BEAN_BEAN_H
+  serialPort->flush();
+  serialPort->listen();
+
+  //  Send the buffer: need to write/read char by char because of echo.
+  const char *rawBuffer = buffer.c_str();
+  //  Send buffer and read response.  Loop until timeout or we see the end of response marker.
+  unsigned long startTime = millis(); int i = 0;
+  //  Previous code for verifying that data was sent correctly.
+  //static String echoSend = "", echoReceive = "";
+  for (;;) {
+    //  If there is data to send, send it.
+    if (i < buffer.length()) {
+      //  Send the char.
+      uint8_t txChar = rawBuffer[i];
+      //echoSend.concat(toHex((char) txChar) + ' ');
+      serialPort->write(txChar);
+#ifdef BEAN_BEAN_BEAN_H
+      Bean.sleep(10);
+#else  // BEAN_BEAN_BEAN_H
+      delay(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
+#endif // BEAN_BEAN_BEAN_H
+      i = i + 1;
+      startTime = millis();  //  Start the timer only when all data has been sent.
+    }
+
+    //  If timeout, quit.
+    const unsigned long currentTime = millis();
+    if (currentTime - startTime > timeout) break;
+
+    //  If data is available to receive, receive it.
+    if (serialPort->available() > 0) {
+      int rxChar = serialPort->read();
+      //  echoReceive.concat(toHex((char) rxChar) + ' ');
+      if (rxChar == -1) continue;
+      if (rxChar == END_OF_RESPONSE) {
+        if (actualMarkerCount < markerPosMax)
+          markerPos[actualMarkerCount] = response.length();  //  Remember the marker pos.
+        actualMarkerCount++;  //  Count the number of end markers.
+        if (actualMarkerCount >= expectedMarkerCount) break;  //  Seen all markers already.
+      } else {
+        response.concat(toHex((char) rxChar));
+      }
+    }
+
+    //  TODO: Check for downlink response.
+
+  }
+  serialPort->end();
+  //  Log the actual bytes sent and received.
+  //log2(F(">> "), echoSend);
+  //  if (echoReceive.length() > 0) { log2(F("<< "), echoReceive); }
+  logBuffer(F(">> "), rawBuffer, 0, 0);
+  logBuffer(F("<< "), response.c_str(), markerPos, actualMarkerCount);
+
+  //  If we did not see the terminating 'O' (from "OK"), something is wrong.
+  if (actualMarkerCount < expectedMarkerCount) {
+    if (response.length() == 0) {
+      log1(F(" - Wisol.sendBuffer: Error: No response"));  //  Response timeout.
+    } else {
+      log2(F(" - Wisol.sendBuffer: Error: Unknown response: "), response);
+    }
+    return false;
+  }
+  log2(F(" - Wisol.sendBuffer: response: "), response);
+  //  TODO: Parse the downlink response.
+  return true;
+}
+
+bool Wisol::sendMessage(const String &payload) {
+  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
+  //  We prefix with AT$SF= and send to SIGFOX.  Return true if successful.
+  log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
+  if (!isReady()) return false;  //  Prevent user from sending too many messages.
+  //  Exit command mode and prepare to send message.
+  if (!exitCommandMode()) return false;
+
+  //  Decode and send the data.
+  String message = CMD_SEND_MESSAGE + payload + CMD_END, data;
+  if (sendBuffer(message, COMMAND_TIMEOUT, 1, data, markers)) {  //  One "OK" marker expected.
+    log1(data);
+    lastSend = millis();
+    return true;
+  }
+  return false;
+}
+
+bool Wisol::enterCommandMode() {
+  //  Enter Command Mode for sending module commands, not data.
+  log1(F(" - Entering command mode..."));
+  log1(F(" - Wisol.enterCommandMode: OK "));
+  return true;
+}
+
+bool Wisol::exitCommandMode() {
+  //  Exit Command Mode so we can send data.
+  log1(F(" - Wisol.exitCommandMode: OK "));
+  return true;
+}
+
+bool Wisol::getID(String &id, String &pac) {
+  //  Get the SIGFOX ID and PAC for the module.
+  if (useEmulator) { id = device; return true; }
+  String data = "";
+  if (!sendCommand(CMD_GET_ID + CMD_END, 1, data, markers)) return false;
+  id = data;
+  device = id;
+  if (!sendCommand(CMD_GET_PAC + CMD_END, 1, data, markers)) return false;
+  pac = data;
+  log2(F(" - Wisol.getID: returned id="), id + ", pac=" + pac);
+  return true;
+}
+
+bool Wisol::getTemperature(int &temperature) {
+  //  Returns the temperature of the SIGFOX module.
+  if (useEmulator) { temperature = 36; return true; }
+  String data = "";
+  if (!sendCommand(CMD_GET_TEMPERATURE + CMD_END, 1, data, markers)) return false;
+  temperature = (int) data.toInt() / 10;
+  log2(F(" - Wisol.getTemperature: returned "), temperature);
+  return true;
+}
+
+bool Wisol::getVoltage(float &voltage) {
+  //  Returns the power supply voltage.
+  if (useEmulator) { voltage = 12.3; return true; }
+  String data = "";
+  if (!sendCommand(CMD_GET_VOLTAGE + CMD_END, 1, data, markers)) return false;
+  voltage = data.toFloat() / 1000.0;
+  log2(F(" - Wisol.getVoltage: returned "), voltage);
+  return true;
+}
+
+bool Wisol::getHardware(String &hardware) {
+  //  TODO
+  log1(F(" - Wisol.getHardware: ERROR - Not implemented"));
+  hardware = "TODO";
+  return true;
+}
+
+bool Wisol::getFirmware(String &firmware) {
+  //  TODO
+  log1(F(" - Wisol.getFirmware: ERROR - Not implemented"));
+  firmware = "TODO";
+  return true;
+}
+
+bool Wisol::getParameter(uint8_t address, String &value) {
+  //  Read the parameter at the address.
+  log2(F(" - Wisol.getParameter: address=0x"), toHex((char) address));
+  log1(F(" - Wisol.getParameter: ERROR - Not implemented"));
+  log4(F(" - Wisol.getParameter: address=0x"), toHex((char) address), F(" returned "), value);
+  return true;
+}
+
+bool Wisol::getPower(int &power) {
+  //  Get the power step-down.
+  log1(F(" - Wisol.getPower: ERROR - Not implemented"));
+  power = 0;
+  return true;
+}
+
+bool Wisol::setPower(int power) {
+  //  TODO: Power value: 0...14
+  log1(F(" - Wisol.setPower: ERROR - Not implemented"));
+  return true;
+}
+
+bool Wisol::getEmulator(int &result) {
+  //  Get the current emulation mode of the module.
+  //  0 = Emulator disabled (sending to SIGFOX network with unique ID & key)
+  //  1 = Emulator enabled (sending to emulator with public ID & key)
+  //  We assume not using emulator.
+  result = 0;
+  return true;
+}
+
+bool Wisol::disableEmulator(String &result) {
+  //  Set the module key to the unique SIGFOX key.  This is needed for sending
+  //  to a real SIGFOX base station.
+  //  We assume not using emulator.
+  return true;
+}
+
+bool Wisol::enableEmulator(String &result) {
+  //  Set the module key to the public key.  This is needed for sending
+  //  to an emulator.
+  log1(F(" - Wisol.enableEmulator: ERROR - Not implemented"));
+  return true;
+}
+
+bool Wisol::getFrequency(String &result) {
+  //  Get the frequency used for the SIGFOX module
+  //  0: Europe (RCZ1)
+  //  1: US (RCZ2)
+  //  3: SG, TW, AU, NZ (RCZ4)
+  log1(F(" - Wisol.getFrequency: ERROR - Not implemented"));
+  result = "3";
+  return true;
+}
+
+bool Wisol::setFrequency(int zone, String &result) {
+  //  Get the frequency used for the SIGFOX module
+  //  0: Europe (RCZ1)
+  //  1: US (RCZ2)
+  //  3: AU/NZ (RCZ4)
+  log1(F(" - Wisol.setFrequency: ERROR - Not implemented"));
+  return true;
+}
+
+bool Wisol::setFrequencySG(String &result) {
+  //  Set the frequency for the SIGFOX module to Singapore frequency (RCZ4).
+  log1(F(" - Wisol.setFrequencySG"));
+  return setFrequency(4, result); }
+
+bool Wisol::setFrequencyTW(String &result) {
+  //  Set the frequency for the SIGFOX module to Taiwan frequency (RCZ4).
+  log1(F(" - Wisol.setFrequencyTW"));
+  return setFrequency(4, result); }
+
+bool Wisol::setFrequencyETSI(String &result) {
+  //  Set the frequency for the SIGFOX module to ETSI frequency for Europe (RCZ1).
+  log1(F(" - Wisol.setFrequencyETSI"));
+  return setFrequency(1, result); }
+
+bool Wisol::setFrequencyUS(String &result) {
+  //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
+  log1(F(" - Wisol.setFrequencyUS"));
+  return setFrequency(2, result); }
+
+bool Wisol::writeSettings(String &result) {
+  //  TODO: Write settings to module's flash memory.
+  log1(F(" - Wisol.writeSettings: ERROR - Not implemented"));
+  return true;
+}
 
 /* TODO: Run some sanity checks to ensure that Wisol module is configured OK.
   //  Get network mode for transmission.  Should return network mode = 0 for uplink only, no downlink.
@@ -41,7 +307,6 @@ Wisol::Wisol(Country country0, bool useEmulator0, const String device0, bool ech
                          uint8_t rx, uint8_t tx) {
   //  Init the module with the specified transmit and receive pins.
   //  Default to no echo.
-  mode = SEND_MODE;
   country = country0;
   useEmulator = useEmulator0;
   device = device0;
@@ -105,131 +370,15 @@ bool Wisol::begin() {
   return false;  //  Failed to init module.
 }
 
-bool Wisol::sendMessage(const String &payload) {
-  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
-  //  We convert to binary and send to SIGFOX.  Return true if successful.
-  //  We represent the payload as hex instead of binary because 0x00 is a
-  //  valid payload and this causes string truncation in C libraries.
-  log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
-  if (!isReady()) return false;  //  Prevent user from sending too many messages.
-  //  Exit command mode and prepare to send message.
-  if (!exitCommandMode()) return false;
-
-  //  Decode and send the data.
-  //  First byte is payload length, followed by rest of payload.
-  String message = toHex((char) (payload.length() / 2)) + payload, data;
-  if (sendBuffer(message, COMMAND_TIMEOUT, 0, data, markers)) {  //  No markers expected.
-    log1(data);
-    lastSend = millis();
-    return true;
-  }
-  return false;
-}
-
 bool Wisol::sendCommand(const String &cmd, uint8_t expectedMarkerCount,
                               String &result, uint8_t &actualMarkerCount) {
-  //  cmd contains a string of hex digits, up to 24 digits / 12 bytes.
-  //  We convert to binary and send to SIGFOX.  Return true if successful.
+  //  We send the command string in cmd to SIGFOX.  Return true if successful.
   String data;
   //  Enter command mode.
   if (!enterCommandMode()) return false;
   if (!sendBuffer(cmd, COMMAND_TIMEOUT, expectedMarkerCount,
                   data, actualMarkerCount)) return false;
   result = data;
-  return true;
-}
-
-//  Remember where in response the '>' markers were seen.
-const uint8_t markerPosMax = 5;
-static uint8_t markerPos[markerPosMax];
-
-bool Wisol::sendBuffer(const String &buffer, const int timeout,
-                             uint8_t expectedMarkerCount, String &response,
-                             uint8_t &actualMarkerCount) {
-  //  buffer contains a string of hex digits, up to 24 digits / 12 bytes.
-  //  We convert to binary and send to SIGFOX.  Return true if successful.
-  //  We represent the payload as hex instead of binary because 0x00 is a
-  //  valid payload and this causes string truncation in C libraries.
-  //  expectedMarkerCount is the number of end-of-command markers '>' we
-  //  expect to see.  actualMarkerCount contains the actual number seen.
-  log2(F(" - Wisol.sendBuffer: "), buffer);
-  response = "";
-  if (useEmulator) return true;
-
-  actualMarkerCount = 0;
-  //  Start serial interface.
-  serialPort->begin(MODEM_BITS_PER_SECOND);
-#ifdef BEAN_BEAN_BEAN_H
-  Bean.sleep(200);
-#else  // BEAN_BEAN_BEAN_H
-  delay(200);
-#endif // BEAN_BEAN_BEAN_H
-  serialPort->flush();
-  serialPort->listen();
-
-  //  Send the buffer: need to write/read char by char because of echo.
-  const char *rawBuffer = buffer.c_str();
-  //  Send buffer and read response.  Loop until timeout or we see the end of response marker.
-  unsigned long startTime = millis(); int i = 0;
-  //  Previous code for verifying that data was sent correctly.
-  //static String echoSend = "", echoReceive = "";
-  for (;;) {
-    //  If there is data to send, send it.
-    if (i < buffer.length()) {
-      //  Convert 2 hex digits to 1 char and send.
-      uint8_t txChar = hexDigitToDecimal(rawBuffer[i]) * 16 +
-                       hexDigitToDecimal(rawBuffer[i + 1]);
-      //echoSend.concat(toHex((char) txChar) + ' ');
-      serialPort->write(txChar);
-#ifdef BEAN_BEAN_BEAN_H
-      Bean.sleep(10);
-#else  // BEAN_BEAN_BEAN_H
-      delay(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
-#endif // BEAN_BEAN_BEAN_H
-      i = i + 2;
-      startTime = millis();  //  Start the timer only when all data has been sent.
-    }
-
-    //  If timeout, quit.
-    const unsigned long currentTime = millis();
-    if (currentTime - startTime > timeout) break;
-
-    //  If data is available to receive, receive it.
-    if (serialPort->available() > 0) {
-      int rxChar = serialPort->read();
-      //  echoReceive.concat(toHex((char) rxChar) + ' ');
-      if (rxChar == -1) continue;
-      if (rxChar == END_OF_RESPONSE) {
-        if (actualMarkerCount < markerPosMax)
-          markerPos[actualMarkerCount] = response.length();  //  Remember the marker pos.
-        actualMarkerCount++;  //  Count the number of end markers.
-        if (actualMarkerCount >= expectedMarkerCount) break;  //  Seen all markers already.
-      } else {
-        response.concat(toHex((char) rxChar));
-      }
-    }
-
-    //  TODO: Check for downlink response.
-
-  }
-  serialPort->end();
-  //  Log the actual bytes sent and received.
-  //log2(F(">> "), echoSend);
-  //  if (echoReceive.length() > 0) { log2(F("<< "), echoReceive); }
-  logBuffer(F(">> "), rawBuffer, 0, 0);
-  logBuffer(F("<< "), response.c_str(), markerPos, actualMarkerCount);
-
-  //  If we did not see the terminating '>', something is wrong.
-  if (actualMarkerCount < expectedMarkerCount) {
-    if (response.length() == 0) {
-      log1(F(" - Wisol.sendBuffer: Error: No response"));  //  Response timeout.
-    } else {
-      log2(F(" - Wisol.sendBuffer: Error: Unknown response: "), response);
-    }
-    return false;
-  }
-  log2(F(" - Wisol.sendBuffer: response: "), response);
-  //  TODO: Parse the downlink response.
   return true;
 }
 
@@ -282,193 +431,6 @@ bool Wisol::isReady()
 }
 
 static String data;
-
-bool Wisol::enterCommandMode() {
-  //  Enter Command Mode for sending module commands, not data.
-  //  TODO: Confirm response = '>'
-  if (mode == COMMAND_MODE) return true;
-  log1(F(" - Entering command mode..."));
-  if (!sendBuffer("00", COMMAND_TIMEOUT, 1, data, markers)) return false;
-  mode = COMMAND_MODE;
-  log1(F(" - Wisol.enterCommandMode: OK "));
-  return true;
-}
-
-bool Wisol::exitCommandMode() {
-  //  Exit Command Mode so we can send data.
-  if (mode == SEND_MODE) return true;
-  if (!sendBuffer(toHex('X'), COMMAND_TIMEOUT, 0, data, markers)) return false;
-  mode = SEND_MODE;
-  log1(F(" - Wisol.exitCommandMode: OK "));
-  return true;
-}
-
-bool Wisol::getID(String &id, String &pac) {
-  //  Get the SIGFOX ID and PAC for the module.
-  if (!sendCommand(toHex('9'), 1, data, markers)) return false;
-  //  Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
-  if (data.length() != 12 * 2) {
-    if (useEmulator) { id = device; return true; }
-    log2(F(" - Wisol.getID: Unknown response: "), data);
-    return false;
-  }
-  id = data.substring(6, 8) + data.substring(4, 6) + data.substring(2, 4) + data.substring(0, 2);
-  pac = data.substring(8, 8 + 16);
-  device = id;
-  log2(F(" - Wisol.getID: returned id="), id + ", pac=" + pac);
-  return true;
-}
-
-bool Wisol::getTemperature(int &temperature) {
-  //  Returns the temperature of the SIGFOX module.
-  if (!sendCommand(toHex('U'), 1, data, markers)) return false;
-  if (data.length() != 2) {
-    if (useEmulator) { temperature = 36; return true; }
-    log2(F(" - Wisol.getTemperature: Unknown response: "), data);
-    return false;
-  }
-  temperature = hexDigitToDecimal(data.charAt(0)) * 16 +
-                   hexDigitToDecimal(data.charAt(1)) - 128;
-  log2(F(" - Wisol.getTemperature: returned "), temperature);
-  return true;
-}
-
-bool Wisol::getVoltage(float &voltage) {
-  //  Returns one byte indicating the power supply voltage.
-  if (!sendCommand(toHex('V'), 1, data, markers)) return false;
-  if (data.length() != 2) {
-    if (useEmulator) { voltage = 12.3; return true; }
-    log2(F(" - Wisol.getVoltage: Unknown response: "), data);
-    return false;
-  }
-  voltage = 0.030 * (hexDigitToDecimal(data.charAt(0)) * 16 +
-                hexDigitToDecimal(data.charAt(1)));
-  log2(F(" - Wisol.getVoltage: returned "), voltage);
-  return true;
-}
-
-bool Wisol::getHardware(String &hardware) {
-  //  TODO
-  log1(F(" - Wisol.getHardware: ERROR - Not implemented"));
-  hardware = "TODO";
-  return true;
-}
-
-bool Wisol::getFirmware(String &firmware) {
-  //  TODO
-  log1(F(" - Wisol.getFirmware: ERROR - Not implemented"));
-  firmware = "TODO";
-  return true;
-}
-
-bool Wisol::getParameter(uint8_t address, String &value) {
-  //  Read the parameter at the address.
-  log2(F(" - Wisol.getParameter: address=0x"), toHex((char) address));
-  if (!sendCommand(toHex(CMD_READ_MEMORY) +   //  Read memory ('Y')
-                   toHex((char) address),  //  Address of parameter
-                   2,  //  Expect 1 marker for command, 1 for response.
-                   data, markers)) return false;
-  value = data;
-  log4(F(" - Wisol.getParameter: address=0x"), toHex((char) address), F(" returned "), value);
-  return true;
-}
-
-bool Wisol::getPower(int &power) {
-  //  Get the power step-down.
-  if (!getParameter(0x01, data)) return false;  //  Address of parameter = RF_POWER (0x01)
-  power = (int) data.toInt();
-  log2(F(" - Wisol.getPower: returned "), power);
-  return true;
-}
-
-bool Wisol::setPower(int power) {
-  //  TODO: Power value: 0...14
-  log1(F(" - Wisol.receive: ERROR - Not implemented"));
-  return true;
-}
-
-bool Wisol::getEmulator(int &result) {
-  //  Get the current emulation mode of the module.
-  //  0 = Emulator disabled (sending to SIGFOX network with unique ID & key)
-  //  1 = Emulator enabled (sending to emulator with public ID & key)
-  if (!getParameter(0x28, data)) return false;  //  Address of parameter = PUBLIC_KEY (0x28)
-  result = (int) data.toInt();
-  return true;
-}
-
-bool Wisol::disableEmulator(String &result) {
-  //  Set the module key to the unique SIGFOX key.  This is needed for sending
-  //  to a real SIGFOX base station.
-  if (!sendCommand(toHex(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
-      "28" + //  Address of parameter = PUBLIC_KEY (0x28)
-      "00",  //  Value of parameter = Unique ID & key (0x00)
-       1, data, markers)) { sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers); return false; }
-  result = data;
-  sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers);  //  Exit config mode.
-  return true;
-}
-
-bool Wisol::enableEmulator(String &result) {
-  //  Set the module key to the public key.  This is needed for sending
-  //  to an emulator.
-  if (!sendCommand(toHex(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
-      "28" + //  Address of parameter = PUBLIC_KEY (0x28)
-      "01",  //  Value of parameter = Public ID & key (0x00)
-      1, data, markers)) { sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers); return false; }
-  result = data;
-  sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers);  //  Exit config mode.
-  return true;
-}
-
-bool Wisol::getFrequency(String &result) {
-  //  Get the frequency used for the SIGFOX module
-  //  0: Europe (RCZ1)
-  //  1: US (RCZ2)
-  //  3: SG, TW, AU, NZ (RCZ4)
-  if (!sendCommand(toHex(CMD_READ_MEMORY) + "00", 1, data, markers)) return false;
-  result = data;
-  return true;
-}
-
-bool Wisol::setFrequency(int zone, String &result) {
-  //  Get the frequency used for the SIGFOX module
-  //  0: Europe (RCZ1)
-  //  1: US (RCZ2)
-  //  3: AU/NZ (RCZ4)
-  if (!sendCommand(toHex(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
-    "00" + //  Address of parameter = RF_FREQUENCY_DOMAIN (0x0)
-    toHex((char) (zone - 1)),  //  Value of parameter = RCZ - 1
-    1, data, markers)) { sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers); return false; }
-  result = data;
-  sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers);  //  Exit config mode.
-  return true;
-}
-
-bool Wisol::setFrequencySG(String &result) {
-  //  Set the frequency for the SIGFOX module to Singapore frequency (RCZ4).
-  log1(F(" - Wisol.setFrequencySG"));
-  return setFrequency(4, result); }
-
-bool Wisol::setFrequencyTW(String &result) {
-  //  Set the frequency for the SIGFOX module to Taiwan frequency (RCZ4).
-  log1(F(" - Wisol.setFrequencyTW"));
-  return setFrequency(4, result); }
-
-bool Wisol::setFrequencyETSI(String &result) {
-  //  Set the frequency for the SIGFOX module to ETSI frequency for Europe (RCZ1).
-  log1(F(" - Wisol.setFrequencyETSI"));
-  return setFrequency(1, result); }
-
-bool Wisol::setFrequencyUS(String &result) {
-  //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
-  log1(F(" - Wisol.setFrequencyUS"));
-  return setFrequency(2, result); }
-
-bool Wisol::writeSettings(String &result) {
-  //  TODO: Write settings to module's flash memory.
-  log1(F(" - Wisol.writeSettings: ERROR - Not implemented"));
-  return true;
-}
 
 bool Wisol::reboot(String &result) {
   //  TODO: Reboot the module.
