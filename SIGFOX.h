@@ -35,6 +35,10 @@ enum Country {
 //  Send structured messages to SIGFOX cloud.
 #include "Message.h"
 
+//  Define aliases for each UnaShield and the transceiver it uses.
+#define UnaShieldV1 Radiocrafts
+#define UnaShieldV2S Wisol
+
 //  Drop all data passed to this port.  Used to suppress echo output.
 class NullPort: public Print {
   virtual size_t write(uint8_t) {}

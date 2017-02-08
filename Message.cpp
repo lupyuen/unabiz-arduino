@@ -46,12 +46,18 @@ static String doubleToString(double d) {
 }
 
 void Message::echo(String msg) {
-  if (radiocrafts) radiocrafts->echo(msg);
+  if (wisol) wisol->echo(msg);
+  else if (radiocrafts) radiocrafts->echo(msg);
 }
 
 Message::Message(Radiocrafts &transceiver) {
   //  Construct a message for Radiocrafts.
   radiocrafts = &transceiver;
+}
+
+Message::Message(Wisol &transceiver) {
+  //  Construct a message for Wisol.
+  wisol = &transceiver;
 }
 
 //  TODO: Move these messages to Flash memory.
@@ -86,7 +92,8 @@ bool Message::addIntField(const String name, int value) {
     return false;
   }
   addName(name);
-  if (radiocrafts) encodedMessage.concat(radiocrafts->toHex(value));
+  if (wisol) encodedMessage.concat(wisol->toHex(value));
+  else if (radiocrafts) encodedMessage.concat(radiocrafts->toHex(value));
   return true;
 }
 
@@ -120,7 +127,8 @@ bool Message::addName(const String name) {
       (buffer[0] << 10) +
       (buffer[1] << 5) +
       (buffer[2]);
-  if (radiocrafts) encodedMessage.concat(radiocrafts->toHex(result));
+  if (wisol) encodedMessage.concat(wisol->toHex(result));
+  else if (radiocrafts) encodedMessage.concat(radiocrafts->toHex(result));
   return true;
 }
 
@@ -135,7 +143,8 @@ bool Message::send() {
     echo(tooLong + (encodedMessage.length() / 2) + " bytes");
     return false;
   }
-  if (radiocrafts) return radiocrafts->sendMessage(msg);
+  if (wisol) return wisol->sendMessage(msg);
+  else if (radiocrafts) return radiocrafts->sendMessage(msg);
   return false;
 }
 

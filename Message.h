@@ -14,6 +14,7 @@ class Message
 {
 public:
   Message(Radiocrafts &transceiver);  //  Construct a message for Radiocrafts.
+  Message(Wisol &transceiver);  //  Construct a message for Wisol.
   bool addField(const String name, int value);  //  Add an integer field scaled by 10.
   bool addField(const String name, float value);  //  Add a float field with 1 decimal place.
   bool addField(const String name, double value);  //  Add a double field with 1 decimal place.
@@ -27,7 +28,8 @@ private:
   bool addName(const String name);  //  Encode and add the 3-letter name.
   void echo(String msg);
   String encodedMessage;  //  Encoded message.
-  Radiocrafts *radiocrafts = 0;  //  Reference to Radiocrafts transceiver.
+  Radiocrafts *radiocrafts = 0;  //  Reference to Radiocrafts transceiver for sending the message.
+  Wisol *wisol = 0;  //  Reference to Wisol transceiver for sending the message.
 };
 
 #endif // UNABIZ_ARDUINO_MESSAGE_H
