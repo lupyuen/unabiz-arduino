@@ -26,11 +26,11 @@ enum Country {
   #include "BeanSoftwareSerial.h"
 #endif // BEAN_BEAN_BEAN_H
 
-//  Library for UnaShield SIGFOX Shield by UnaBiz. Uses pin D4 for transmit, pin D5 for receive.
-#include "Radiocrafts.h"
+//  Library for UnaShield V2S Shield by UnaBiz. Uses pin D4 for transmit, pin D5 for receive.
+#include "Wisol.h"
 
-//  Library for Akene SIGFOX Shield by Snootlabs. Uses pin D4 for receive, pin D5 for transmit.
-#include "Akeru.h"
+//  Library for UnaShield V1 Shield by UnaBiz. Uses pin D4 for transmit, pin D5 for receive.
+#include "Radiocrafts.h"
 
 //  Send structured messages to SIGFOX cloud.
 #include "Message.h"

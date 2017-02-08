@@ -14,9 +14,6 @@ class Message
 {
 public:
   Message(Radiocrafts &transceiver);  //  Construct a message for Radiocrafts.
-#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-  Message(Akeru &transceiver);  //  Construct a message for Akeru.
-#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
   bool addField(const String name, int value);  //  Add an integer field scaled by 10.
   bool addField(const String name, float value);  //  Add a float field with 1 decimal place.
   bool addField(const String name, double value);  //  Add a double field with 1 decimal place.
@@ -31,9 +28,6 @@ private:
   void echo(String msg);
   String encodedMessage;  //  Encoded message.
   Radiocrafts *radiocrafts = 0;  //  Reference to Radiocrafts transceiver.
-#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-  Akeru *akeru = 0;  //  Reference to Akeru transceiver.
-#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 };
 
 #endif // UNABIZ_ARDUINO_MESSAGE_H

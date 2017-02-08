@@ -47,22 +47,12 @@ static String doubleToString(double d) {
 
 void Message::echo(String msg) {
   if (radiocrafts) radiocrafts->echo(msg);
-#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-  if (akeru) akeru->echo(msg);
-#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 }
 
 Message::Message(Radiocrafts &transceiver) {
   //  Construct a message for Radiocrafts.
   radiocrafts = &transceiver;
 }
-
-#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-Message::Message(Akeru &transceiver) {
-  //  Construct a message for Akeru.
-  akeru = &transceiver;
-}
-#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
 
 //  TODO: Move these messages to Flash memory.
 static String addFieldHeader = "Message.addField: ";
@@ -97,9 +87,6 @@ bool Message::addIntField(const String name, int value) {
   }
   addName(name);
   if (radiocrafts) encodedMessage.concat(radiocrafts->toHex(value));
-#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-  if (akeru) encodedMessage.concat(akeru->toHex(value));
-#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
   return true;
 }
 
@@ -134,9 +121,6 @@ bool Message::addName(const String name) {
       (buffer[1] << 5) +
       (buffer[2]);
   if (radiocrafts) encodedMessage.concat(radiocrafts->toHex(result));
-#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-  if (akeru) encodedMessage.concat(akeru->toHex(result));
-#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
   return true;
 }
 
@@ -152,9 +136,6 @@ bool Message::send() {
     return false;
   }
   if (radiocrafts) return radiocrafts->sendMessage(msg);
-#ifndef BEAN_BEAN_BEAN_H  //  Not supported on Bean+
-  if (akeru) return akeru->sendMessage(msg);
-#endif // BEAN_BEAN_BEAN_H  //  Not supported on Bean+
   return false;
 }
 
