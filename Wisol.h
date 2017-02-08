@@ -90,6 +90,7 @@ private:
   void logBuffer(const __FlashStringHelper *prefix, const char *buffer,
                  uint8_t markerPos[], uint8_t markerCount);
 
+  int zone;  //  0 to 3 representing SIGFOX frequencies RCZ 1 to 4.
   Country country;   //  Country to be set for SIGFOX transmission frequencies.
   bool useEmulator;  //  Set to true if using UnaBiz Emulator.
   String device;  //  Name of device if using UnaBiz Emulator.
@@ -97,6 +98,7 @@ private:
   Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
   Print *lastEchoPort;  //  Last port used for sending echo output.
   unsigned long lastSend;  //  Timestamp of last send.
+  bool setOutputPower();
 };
 
 #endif // UNABIZ_ARDUINO_WISOL_H

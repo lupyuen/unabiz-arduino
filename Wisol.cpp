@@ -17,17 +17,21 @@
 
 #define MODEM_BITS_PER_SECOND 9600  //  Connect to modem at this bps.
 #define END_OF_RESPONSE '\r'  //  Character '\r' marks the end of response.
+#define CMD_OUTPUT_POWER_MAX "ATS302=15"  //  For RCZ1: Set output power to maximum power level.
+#define CMD_PRESEND "AT$GI?"  //  For RCZ2, 4: Send this command before sending messages.
 #define CMD_SEND_MESSAGE "AT$SF="  //  Prefix to send a message to SIGFOX cloud.
 #define CMD_GET_ID "AT$I=10"  //  Get SIGFOX device ID.
 #define CMD_GET_PAC "AT$I=11"  //  Get SIGFOX device PAC, used for registering the device.
 #define CMD_GET_TEMPERATURE "AT$T?"  //  Get the module temperature.
 #define CMD_GET_VOLTAGE "AT$V?"  //  Get the module voltage.
+#define CMD_RESET "AT$P=0"  //  Software reset.
 #define CMD_SLEEP "AT$P=1"  //  TODO: Switch to sleep mode : consumption is < 1.5uA
 #define CMD_WAKEUP "AT$P=0"  //  TODO: Switch back to normal mode : consumption is 0.5 mA
 #define CMD_END "\r"
 
 static NullPort nullPort;
 static uint8_t markers = 0;
+static String data;
 
 //  Remember where in response the '>' markers were seen.
 const uint8_t markerPosMax = 5;
@@ -125,8 +129,9 @@ bool Wisol::sendMessage(const String &payload) {
   if (!isReady()) return false;  //  Prevent user from sending too many messages.
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return false;
-
-  //  Decode and send the data.
+  //  Set the output power for the zone.
+  if (!setOutputPower()) return false;
+  //  Send the data.
   String message = String(CMD_SEND_MESSAGE) + payload + CMD_END, data;
   if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 1, data, markers)) {  //  One '\r' marker expected ("OK\r").
     log1(data);
@@ -134,6 +139,25 @@ bool Wisol::sendMessage(const String &payload) {
     return true;
   }
   return false;
+}
+
+bool Wisol::setOutputPower() {
+  //  Set the output power for the zone before sending a message.
+  switch(zone) {
+    case 0:  //  RCZ1
+      if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers)) return false;
+      break;
+    case 1:  //  RCZ2
+    case 3:  //  RCZ4
+      if (!sendCommand(String(CMD_PRESEND) + CMD_END, 1, data, markers)) return false;
+      break;
+    case 2:  //  TODO: RCZ3
+      break;
+    default:
+      log2(F(" - Wisol.setOutputPower: Unknown zone "), zone);
+      return false;
+  }
+  return true;
 }
 
 bool Wisol::enterCommandMode() {
@@ -151,7 +175,6 @@ bool Wisol::exitCommandMode() {
 bool Wisol::getID(String &id, String &pac) {
   //  Get the SIGFOX ID and PAC for the module.
   if (useEmulator) { id = device; return true; }
-  String data = "";
   if (!sendCommand(String(CMD_GET_ID) + CMD_END, 1, data, markers)) return false;
   id = data;
   device = id;
@@ -164,8 +187,6 @@ bool Wisol::getID(String &id, String &pac) {
 bool Wisol::getTemperature(float &temperature) {
   //  Returns the temperature of the SIGFOX module.
   if (useEmulator) { temperature = 36; return true; }
-  String data = "";
-  log1("getTemperature"); ////
   if (!sendCommand(String(CMD_GET_TEMPERATURE) + CMD_END, 1, data, markers)) return false;
   temperature = data.toInt() / 10.0;
   log2(F(" - Wisol.getTemperature: returned "), temperature);
@@ -175,7 +196,6 @@ bool Wisol::getTemperature(float &temperature) {
 bool Wisol::getVoltage(float &voltage) {
   //  Returns the power supply voltage.
   if (useEmulator) { voltage = 12.3; return true; }
-  String data = "";
   if (!sendCommand(String(CMD_GET_VOLTAGE) + CMD_END, 1, data, markers)) return false;
   voltage = data.toFloat() / 1000.0;
   log2(F(" - Wisol.getVoltage: returned "), voltage);
@@ -245,19 +265,19 @@ bool Wisol::getFrequency(String &result) {
   //  0: Europe (RCZ1)
   //  1: US (RCZ2)
   //  3: SG, TW, AU, NZ (RCZ4)
-  //  Not used for Wisol.
   //  log1(F(" - Wisol.getFrequency: ERROR - Not implemented"));
-  result = "3";
+  result = zone + "0";
   return true;
 }
 
-bool Wisol::setFrequency(int zone, String &result) {
+bool Wisol::setFrequency(int zone0, String &result) {
   //  Get the frequency used for the SIGFOX module
   //  0: Europe (RCZ1)
   //  1: US (RCZ2)
   //  3: AU/NZ (RCZ4)
-  //  Not used for Wisol.
   //  log1(F(" - Wisol.setFrequency: ERROR - Not implemented"));
+  zone = zone0;
+  result = "OK";
   return true;
 }
 
@@ -280,6 +300,13 @@ bool Wisol::setFrequencyUS(String &result) {
   //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
   log1(F(" - Wisol.setFrequencyUS"));
   return setFrequency(2, result); }
+
+bool Wisol::reboot(String &result) {
+  //  Software reset the module.
+  log1(F(" - Wisol.reboot"));
+  if (!sendCommand(String(CMD_RESET) + CMD_END, 1, data, markers)) return false;
+  return true;
+}
 
 bool Wisol::writeSettings(String &result) {
   //  TODO: Write settings to module's flash memory.
@@ -304,6 +331,7 @@ Wisol::Wisol(Country country0, bool useEmulator0, const String device0, bool ech
                          uint8_t rx, uint8_t tx) {
   //  Init the module with the specified transmit and receive pins.
   //  Default to no echo.
+  zone = 3;  //  RCZ4
   country = country0;
   useEmulator = useEmulator0;
   device = device0;
@@ -348,7 +376,9 @@ bool Wisol::begin() {
     echoPort->print(F(" - PAC = "));  Serial.println(pac);
 
     //  Set the frequency of SIGFOX module.
-    log2(F(" - Setting frequency for country "), (int) country);
+    log1(F(" - Setting frequency for country "));
+    echoPort->write((uint8_t) 'A' + (country / 16));
+    echoPort->write((uint8_t) 'A' + (country % 16));
     if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
       if (!setFrequencyUS(result)) continue;
     } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).
@@ -370,7 +400,6 @@ bool Wisol::begin() {
 bool Wisol::sendCommand(const String &cmd, uint8_t expectedMarkerCount,
                               String &result, uint8_t &actualMarkerCount) {
   //  We send the command string in cmd to SIGFOX.  Return true if successful.
-  String data;
   //  Enter command mode.
   if (!enterCommandMode()) return false;
   if (!sendBuffer(cmd, WISOL_COMMAND_TIMEOUT, expectedMarkerCount,
@@ -424,14 +453,6 @@ bool Wisol::isReady()
   }  //  Wait before sending.
   if (elapsedTime <= SEND_DELAY)
     log1(F("Warning: Should wait 10 mins before sending the next message"));
-  return true;
-}
-
-static String data;
-
-bool Wisol::reboot(String &result) {
-  //  TODO: Reboot the module.
-  log1(F(" - Wisol.reboot: ERROR - Not implemented"));
   return true;
 }
 
@@ -585,3 +606,4 @@ void Wisol::logBuffer(const __FlashStringHelper *prefix, const char *buffer,
   }
   echoPort->write('\n');
 }
+
