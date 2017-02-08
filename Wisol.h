@@ -25,6 +25,7 @@
 
 const uint8_t WISOL_TX = 4;  //  Transmit port for For UnaBiz / Wisol Dev Kit
 const uint8_t WISOL_RX = 5;  //  Receive port for UnaBiz / Wisol Dev Kit
+const unsigned int WISOL_COMMAND_TIMEOUT = 10000;  //  Wait up to 10 seconds for response from SIGFOX module.
 
 class Wisol
 {
@@ -60,7 +61,7 @@ public:
   bool setFrequencyUS(String &result);
   bool writeSettings(String &result); //  Write frequency and other settings to flash memory of the module.
   bool reboot(String &result);  //  Reboot the SIGFOX module.
-  bool getTemperature(int &temperature);
+  bool getTemperature(float &temperature);
   bool getID(String &id, String &pac);  //  Get the SIGFOX ID and PAC for the module.
   bool getVoltage(float &voltage);
   bool getHardware(String &hardware);
