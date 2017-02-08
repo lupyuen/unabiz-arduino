@@ -154,8 +154,8 @@ bool Wisol::setOutputPower() {
       //  Parse the returned X,Y.
       int x = data.charAt(0) - '0';
       int y = data.charAt(2) - '0';
-      log4("x,y=", String(x), ',', String(y));
-      if (x==0 || y<3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers);
+      // log4("x,y=", String(x), ',', String(y));
+      if (x == 0 || y < 3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers);
       break;
     }
     case 3:  //  TODO: RCZ3
@@ -383,9 +383,9 @@ bool Wisol::begin() {
     echoPort->print(F(" - PAC = "));  Serial.println(pac);
 
     //  Set the frequency of SIGFOX module.
-    log1(F(" - Setting frequency for country "));
-    echoPort->write((uint8_t) (country / 8));
-    echoPort->write((uint8_t) (country % 8));
+    // log1(F(" - Setting frequency for country "));
+    // echoPort->write((uint8_t) (country / 8));
+    // echoPort->write((uint8_t) (country % 8));
     if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
       if (!setFrequencyUS(result)) continue;
     } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).
