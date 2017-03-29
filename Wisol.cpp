@@ -29,6 +29,11 @@
 #define CMD_SLEEP "AT$P=1"  //  TODO: Switch to sleep mode : consumption is < 1.5uA
 #define CMD_WAKEUP "AT$P=0"  //  TODO: Switch back to normal mode : consumption is 0.5 mA
 #define CMD_END "\r"
+#define CMD_RCZ1 "AT$IF=868130000"  //  EU Frequency
+#define CMD_RCZ2 "AT$IF=902200000"  //  US Frequency
+#define CMD_RCZ4 "AT$IF=920800000"  //  RCZ4 Frequency
+#define CMD_MODULATION_ON "AT$CB=-1,1"  //  Modulation wave on.
+#define CMD_MODULATION_OFF "AT$CB=-1,0"  //  Modulation wave off.
 
 static NullPort nullPort;
 static uint8_t markers = 0;
@@ -269,9 +274,9 @@ bool Wisol::enableEmulator(String &result) {
 
 bool Wisol::getFrequency(String &result) {
   //  Get the frequency used for the SIGFOX module
-  //  0: Europe (RCZ1)
-  //  1: US (RCZ2)
-  //  3: SG, TW, AU, NZ (RCZ4)
+  //  1: Europe (RCZ1)
+  //  2: US (RCZ2)
+  //  4: SG, TW, AU, NZ (RCZ4)
   //  log1(F(" - Wisol.getFrequency: ERROR - Not implemented"));
   result = String(zone + '0');
   return true;
@@ -279,11 +284,31 @@ bool Wisol::getFrequency(String &result) {
 
 bool Wisol::setFrequency(int zone0, String &result) {
   //  Get the frequency used for the SIGFOX module
-  //  0: Europe (RCZ1)
-  //  1: US (RCZ2)
-  //  3: AU/NZ (RCZ4)
-  //  log1(F(" - Wisol.setFrequency: ERROR - Not implemented"));
+  //  1: Europe (RCZ1)
+  //  2: US (RCZ2)
+  //  4: AU/NZ (RCZ4)
   zone = zone0;
+  switch(zone) {
+    case 1:  //  RCZ1
+      // if (!sendCommand(String(CMD_RCZ1) + CMD_END, 1, data, markers)) return false;
+      // if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers)) return false;
+      // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
+      break;
+    case 2:  //  RCZ2
+      // if (!sendCommand(String(CMD_RCZ2) + CMD_END, 1, data, markers)) return false;
+      // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
+      break;
+    case 4:  //  RCZ4
+      // if (!sendCommand(String(CMD_RCZ4) + CMD_END, 1, data, markers)) return false;
+      // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
+      break;
+    case 3:  //  TODO: RCZ3
+      break;
+    default:
+      log2(F(" - Wisol.setFrequency: Unknown zone "), zone);
+      return false;
+  }
+  // if (!sendCommand(String(CMD_MODULATION_OFF) + CMD_END, 1, data, markers)) return false;
   result = "OK";
   return true;
 }
