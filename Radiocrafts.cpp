@@ -12,7 +12,7 @@
 //  Use a macro for logging because Flash strings not supported with String class in Bean+
 #define log1(x) { echoPort->println(x); }
 #define log2(x, y) { echoPort->print(x); echoPort->println(y); }
-#define log3(x, y, z) { echoPort->print(x); echoPort->print(y); echoPort->println(z); }
+// #define log3(x, y, z) { echoPort->print(x); echoPort->print(y); echoPort->println(z); }
 #define log4(x, y, z, a) { echoPort->print(x); echoPort->print(y); echoPort->print(z); echoPort->println(a); }
 
 #define MODEM_BITS_PER_SECOND 19200
@@ -22,7 +22,6 @@
 #define CMD_EXIT_CONFIG (char) 0xff  //  Exit config mode.
 
 static NullPort nullPort;
-static uint8_t markers = 0;
 
 /* TODO: Run some sanity checks to ensure that Radiocrafts module is configured OK.
   //  Get network mode for transmission.  Should return network mode = 0 for uplink only, no downlink.
@@ -110,14 +109,14 @@ bool Radiocrafts::sendMessage(const String &payload) {
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   //  We represent the payload as hex instead of binary because 0x00 is a
   //  valid payload and this causes string truncation in C libraries.
+  //  Assumes we are in Send Mode.
   log2(F(" - Radiocrafts.sendMessage: "), device + ',' + payload);
-  if (!isReady()) return false;  //  Prevent user from sending too many messages.
-  //  Exit command mode and prepare to send message.
-  if (!exitCommandMode()) return false;
+  if (!isReady()) return false;  //  Prevent user from sending too many messages without sufficient delay.
 
   //  Decode and send the data.
   //  First byte is payload length, followed by rest of payload.
   String message = toHex((char) (payload.length() / 2)) + payload, data;
+  uint8_t markers = 0;
   if (sendBuffer(message, COMMAND_TIMEOUT, 0, data, markers)) {  //  No markers expected.
     log1(data);
     lastSend = millis();
@@ -128,15 +127,38 @@ bool Radiocrafts::sendMessage(const String &payload) {
 
 bool Radiocrafts::sendCommand(const String &cmd, uint8_t expectedMarkerCount,
                               String &result, uint8_t &actualMarkerCount) {
+  //  Send a Radiocrafts command in Command Mode.
+  //  Switches to Command Mode and returns to Send Mode after sending.
+  //  Device must be already in Send Mode.
   //  cmd contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We convert to binary and send to SIGFOX.  Return true if successful.
   String data;
   //  Enter command mode.
   if (!enterCommandMode()) return false;
-  if (!sendBuffer(cmd, COMMAND_TIMEOUT, expectedMarkerCount,
-                  data, actualMarkerCount)) return false;
-  result = data;
-  return true;
+  bool status = sendBuffer(cmd, COMMAND_TIMEOUT, expectedMarkerCount,
+    data, actualMarkerCount);
+  if (status) result = data;
+  //  Always exit command mode so that the device is normally in send mode.
+  if (!exitCommandMode()) return false;
+  return status;
+}
+
+bool Radiocrafts::sendConfigCommand(const String &cmd, String &result) {
+  //  Send a Radiocrafts config command in Config Mode.
+  //  Switches to Config Mode and returns to Send Mode after sending.
+  //  Device must be already in Send Mode.
+  //  cmd contains a string of hex digits, up to 24 digits / 12 bytes.
+  //  We convert to binary and send to SIGFOX.  Return true if successful.
+  String data;
+  //  Enter config mode.
+  if (!enterConfigMode()) return false;
+  uint8_t actualMarkerCount = 0;
+  bool status = sendBuffer(cmd, COMMAND_TIMEOUT, 0,
+                           data, actualMarkerCount);
+  if (status) result = data;
+  //  Always exit config mode so that the device is normally in send mode.
+  if (!exitConfigMode()) return false;
+  return status;
 }
 
 //  Remember where in response the '>' markers were seen.
@@ -281,30 +303,83 @@ bool Radiocrafts::isReady()
   return true;
 }
 
-static String data;
+static String data;  //  Used by all functions except enter/exit command/config mode.
+static String modeData;  //  Used by enter/exit command/config mode only.
 
 bool Radiocrafts::enterCommandMode() {
-  //  Enter Command Mode for sending module commands, not data.
-  //  TODO: Confirm response = '>'
-  if (mode == COMMAND_MODE) return true;
+  //  Enter Command Mode for sending module commands, not data.  Assumes we are in Send Mode.
   log1(F(" - Entering command mode..."));
-  if (!sendBuffer("00", COMMAND_TIMEOUT, 1, data, markers)) return false;
+  //  Confirm we are in SEND_MODE
+  if (mode != SEND_MODE) {
+    log1(F(" - Warning: Radiocrafts.enterCommandMode did not detect expected Send Mode, may be in incorrect mode"));
+  }
+  uint8_t markers = 0;
+  if (!sendBuffer("00", COMMAND_TIMEOUT, 1, modeData, markers)) return false;
+  //  Confirm response = '>'
+  if (modeData != String("") || markers != 1) {
+    log1(F(" - Warning: Radiocrafts.enterCommandMode did not receive expected '>', may be in incorrect mode"));
+  }
   mode = COMMAND_MODE;
   log1(F(" - Radiocrafts.enterCommandMode: OK "));
   return true;
 }
 
 bool Radiocrafts::exitCommandMode() {
-  //  Exit Command Mode so we can send data.
-  if (mode == SEND_MODE) return true;
-  if (!sendBuffer(toHex('X'), COMMAND_TIMEOUT, 0, data, markers)) return false;
+  //  Exit Command Mode and return to Send Mode so we can send data.  Assumes we are in Command Mode.
+  log1(F(" - Exiting command mode..."));
+  //  Confirm we are in COMMAND_MODE.
+  if (mode != COMMAND_MODE) {
+    log1(F(" - Warning: Radiocrafts.exitCommandMode did not detect expected Command Mode, may be in incorrect mode"));
+  }
+  for (;;) {
+    //  Keep sending the exit command until we are really sure.  Sometimes we might out of sync.
+    uint8_t markers = 0;
+    if (!sendBuffer(toHex('X'), COMMAND_TIMEOUT, 0, modeData, markers)) return false;
+    if (modeData == String("") && markers == 0) break;
+    log1(F(" - Warning: Radiocrafts.exitCommandMode resending exit command, may be in incorrect mode"));
+  }
   mode = SEND_MODE;
   log1(F(" - Radiocrafts.exitCommandMode: OK "));
   return true;
 }
 
+bool Radiocrafts::enterConfigMode() {
+  //  Enter Config Mode for setting config.  Assumes we are in Send Mode.
+  //  Device is normally in Send Mode.  We switch to Command Mode first.
+  if (!enterCommandMode()) return false;
+  //  Confirm we are in COMMAND_MODE
+  if (mode != COMMAND_MODE) {
+    log1(F(" - Warning: Radiocrafts.enterConfigMode did not detect expected Command Mode, may be in incorrect mode"));
+  }
+  //  Now switch from Command Mode to Config Mode.
+  log1(F(" - Entering config mode from send mode..."));
+  uint8_t markers = 0;
+  if (!sendBuffer(toHex(CMD_ENTER_CONFIG), COMMAND_TIMEOUT, 1, modeData, markers)) return false;
+  mode = CONFIG_MODE;
+  log1(F(" - Radiocrafts.enterConfigMode: OK "));
+  return true;
+}
+
+bool Radiocrafts::exitConfigMode() {
+  //  Exit Config Mode and return to Send Mode so we can send data.
+  //  We exit to Command Mode first.
+  log1(F(" - Exiting config mode to send mode..."));
+  //  Confirm we are in CONFIG_MODE
+  if (mode != CONFIG_MODE) {
+    log1(F(" - Warning: Radiocrafts.exitConfigMode did not detect expected Config Mode, may be in incorrect mode"));
+  }
+  uint8_t markers = 0;
+  if (!sendBuffer(toHex(CMD_EXIT_CONFIG), COMMAND_TIMEOUT, 1, modeData, markers)) return false;
+  mode = COMMAND_MODE;
+  log1(F(" - Radiocrafts.exitConfigMode: OK "));
+  //  Then exit to Send Mode.
+  exitCommandMode();
+  return true;
+}
+
 bool Radiocrafts::getID(String &id, String &pac) {
   //  Get the SIGFOX ID and PAC for the module.
+  uint8_t markers = 0;
   if (!sendCommand(toHex('9'), 1, data, markers)) return false;
   //  Returns with 12 bytes: 4 bytes ID (LSB first) and 8 bytes PAC (MSB first).
   if (data.length() != 12 * 2) {
@@ -321,6 +396,7 @@ bool Radiocrafts::getID(String &id, String &pac) {
 
 bool Radiocrafts::getTemperature(int &temperature) {
   //  Returns the temperature of the SIGFOX module.
+  uint8_t markers = 0;
   if (!sendCommand(toHex('U'), 1, data, markers)) return false;
   if (data.length() != 2) {
     if (useEmulator) { temperature = 36; return true; }
@@ -335,6 +411,7 @@ bool Radiocrafts::getTemperature(int &temperature) {
 
 bool Radiocrafts::getVoltage(float &voltage) {
   //  Returns one byte indicating the power supply voltage.
+  uint8_t markers = 0;
   if (!sendCommand(toHex('V'), 1, data, markers)) return false;
   if (data.length() != 2) {
     if (useEmulator) { voltage = 12.3; return true; }
@@ -364,6 +441,7 @@ bool Radiocrafts::getFirmware(String &firmware) {
 bool Radiocrafts::getParameter(uint8_t address, String &value) {
   //  Read the parameter at the address.
   log2(F(" - Radiocrafts.getParameter: address=0x"), toHex((char) address));
+  uint8_t markers = 0;
   if (!sendCommand(toHex(CMD_READ_MEMORY) +   //  Read memory ('Y')
                    toHex((char) address),  //  Address of parameter
                    2,  //  Expect 1 marker for command, 1 for response.
@@ -399,24 +477,22 @@ bool Radiocrafts::getEmulator(int &result) {
 bool Radiocrafts::disableEmulator(String &result) {
   //  Set the module key to the unique SIGFOX key.  This is needed for sending
   //  to a real SIGFOX base station.
-  if (!sendCommand(toHex(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
+  if (!sendConfigCommand(String() +
       "28" + //  Address of parameter = PUBLIC_KEY (0x28)
       "00",  //  Value of parameter = Unique ID & key (0x00)
-       1, data, markers)) { sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers); return false; }
+      data)) return false;
   result = data;
-  sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers);  //  Exit config mode.
   return true;
 }
 
 bool Radiocrafts::enableEmulator(String &result) {
   //  Set the module key to the public key.  This is needed for sending
   //  to an emulator.
-  if (!sendCommand(toHex(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
+  if (!sendConfigCommand(String() +
       "28" + //  Address of parameter = PUBLIC_KEY (0x28)
       "01",  //  Value of parameter = Public ID & key (0x00)
-      1, data, markers)) { sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers); return false; }
+      data)) return false;
   result = data;
-  sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers);  //  Exit config mode.
   return true;
 }
 
@@ -425,6 +501,7 @@ bool Radiocrafts::getFrequency(String &result) {
   //  0: Europe (RCZ1)
   //  1: US (RCZ2)
   //  3: SG, TW, AU, NZ (RCZ4)
+  uint8_t markers = 0;
   if (!sendCommand(toHex(CMD_READ_MEMORY) + "00", 1, data, markers)) return false;
   result = data;
   return true;
@@ -435,12 +512,11 @@ bool Radiocrafts::setFrequency(int zone, String &result) {
   //  0: Europe (RCZ1)
   //  1: US (RCZ2)
   //  3: AU/NZ (RCZ4)
-  if (!sendCommand(toHex(CMD_ENTER_CONFIG) +   //  Tell module to receive address ('M').
+  if (!sendConfigCommand(String() +
     "00" + //  Address of parameter = RF_FREQUENCY_DOMAIN (0x0)
     toHex((char) (zone - 1)),  //  Value of parameter = RCZ - 1
-    1, data, markers)) { sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers); return false; }
+    data)) return false;
   result = data;
-  sendCommand(toHex(CMD_EXIT_CONFIG), 1, data, markers);  //  Exit config mode.
   return true;
 }
 

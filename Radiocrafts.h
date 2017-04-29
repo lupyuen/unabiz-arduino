@@ -29,6 +29,7 @@ const uint8_t RADIOCRAFTS_RX = 5;  //  Receive port for UnaBiz / Radiocrafts Dev
 enum Mode {
   SEND_MODE = 0,
   COMMAND_MODE = 1,
+  CONFIG_MODE = 2,
 };
 
 class Radiocrafts
@@ -47,7 +48,7 @@ public:
   bool sendString(const String &str);  //  Sending a text string, max 12 characters allowed.
   bool receive(String &data);  //  Receive a message.
   bool enterCommandMode();  //  Enter Command Mode for sending module commands, not data.
-  bool exitCommandMode();  //  Exit Command Mode so we can send data.
+  bool exitCommandMode();  //  Exit Command Mode and return to Send Mode so we can send data.
 
   //  Commands for the module, must be run in Command Mode.
   bool getEmulator(int &result);  //  Return 0 if emulator mode disabled, else return 1.
@@ -87,9 +88,12 @@ public:
 private:
   bool sendCommand(const String &cmd, uint8_t expectedMarkers,
                    String &result, uint8_t &actualMarkers);
+  bool sendConfigCommand(const String &cmd, String &result);
   bool sendBuffer(const String &buffer, int timeout, uint8_t expectedMarkers,
                   String &dataOut, uint8_t &actualMarkers);
   bool setFrequency(int zone, String &result);
+  bool enterConfigMode();  //  Enter Config Mode for setting config.
+  bool exitConfigMode();  //  Exit Config Mode and return to Send Mode so we can send data.
   uint8_t hexDigitToDecimal(char ch);
   void logBuffer(const __FlashStringHelper *prefix, const char *buffer,
                  uint8_t markerPos[], uint8_t markerCount);
