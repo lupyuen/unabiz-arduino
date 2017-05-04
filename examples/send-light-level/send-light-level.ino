@@ -32,8 +32,8 @@ static const String device = "g88pi";  //  Set this to your device name if you'r
 static const bool useEmulator = false;  //  Set to true if using UnaBiz Emulator.
 static const bool echo = true;  //  Set to true if the SIGFOX library should display the executed commands.
 static const Country country = COUNTRY_SG;  //  Set this to your country to configure the SIGFOX transmission frequencies.
-static Radiocrafts transceiver(country, useEmulator, device, echo);  //  Uncomment this for UnaBiz UnaShield Dev Kit with Radiocrafts module.
-//  static Akeru transceiver(country, useEmulator, device, echo);  //  Uncomment this for UnaBiz Akene Dev Kit.
+// static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Uncomment this for UnaBiz UnaShield V2S Dev Kit
+static UnaShieldV1 transceiver(country, useEmulator, device, echo);  //  Uncomment this for UnaBiz UnaShield V1 Dev Kit
 
 //  End SIGFOX Module Declaration
 ////////////////////////////////////////////////////////////
