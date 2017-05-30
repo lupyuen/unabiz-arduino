@@ -21,6 +21,7 @@
 #define CMD_PRESEND "AT$GI?"  //  For RCZ2, 4: Send this command before sending messages.  Returns X,Y.
 #define CMD_PRESEND2 "AT$RC"  //  For RCZ2, 4: Send this command if presend returns X=0 or Y<3.
 #define CMD_SEND_MESSAGE "AT$SF="  //  Prefix to send a message to SIGFOX cloud.
+#define CMD_SEND_MESSAGE_RESPONSE ",1"  //  Expect downlink response from SIGFOX.
 #define CMD_GET_ID "AT$I=10"  //  Get SIGFOX device ID.
 #define CMD_GET_PAC "AT$I=11"  //  Get SIGFOX device PAC, used for registering the device.
 #define CMD_GET_TEMPERATURE "AT$T?"  //  Get the module temperature.
@@ -105,7 +106,6 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
         response.concat(String((char) rxChar));
       }
     }
-    //  TODO: Check for downlink response.
   }
   serialPort->end();
   //  Log the actual bytes sent and received.
@@ -124,7 +124,6 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
     return false;
   }
   log2(F(" - Wisol.sendBuffer: response: "), response);
-  //  TODO: Parse the downlink response.
   return true;
 }
 
@@ -142,6 +141,31 @@ bool Wisol::sendMessage(const String &payload) {
   if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 1, data, markers)) {  //  One '\r' marker expected ("OK\r").
     log1(data);
     lastSend = millis();
+    return true;
+  }
+  return false;
+}
+
+bool Wisol::sendMessageAndGetResponse(const String &payload, String &response) {
+  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
+  //  We prefix with AT$SF= and send to SIGFOX.  Return response message from Sigfox in the response parameter.
+  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
+  if (!isReady()) return false;  //  Prevent user from sending too many messages.
+  //  Exit command mode and prepare to send message.
+  if (!exitCommandMode()) return false;
+  //  Set the output power for the zone.
+  if (!setOutputPower()) return false;
+  //  Send the data.
+  String message = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END, data;
+  //  Two '\r' markers expected ("OK\r RX=...\r").
+  if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 2, data, markers)) {
+    log1(data);
+    lastSend = millis();
+    response = data;
+    //  Response contains OK\nRX=01 23 45 67 89 AB CD EF
+    //  Remove the prefix and spaces.
+    response.replace("OK\nRX=", "");
+    response.replace(" ", "");
     return true;
   }
   return false;

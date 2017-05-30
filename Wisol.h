@@ -25,7 +25,7 @@
 
 const uint8_t WISOL_TX = 4;  //  Transmit port for For UnaBiz / Wisol Dev Kit
 const uint8_t WISOL_RX = 5;  //  Receive port for UnaBiz / Wisol Dev Kit
-const unsigned int WISOL_COMMAND_TIMEOUT = 10000;  //  Wait up to 10 seconds for response from SIGFOX module.
+const unsigned int WISOL_COMMAND_TIMEOUT = 60000;  //  Wait up to 60 seconds for response from SIGFOX module.  Includes downlink response.
 
 class Wisol
 {
@@ -40,6 +40,7 @@ public:
   void echo(const String &msg);  //  Echo the debug message.
   bool isReady();
   bool sendMessage(const String &payload);  //  Send the payload of hex digits to the network, max 12 bytes.
+  bool sendMessageAndGetResponse(const String &payload, String &response);  //  Send the payload of hex digits to the network and get response.
   bool sendString(const String &str);  //  Sending a text string, max 12 characters allowed.
   bool receive(String &data);  //  Receive a message.
   bool enterCommandMode();  //  Enter Command Mode for sending module commands, not data.

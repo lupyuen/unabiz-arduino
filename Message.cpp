@@ -148,6 +148,22 @@ bool Message::send() {
   return false;
 }
 
+bool Message::sendAndGetResponse(String &response) {
+  //  Send the structured message and get the downlink response.
+  String msg = getEncodedMessage();
+  if (msg.length() == 0) {
+    echo("****ERROR: Nothing to send");  //  TODO: Move to Flash.
+    return false;
+  }
+  if (msg.length() > MAX_BYTES_PER_MESSAGE * 2) {
+    echo(tooLong + (encodedMessage.length() / 2) + " bytes");
+    return false;
+  }
+  if (wisol) return wisol->sendMessageAndGetResponse(msg, response);
+  else if (radiocrafts) return radiocrafts->sendMessage(msg);
+  return false;
+}
+
 String Message::getEncodedMessage() {
   //  Return the encoded message to be transmitted.
   return encodedMessage;
