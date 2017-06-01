@@ -13,6 +13,7 @@ enum Country {
   COUNTRY_AU = 'A'+'U' << 8,  //  Australia
   COUNTRY_BR = 'B'+'R' << 8,  //  Brazil
   COUNTRY_FR = 'F'+'R' << 8,  //  France
+  COUNTRY_JP = 'J'+'P' << 8,  //  Japan
   COUNTRY_NZ = 'N'+'Z' << 8,  //  New Zealand
   COUNTRY_SG = 'S'+'G' << 8,  //  Singapore
   COUNTRY_US = 'U'+'S' << 8,  //  USA

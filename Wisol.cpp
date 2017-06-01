@@ -30,8 +30,9 @@
 #define CMD_SLEEP "AT$P=1"  //  TODO: Switch to sleep mode : consumption is < 1.5uA
 #define CMD_WAKEUP "AT$P=0"  //  TODO: Switch back to normal mode : consumption is 0.5 mA
 #define CMD_END "\r"
-#define CMD_RCZ1 "AT$IF=868130000"  //  EU Frequency
-#define CMD_RCZ2 "AT$IF=902200000"  //  US Frequency
+#define CMD_RCZ1 "AT$IF=868130000"  //  EU / RCZ1 Frequency
+#define CMD_RCZ2 "AT$IF=902200000"  //  US / RCZ2 Frequency
+#define CMD_RCZ3 "AT$IF=902080000"  //  JP / RCZ3 Frequency
 #define CMD_RCZ4 "AT$IF=920800000"  //  RCZ4 Frequency
 #define CMD_MODULATION_ON "AT$CB=-1,1"  //  Modulation wave on.
 #define CMD_MODULATION_OFF "AT$CB=-1,0"  //  Modulation wave off.
@@ -175,6 +176,7 @@ bool Wisol::setOutputPower() {
   //  Set the output power for the zone before sending a message.
   switch(zone) {
     case 1:  //  RCZ1
+    case 3:  //  RCZ3
       if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers)) return false;
       break;
     case 2:  //  RCZ2
@@ -187,8 +189,6 @@ bool Wisol::setOutputPower() {
       if (x == 0 || y < 3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers);
       break;
     }
-    case 3:  //  TODO: RCZ3
-      break;
     default:
       log2(F(" - Wisol.setOutputPower: Unknown zone "), zone);
       return false;
@@ -300,6 +300,7 @@ bool Wisol::getFrequency(String &result) {
   //  Get the frequency used for the SIGFOX module
   //  1: Europe (RCZ1)
   //  2: US (RCZ2)
+  //  3: JP (RCZ3)
   //  4: SG, TW, AU, NZ (RCZ4)
   //  log1(F(" - Wisol.getFrequency: ERROR - Not implemented"));
   result = String(zone + '0');
@@ -310,6 +311,7 @@ bool Wisol::setFrequency(int zone0, String &result) {
   //  Get the frequency used for the SIGFOX module
   //  1: Europe (RCZ1)
   //  2: US (RCZ2)
+  //  3: JP (RCZ3)
   //  4: AU/NZ (RCZ4)
   zone = zone0;
   switch(zone) {
@@ -322,11 +324,14 @@ bool Wisol::setFrequency(int zone0, String &result) {
       // if (!sendCommand(String(CMD_RCZ2) + CMD_END, 1, data, markers)) return false;
       // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
       break;
+    case 3:  //  RCZ3
+      // if (!sendCommand(String(CMD_RCZ3) + CMD_END, 1, data, markers)) return false;
+      // if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers)) return false;
+      // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
+      break;
     case 4:  //  RCZ4
       // if (!sendCommand(String(CMD_RCZ4) + CMD_END, 1, data, markers)) return false;
       // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
-      break;
-    case 3:  //  TODO: RCZ3
       break;
     default:
       log2(F(" - Wisol.setFrequency: Unknown zone "), zone);
@@ -356,6 +361,11 @@ bool Wisol::setFrequencyUS(String &result) {
   //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
   log1(F(" - Wisol.setFrequencyUS"));
   return setFrequency(2, result); }
+
+bool Wisol::setFrequencyJP(String &result) {
+  //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
+  log1(F(" - Wisol.setFrequencyJP"));
+  return setFrequency(3, result); }
 
 bool Wisol::reboot(String &result) {
   //  Software reset the module.
@@ -435,9 +445,12 @@ bool Wisol::begin() {
     // log1(F(" - Setting frequency for country "));
     // echoPort->write((uint8_t) (country / 8));
     // echoPort->write((uint8_t) (country % 8));
-    if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
+    if (country == COUNTRY_JP) {  //  Set Japan frequency (RCZ3).
+      if (!setFrequencyJP(result)) continue;
+    } else if (country == COUNTRY_US) {  //  Set US frequency (RCZ2).
       if (!setFrequencyUS(result)) continue;
-    } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).
+    } else if (country == COUNTRY_FR) {  //  Set France frequency (RCZ1).
+      //  TODO: South Africa
       if (!setFrequencyETSI(result)) continue;
     } else { //  Rest of the world runs on RCZ4.
       if (!setFrequencySG(result)) continue;

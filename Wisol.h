@@ -60,6 +60,8 @@ public:
   bool setFrequencyETSI(String &result);
   //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
   bool setFrequencyUS(String &result);
+  //  Set the frequency for the SIGFOX module to Japan frequency (RCZ3).
+  bool setFrequencyJP(String &result);
   bool writeSettings(String &result); //  Write frequency and other settings to flash memory of the module.
   bool reboot(String &result);  //  Reboot the SIGFOX module.
   bool getTemperature(float &temperature);
