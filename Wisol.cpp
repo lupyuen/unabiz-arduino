@@ -449,8 +449,10 @@ bool Wisol::begin() {
       if (!setFrequencyJP(result)) continue;
     } else if (country == COUNTRY_US) {  //  Set US frequency (RCZ2).
       if (!setFrequencyUS(result)) continue;
-    } else if (country == COUNTRY_FR) {  //  Set France frequency (RCZ1).
-      //  TODO: South Africa
+    } else if (
+      country == COUNTRY_FR
+      || country == COUNTRY_OM
+      || country == COUNTRY_SA) {  //  Set France frequency (RCZ1).
       if (!setFrequencyETSI(result)) continue;
     } else { //  Rest of the world runs on RCZ4.
       if (!setFrequencySG(result)) continue;
