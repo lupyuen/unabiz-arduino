@@ -1,4 +1,4 @@
-Check out the wiki: https://github.com/UnaBiz/unabiz-arduino/wiki/UnaShield
+Check out the docs at: https://unabiz.github.io/unashield/
 
 
 
