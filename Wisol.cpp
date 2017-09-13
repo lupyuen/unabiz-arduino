@@ -36,6 +36,8 @@
 #define CMD_RCZ4 "AT$IF=920800000"  //  RCZ4 Frequency
 #define CMD_MODULATION_ON "AT$CB=-1,1"  //  Modulation wave on.
 #define CMD_MODULATION_OFF "AT$CB=-1,0"  //  Modulation wave off.
+#define CMD_EMULATOR_DISABLE "ATS410=0"  //  Device will only talk to Sigfox network.
+#define CMD_EMULATOR_ENABLE "ATS410=1"  //  Device will only talk to SNEK emulator.
 
 static NullPort nullPort;
 static uint8_t markers = 0;
@@ -54,7 +56,6 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
   //  expect to see.  actualMarkerCount contains the actual number seen.
   log2(F(" - Wisol.sendBuffer: "), buffer);
   response = "";
-  if (useEmulator) return true;
 
   actualMarkerCount = 0;
   //  Start serial interface.
@@ -210,7 +211,6 @@ bool Wisol::exitCommandMode() {
 
 bool Wisol::getID(String &id, String &pac) {
   //  Get the SIGFOX ID and PAC for the module.
-  if (useEmulator) { id = device; return true; }
   if (!sendCommand(String(CMD_GET_ID) + CMD_END, 1, data, markers)) return false;
   id = data;
   device = id;
@@ -222,7 +222,6 @@ bool Wisol::getID(String &id, String &pac) {
 
 bool Wisol::getTemperature(float &temperature) {
   //  Returns the temperature of the SIGFOX module.
-  if (useEmulator) { temperature = 36; return true; }
   if (!sendCommand(String(CMD_GET_TEMPERATURE) + CMD_END, 1, data, markers)) return false;
   temperature = data.toInt() / 100.0;
   log2(F(" - Wisol.getTemperature: returned "), temperature);
@@ -231,7 +230,6 @@ bool Wisol::getTemperature(float &temperature) {
 
 bool Wisol::getVoltage(float &voltage) {
   //  Returns the power supply voltage.
-  if (useEmulator) { voltage = 12.3; return true; }
   if (!sendCommand(String(CMD_GET_VOLTAGE) + CMD_END, 1, data, markers)) return false;
   voltage = data.toFloat() / 1000.0;
   log2(F(" - Wisol.getVoltage: returned "), voltage);
@@ -278,6 +276,7 @@ bool Wisol::getEmulator(int &result) {
   //  0 = Emulator disabled (sending to SIGFOX network with unique ID & key)
   //  1 = Emulator enabled (sending to emulator with public ID & key)
   //  We assume not using emulator.
+  //  TODO: Return the actual value.
   result = 0;
   return true;
 }
@@ -285,14 +284,17 @@ bool Wisol::getEmulator(int &result) {
 bool Wisol::disableEmulator(String &result) {
   //  Set the module key to the unique SIGFOX key.  This is needed for sending
   //  to a real SIGFOX base station.
-  //  We assume not using emulator.
+  log1(F(" - Disabling SNEK emulation mode..."));
+  if (!sendCommand(String(CMD_EMULATOR_DISABLE) + CMD_END, 1, data, markers)) return false;
   return true;
 }
 
 bool Wisol::enableEmulator(String &result) {
   //  Set the module key to the public key.  This is needed for sending
   //  to an emulator.
-  log1(F(" - Wisol.enableEmulator: ERROR - Not implemented"));
+  log1(F(" - Enabling SNEK emulation mode..."));
+  log1(F(" - WARNING: SNEK emulation mode will NOT work with a Sigfox network"));
+  if (!sendCommand(String(CMD_EMULATOR_ENABLE) + CMD_END, 1, data, markers)) return false;
   return true;
 }
 
@@ -427,13 +429,11 @@ bool Wisol::begin() {
       if (!enableEmulator(result)) continue;
     } else {
       //  Disable emulation mode.
-      log1(F(" - Disabling emulation mode..."));
       if (!disableEmulator(result)) continue;
-
-      //  Check whether emulator is used for transmission.
-      log1(F(" - Checking emulation mode (expecting 0)...")); int emulator = 0;
-      if (!getEmulator(emulator)) continue;
     }
+    //  TODO: Check whether emulator is used for transmission.
+    //  log1(F(" - Checking emulation mode (expecting 0)...")); int emulator = 0;
+    //  if (!getEmulator(emulator)) continue;
 
     //  Read SIGFOX ID and PAC from module.
     log1(F(" - Getting SIGFOX ID..."));  String id, pac;
