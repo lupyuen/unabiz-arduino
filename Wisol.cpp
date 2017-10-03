@@ -223,7 +223,7 @@ bool Wisol::getID(String &id, String &pac) {
 bool Wisol::getTemperature(float &temperature) {
   //  Returns the temperature of the SIGFOX module.
   if (!sendCommand(String(CMD_GET_TEMPERATURE) + CMD_END, 1, data, markers)) return false;
-  temperature = data.toInt() / 100.0;
+  temperature = data.toInt() / 10.0;
   log2(F(" - Wisol.getTemperature: returned "), temperature);
   return true;
 }
