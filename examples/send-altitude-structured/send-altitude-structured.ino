@@ -189,27 +189,32 @@ Running setup...
  - Wisol.sendBuffer: AT$T?
 
 >> AT$T?
-<< 283
- - Wisol.sendBuffer: response: 283
- - Wisol.getTemperature: returned 28.30
-scaledTemp = 27.60 degrees C
-scaledHumidity = 58.35 %
-scaledAltitude = 17.14 metres above sea level
-scaledModuleTemp = 28.30 degrees C
+<< 322
+ - Wisol.sendBuffer: response: 322
+ - Wisol.getTemperature: returned 32.20
+scaledTemp = 31.21 degrees C
+scaledHumidity = 49.62 %
+scaledAltitude = 16.58 metres above sea level
+scaledModuleTemp = 32.20 degrees C
 
 Running loop #0
- - Message.addField: tmp=276.6
- - Message.addField: hmd=583.3
- - Message.addField: alt=171.1
- - Wisol.sendMessage: 002C30EB,b0511401a42147029405ab00
+ - Message.addField: tmp=31.2
+ - Message.addField: hmd=49.6
+ - Message.addField: alt=16.5
+ - Wisol.sendMessage: 002C30EB,b0513801a421f0019405a500
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
-<< 1,3
- - Wisol.sendBuffer: response: 1,3
- - Wisol.sendBuffer: AT$SF=b0511401a42147029405ab00
+<< 1,0
+ - Wisol.sendBuffer: response: 1,0
+ - Wisol.sendBuffer: AT$RC
 
->> AT$SF=b0511401a42147029405ab00
+>> AT$RC
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+ - Wisol.sendBuffer: AT$SF=b0513801a421f0019405a500
+
+>> AT$SF=b0513801a421f0019405a500
 << OK0x0d
  - Wisol.sendBuffer: response: OK
 OK
@@ -217,19 +222,48 @@ Waiting 10 seconds...
  - Wisol.sendBuffer: AT$T?
 
 >> AT$T?
-<< 283
- - Wisol.sendBuffer: response: 283
- - Wisol.getTemperature: returned 28.30
-scaledTemp = 27.63 degrees C
-scaledHumidity = 58.24 %
-scaledAltitude = 17.15 metres above sea level
-scaledModuleTemp = 28.30 degrees C
+<< 326
+ - Wisol.sendBuffer: response: 326
+ - Wisol.getTemperature: returned 32.60
+scaledTemp = 31.23 degrees C
+scaledHumidity = 49.66 %
+scaledAltitude = 16.55 metres above sea level
+scaledModuleTemp = 32.60 degrees C
 
 Running loop #1
- - Message.addField: tmp=276.6
- - Message.addField: hmd=582.2
- - Message.addField: alt=171.1
- - Wisol.sendMessage: 002C30EB,b0511401a42146029405ab00
+ - Message.addField: tmp=31.2
+ - Message.addField: hmd=49.6
+ - Message.addField: alt=16.5
+ - Wisol.sendMessage: 002C30EB,b0513801a421f0019405a500
+Warning: Should wait 10 mins before sending the next message
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+<< 1,3
+ - Wisol.sendBuffer: response: 1,3
+ - Wisol.sendBuffer: AT$SF=b0513801a421f0019405a500
+
+>> AT$SF=b0513801a421f0019405a500
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+OK
+Waiting 10 seconds...
+ - Wisol.sendBuffer: AT$T?
+
+>> AT$T?
+<< 328
+ - Wisol.sendBuffer: response: 328
+ - Wisol.getTemperature: returned 32.80
+scaledTemp = 31.23 degrees C
+scaledHumidity = 49.72 %
+scaledAltitude = 16.64 metres above sea level
+scaledModuleTemp = 32.80 degrees C
+
+Running loop #2
+ - Message.addField: tmp=31.2
+ - Message.addField: hmd=49.7
+ - Message.addField: alt=16.6
+ - Wisol.sendMessage: 002C30EB,b0513801a421f1019405a600
 Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
 
@@ -241,9 +275,9 @@ Warning: Should wait 10 mins before sending the next message
 >> AT$RC
 << OK0x0d
  - Wisol.sendBuffer: response: OK
- - Wisol.sendBuffer: AT$SF=b0511401a42146029405ab00
+ - Wisol.sendBuffer: AT$SF=b0513801a421f1019405a600
 
->> AT$SF=b0511401a42146029405ab00
+>> AT$SF=b0513801a421f1019405a600
 << OK0x0d
  - Wisol.sendBuffer: response: OK
 OK

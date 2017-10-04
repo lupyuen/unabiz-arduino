@@ -41,7 +41,7 @@ static char decodeLetter(uint8_t code) {
 static String doubleToString(double d) {
   //  Convert double to string, since Bean+ doesn't support double in Strings.
   //  Assume 1 decimal place.
-  String result = String((int) (d * 10.0)) + '.' + String(((int) (d * 10.0)) % 10);
+  String result = String((int) (d)) + '.' + String(((int) (d * 10.0)) % 10);
   return result;
 }
 
