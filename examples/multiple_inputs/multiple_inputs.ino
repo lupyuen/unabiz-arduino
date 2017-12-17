@@ -6,7 +6,7 @@
 //  multitasking by using a Finite State Machine: https://github.com/jonblack/arduino-fsm
 
 ////////////////////////////////////////////////////////////
-//  Begin Sigfox Module Declaration - Update the settings if necessary
+//  Begin Sigfox Transceiver Declaration - Update the settings if necessary
 
 #include "SIGFOX.h"
 
@@ -17,7 +17,7 @@ static const bool echo = true;          //  Set to true if the Sigfox library sh
 static const Country country = COUNTRY_SG;  //  Set this to your country to configure the Sigfox transmission frequencies.
 static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assumes you are using UnaBiz UnaShield V2S Dev Kit
 
-//  End Sigfox Module Declaration
+//  End Sigfox Transceiver Declaration
 ////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
@@ -40,6 +40,7 @@ static const int INPUT_SENT = 2;
 void checkInput1();
 void checkInput2();
 void checkInput3();
+void checkPin(Fsm *fsm, int inputNum, int inputPin);
 
 //  Declare the Finite State Machine States for each input and for the Sigfox transceiver.
 //  Each state has 3 properties:
@@ -96,10 +97,22 @@ void initSensors() {
 }
 
 //  Check the inputs #1, #2, #3.  If any input has changed, trigger the INPUT_CHANGED event.
-void checkPin(Fsm *fsm, int inputNum, int inputPin);
 void checkInput1() { checkPin(&input1Fsm, 0, DIGITAL_INPUT_PIN1); }
 // void checkInput2() { checkPin(&input2Fsm, 1, DIGITAL_INPUT_PIN2); }
 // void checkInput3() { checkPin(&input3Fsm, 2, DIGITAL_INPUT_PIN3); }
+
+Message composeSensorMessage() {
+  //  Compose the Structured Message contain field names and values, total 12 bytes.
+  //  This requires a decoding function in the receiving cloud (e.g. Google Cloud) to decode the message.
+  //  We will send the 3 inputs as sensor fields named "sw1", "sw2", "sw3".
+
+  Message msg(transceiver);  //  Will contain the structured sensor data.
+  msg.addField("sw1", lastInputValues[0]);  //  4 bytes for the first input.
+  msg.addField("sw2", lastInputValues[1]);  //  4 bytes for the second input.
+  msg.addField("sw3", lastInputValues[2]);  //  4 bytes for the third input.
+  //  Total 12 bytes out of 12 bytes used.
+  return msg;
+}
 
 void checkPin(Fsm *fsm, int inputNum, int inputPin) {
   //  Check whether input #inputNum has changed. If so, trigger the INPUT_CHANGED event.
@@ -140,21 +153,17 @@ void addTransceiverTransitions() {
 
   //  From state           To state             Interval (millisecs) When transitioning states
   transceiverFsm.add_timed_transition(                               //  Wait 2.1 seconds before next send.  Else the transceiver library will reject the send.
-      &transceiverSent,    &transceiverIdle,    2.1 * 1000,          0);
+      &transceiverSent,    &transceiverIdle,    2.1 * 1000,          &transceiverSentToIdle);
   transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 10 seconds, send the inputs.
-      &transceiverIdle,    &transceiverSending, 10 * 1000,           0);
+      &transceiverIdle,    &transceiverSending, 10 * 1000,           &transceiverIdleToSending);
 }
 
 void whenTransceiverSending() {
   //  Send the sensor values to Sigfox in a single Structured message.
+  //  This occurs when the transceiver enters the "Sending" state.
 
-  //  Compose the Structured Message contain field names and values, total 12 bytes.
-  //  This requires a decoding function in the receiving cloud (e.g. Google Cloud) to decode the message.
-  Message msg(transceiver);  //  Will contain the structured sensor data.
-  msg.addField("sw1", lastInputValues[0]);  //  4 bytes for the first input.
-  msg.addField("sw2", lastInputValues[1]);  //  4 bytes for the second input.
-  msg.addField("sw3", lastInputValues[2]);  //  4 bytes for the third input.
-  //  Total 12 bytes out of 12 bytes used.
+  //  Compose the message with the sensor data.
+  Message msg = composeSensorMessage();
 
   //  Send the encoded structured message.
   pendingResend = 0; //  Clear the pending resend count, so we will know when transceiver has been asked to resend.
@@ -180,6 +189,7 @@ void whenTransceiverSending() {
     Serial.print(F(", failed: "));  Serial.println(failCount);
   }
   //  Switch the transceiver to the "Sent" state, which waits 2.1 seconds before next send.
+  Serial.println("Transceiver is pausing after sending...");
   transceiverFsm.trigger(INPUT_SENT);
 }
 
@@ -190,6 +200,10 @@ void whenTransceiverIdle() {
 
 //  The transceiver is already sending now, can't resend now.  Wait till idle in 2.1 seconds to resend.
 void scheduleResend() { pendingResend++; }
+
+//  Show the transceiver transitions taking place.
+void transceiverSentToIdle() { Serial.println("Transceiver is now idle"); }
+void transceiverIdleToSending() { Serial.println("Transceiver is sending after idle period..."); }
 
 //  End Sigfox Transceiver Transitions
 ////////////////////////////////////////////////////////////
