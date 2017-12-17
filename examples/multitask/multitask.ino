@@ -25,10 +25,15 @@ State input1Idle(
     &checkInput1,  //  On State
     NULL  //  On Exit
 );
-State input1SendingUpdate(
-    &whenInput1SendingUpdate,
-    &checkSending1,
-    NULL
+State input1Sending(
+    &whenInput1Sending,  //  On Enter
+    &checkSending1,  //  On State
+    NULL  //  On Exit
+);
+State input1Sent(
+    &whenInput1Sent,  //  On Enter
+    &checkSent1,  //  On State
+    NULL  //  On Exit
 );
 
 // Transition functions
