@@ -12,17 +12,23 @@
 
 #include "Fsm.h"  //  Install from https://github.com/jonblack/arduino-fsm
 
-#define LED1_PIN 10
-#define LED2_PIN 11
-#define BUTTON_EVENT  0
+const DIGITAL_INPUT_PIN1 = 6;  //  Check for input on D6.
+const DIGITAL_INPUT_PIN2 = -1;
+const DIGITAL_INPUT_PIN3 = -1;
+
+const INPUT1_CHANGED = 1;
+const INPUT2_CHANGED = 2;
+const INPUT3_CHANGED = 3;
+
+//   State(void (*on_enter)(), void (*on_state)(), void (*on_exit)());
+State input1Idle(&idleInput1, &checkInput1, NULL);
 
 int buttonState = 0;
 
 /* state 1:  led off
  * state 2:  led on
  * transition from s1 to s2 on button press
- * transition back from s2 to s1 after 3 seconds or button press
- */
+ * transition back from s2 to s1 after 3 seconds or button press */
 State state_led_off(&led_off, &check_button, NULL);
 State state_led_on(&led_on, &check_button, NULL);
 Fsm fsm(&state_led_off);
@@ -48,6 +54,27 @@ void check_button()
     fsm.trigger(BUTTON_EVENT);
   }
 }
+
+int lastInputValues[] = {-1, -1, -1};
+
+const MAX_PINS = 3;
+
+void internalCheckPin(inputNum, inputPin, pinChangedEvent) {
+  int inputValue = digitalRead(inputPin);
+  int lastInputValue = lastInputValue[inputNum];
+  lastInputValue[inputNum] = lastInputValue;
+
+  if (inputValue != lastInputValue) {
+    Serial.print("Pin "); Serial.print(inputPin);
+    Serial.print(" changed from "); Serial.print(lastInputValue);
+    Serial.print(" to "); Serial.println(inputValue);
+    fsm.trigger(pinChangedEvent);
+  }
+}
+
+void checkInput1() { internalCheckPin(0, DIGITAL_INPUT_PIN1, INPUT1_CHANGED); }
+void checkInput2() { internalCheckPin(1, DIGITAL_INPUT_PIN2, INPUT2_CHANGED); }
+void checkInput3() { internalCheckPin(2, DIGITAL_INPUT_PIN3, INPUT3_CHANGED); }
 
 ////////////////////////////////////////////
 
