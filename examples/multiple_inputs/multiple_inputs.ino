@@ -12,73 +12,76 @@
 
 #include "Fsm.h"  //  Install from https://github.com/jonblack/arduino-fsm
 
+//  TODO: Enter the Digital Pins to be checked, up to three pins allowed.
 const DIGITAL_INPUT_PIN1 = 6;  //  Check for input on D6.
 const DIGITAL_INPUT_PIN2 = -1;
 const DIGITAL_INPUT_PIN3 = -1;
 
+//  Events
 const INPUT_CHANGED = 1;
 const INPUT_SENT = 2;
 
-Fsm input1Fsm(&input1Idle);
-Fsm transceiverFsm(&transceiverIdle);
+//  Declare the Finite State Machines for each input and for the Sigfox transceiver.
 
-//    Name of state       When entering state       When inside state   When exiting state
-State input1Idle(         &whenInput1Idle,          &checkInput1,       NULL);
-State input1Sending(      NULL,                     NULL,               NULL);
+//  Name of Finite State Machine    Starting state
+Fsm input1Fsm(                      &input1Idle);
+// Fsm input2Fsm(                   &input2Idle);
+// Fsm input3Fsm(                   &input3Idle);
+Fsm transceiverFsm(                 &transceiverIdle);
 
-State transceiverIdle(    &whenTransceiverIdle,     NULL,               NULL);
-State transceiverSending( &whenTransceiverSending,  NULL,               NULL);
-State transceiverSent(    NULL,                     NULL,               NULL);
+//  Declare the Finite State Machine States for each input and for the Sigfox transceiver.
+//  Each state has 3 properties:
+//  "When Entering State" - The function to run when entering this state
+//  "When Inside State" - The function to run repeatedly when we are in this state
+//  "When Exiting State" - The function to run when exiting this state and entering another state.
 
-//  Transition functions
+//    Name of state   Enter  When inside state   Exit
+State input1Idle(     0,     &checkInput1,       0);  // In "Idle" state, we check
+//State input2Idle(    0,    &checkInput2,       0);  // the input repeatedly for changes.
+//State input3Idle(    0,    &checkInput3,       0);
+State input1Sending(  0,     0,                  0);  // In "Sending" state, we stop
+//State input2Sending(  0,     0,                  0);  // checking the input temporarily
+//State input3Sending(  0,     0,                  0);  // while the transceiver is sending.
 
-int lastInputValues[] = {-1, -1, -1};
-const MAX_PINS = 3;
+//    Name of state       When entering state       Inside   When exiting state
+State transceiverIdle(    &whenTransceiverIdle,     0,       0);  // Transceiver is idle until any input changes.
+State transceiverSending( &whenTransceiverSending,  0,       0);  // Transceiver enters "Sending" state to send changed inputs.
+State transceiverSent(    0,                        0,       0);  // After sending, it waits 2.1 seconds in "Sent" state before going to "Idle" state.
 
-void checkInput1() { internalCheckPin(&input1Fsm, 0, DIGITAL_INPUT_PIN1); }
-// void checkInput2() { internalCheckPin(&input2Fsm, 1, DIGITAL_INPUT_PIN2); }
-// void checkInput3() { internalCheckPin(&input3Fsm, 2, DIGITAL_INPUT_PIN3); }
+int lastInputValues[] = {-1, -1, -1};  //  Remember the last value of each input.
 
 void addSensorTransitions() {
-  //  If the input has changed while in the "Idle" state, send the input and go to the "Sending" state.
-  //  We will temporarily stop checking the input in the "Sending" state.
-  input1Fsm.add_transition(
-      &input1Idle,  //  From State:
-      &input1Sending,  //  To State:
-      INPUT_CHANGED,  //  Event:
-      NULL  //  On Transition:
-  );
+  //  Add the Finite State Machine Transitions for the sensors.
+  //  Each state has 4 properties:
+  //  "From State" - The starting state of the transition
+  //  "To State" - The ending state of the transition
+  //  "Triggering Event" - The event that will trigger the transition.
+  //  "When Transitioning States" - The function to run when the state transition occurs.
 
-  //  If we are in the "Sending" state and transceiver notifies us that the input has been sent,
-  //  go into "Idle" state.
-  input1Fsm.add_transition(
-      &input1Sending,  //  From State:
-      &input1Idle,  //  To State:
-      INPUT_SENT,  //  Event:
-      NULL  //  On Transition:
-  );
+  //                        From state      To state        Triggering event When transitioning states
+  input1Fsm.add_transition( &input1Idle,    &input1Sending, INPUT_CHANGED,   0); // If the input has changed while
+  //input2Fsm.add_transition( &input2Idle,    &input2Sending, INPUT_CHANGED,   0); // in the "Idle" state, send the input
+  //input3Fsm.add_transition( &input3Idle,    &input3Sending, INPUT_CHANGED,   0); // and go to the "Sending" state, which will temporarily stop checking the input.
 
-  //  If the input has been sent and we are in "Idle" state, do nothing.
-  input1Fsm.add_transition(
-      &input1Idle,  //  From State:
-      &input1Idle,  //  To State:
-      INPUT_SENT,  //  Event:
-      NULL  //  On Transition:
-  );
+  input1Fsm.add_transition( &input1Sending, &input1Idle,    INPUT_SENT,      0); // If we are in the "Sending" state and
+  //input2Fsm.add_transition( &input2Sending, &input2Idle,    INPUT_SENT,      0); // transceiver notifies us that the input
+  //input3Fsm.add_transition( &input3Sending, &input3Idle,    INPUT_SENT,      0); // has been sent, go into "Idle" state and resume checking the input.
 
-  // void Fsm::add_timed_transition(State* state_from, State* state_to, unsigned long interval, void (*on_transition)())
-  // fsm.add_transition(&state_led_off, &state_led_on, BUTTON_EVENT, NULL);
-  // fsm.add_timed_transition(&state_led_on, &state_led_off, 3000, NULL);
-  // fsm.add_transition(&state_led_on, &state_led_off, BUTTON_EVENT, NULL);
+  input1Fsm.add_transition( &input1Idle,    &input1Idle,    INPUT_SENT,      0); //  If the input has been sent and
+  //input2Fsm.add_transition( &input2Idle,    &input2Idle,    INPUT_SENT,      0); // we are in "Idle" state, do nothing.
+  //input3Fsm.add_transition( &input3Idle,    &input3Idle,    INPUT_SENT,      0);
 }
 
-void executeSensorTransitions() {
-  if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.run_machine();
-  // if (DIGITAL_INPUT_PIN2 >= 0) input1Fsm.run_machine();
-  // if (DIGITAL_INPUT_PIN3 >= 0) input1Fsm.run_machine();
+void initSensors() {
+  //  Initialise the sensors here.
 }
 
-void internalCheckPin(Fsm *fsm, int inputNum, int inputPin) {
+//  Check the inputs #1, #2, #3.  If any input has changed, trigger the INPUT_CHANGED event.
+void checkInput1() { checkPin(&input1Fsm, 0, DIGITAL_INPUT_PIN1); }
+// void checkInput2() { checkPin(&input2Fsm, 1, DIGITAL_INPUT_PIN2); }
+// void checkInput3() { checkPin(&input3Fsm, 2, DIGITAL_INPUT_PIN3); }
+
+void checkPin(Fsm *fsm, int inputNum, int inputPin) {
   //  Check whether input #inputNum has changed. If so, trigger the INPUT_CHANGED event.
   //  Read the input pin.
   int inputValue = digitalRead(inputPin);
@@ -104,57 +107,20 @@ void internalCheckPin(Fsm *fsm, int inputNum, int inputPin) {
 ////////////////////////////////////////////////////////////
 //  Begin Sigfox Module Transitions
 
-//  How many times we have been asked to resend while the transceiver is already sending.
-int pendingResend = 0;
-
-//  The transceiver is already sending now, can't resend now.  Wait till idle in 2.1 seconds to resend.
-void scheduleResend() { pendingResend++; }
-
-//  The transceiver has just finished waiting 2.1 seconds.  If there are pending resend requests, send now.
-void checkResend() {
-  if (pendingResend > 0) transceiverFsm.trigger(INPUT_CHANGED);
-}
-
 void addTransceiverTransitions() {
-  //  Add the Finite State Machine transitions for the transceiver.
+  //  Add the Finite State Machine Transitions for the transceiver.
 
-  //  If inputs have changed, send the inputs.
-  transceiverFsm.add_transition(
-      &transceiverIdle,  //  From State:
-      &transceiverSending,  //  To State:
-      INPUT_CHANGED,  //  Event:
-      NULL  //  On Transition:
-  );
+  //  From state           To state             Triggering event   When transitioning states
+  transceiverFsm.add_transition(                                   //  If inputs have changed, send the inputs.
+      &transceiverIdle,    &transceiverSending, INPUT_CHANGED,     0);
+  transceiverFsm.add_transition(                                   //  When inputs have been sent, go to the "Sent" state and wait 2.1 seconds.
+      &transceiverSending, &transceiverSent,    INPUT_SENT,        &scheduleResend);
 
-  //  When inputs have been sent, go to the "Sent" state and wait 2.1 seconds.
-  transceiverFsm.add_transition(
-      &transceiverSending,  //  From State:
-      &transceiverSent,  //  To State:
-      INPUT_SENT,  //  Event:
-      &scheduleResend  //  On Transition:
-  );
-
-  //  Wait 2.1 seconds before next send.  Else the transceiver library will reject the send.
-  transceiverFsm.add_timed_transition(
-      &transceiverSent,  //  From State:
-      &transceiverIdle,  //  To State:
-      2.1 * 1000,  //  Interval:
-      &checkResend  //  On Transition:
-  );
-
-  //  If nothing has been sent in the past 10 seconds, send the inputs.
-  transceiverFsm.add_timed_transition(
-      &transceiverIdle,  //  From State:
-      &transceiverSending,  //  To State:
-      10 * 1000,  //  Interval:
-      NULL  //  On Transition:
-  );
-
-  // void Fsm::add_timed_transition(State* state_from, State* state_to, unsigned long interval, void (*on_transition)())
-
-  // fsm.add_transition(&state_led_off, &state_led_on, BUTTON_EVENT, NULL);
-  // fsm.add_timed_transition(&state_led_on, &state_led_off, 3000, NULL);
-  // fsm.add_transition(&state_led_on, &state_led_off, BUTTON_EVENT, NULL);
+  //  From state           To state             Interval (millisecs) When transitioning states
+  transceiverFsm.add_timed_transition(                               //  Wait 2.1 seconds before next send.  Else the transceiver library will reject the send.
+      &transceiverSent,    &transceiverIdle,    2.1 * 1000,          0);
+  transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 10 seconds, send the inputs.
+      &transceiverIdle,    &transceiverSending, 10 * 1000,           0);
 }
 
 void whenTransceiverSending() {
@@ -197,9 +163,16 @@ void whenTransceiverSending() {
   transceiverFsm.trigger(INPUT_SENT);
 }
 
-void executeSensorTransitions() {
-  transceiverFsm.run_machine();
+//  The transceiver has just finished waiting 2.1 seconds.  If there are pending resend requests, send now.
+void whenTransceiverIdle() {
+  if (pendingResend > 0) transceiverFsm.trigger(INPUT_CHANGED);
 }
+
+//  How many times we have been asked to resend while the transceiver is already sending.
+int pendingResend = 0;
+
+//  The transceiver is already sending now, can't resend now.  Wait till idle in 2.1 seconds to resend.
+void scheduleResend() { pendingResend++; }
 
 //  End Sigfox Module Transitions
 ////////////////////////////////////////////////////////////
@@ -220,41 +193,29 @@ static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assume
 ////////////////////////////////////////////////////////////
 
 void setup() {  //  Will be called only once.
-  ////////////////////////////////////////////////////////////
-  //  Begin General Setup
-
   //  Initialize console so we can see debug messages (9600 bits per second).
   Serial.begin(9600);  Serial.println(F("Running setup..."));
 
   //  Initialize the onboard LED at D13 for output.
   pinMode(LED_BUILTIN, OUTPUT);
+  //  Initialize the sensors.
+  initSensors();
 
-  //  End General Setup
-  ////////////////////////////////////////////////////////////
-
-  ////////////////////////////////////////////////////////////
-  //  Begin Sensor Setup
-
+  //  Add the sensor and transceiver transitions for the Finite State Machine.
   addSensorTransitions();
-
-  //  End Sensor Setup
-  ////////////////////////////////////////////////////////////
-
-  ////////////////////////////////////////////////////////////
-  //  Begin SIGFOX Module Setup
+  addTransceiverTransitions();
 
   //  Check whether the SIGFOX module is functioning.
   if (!transceiver.begin()) stop("Unable to init SIGFOX module, may be missing");  //  Will never return.
-  addSigfoxTransitions();
-
-  //  End SIGFOX Module Setup
-  ////////////////////////////////////////////////////////////
 }
 
 void loop() {  //  Will be called repeatedly.
-  executeSensorTransitions();
-  executeTransceiverTransitions();
-  delay(100);
+  //  Execute the sensor and transceiver transitions for the Finite State Machine.
+  if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.run_machine();
+  // if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
+  // if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
+  transceiverFsm.run_machine();
+  delay(0.1 * 1000);  //  Wait 0.1 seconds between loops. Easier to debug.
 }
 /* Expected Output:
  */
