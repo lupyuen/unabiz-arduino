@@ -78,8 +78,8 @@
       <file leaf-file-name="multitask.ino" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/examples/multitask/multitask.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="198">
-              <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+            <state relative-caret-position="432">
+              <caret line="70" column="0" lean-forward="true" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -334,13 +334,7 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="false" />
           <option name="myId" value="UPDATED" />
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/Message.cpp</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/Message.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/README.md</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/SIGFOX.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/Wisol.cpp</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/Wisol.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/DemoTestUnaShieldV2S/DemoTestUnaShieldV2S.ino</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/multitask/multitask.ino</PATH>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Created" />
@@ -348,18 +342,6 @@
           <option name="mySupportsDeletion" value="false" />
           <option name="myCanBeAbsent" value="false" />
           <option name="myId" value="CREATED" />
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/DemoTestUnaShieldV2SRCZ3/DemoTestUnaShieldV2SRCZ3.ino</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/downlink/downlink.ino</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/multitask/multitask.ino</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude-structured/Adafruit_BME280.cpp</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude-structured/Adafruit_BME280.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude-structured/Adafruit_Sensor.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude-structured/send-altitude-structured.ino</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude/Adafruit_BME280.cpp</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude/Adafruit_BME280.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude/Adafruit_Sensor.h</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude/send-altitude.ino</PATH>
-          <PATH vcs="Git" revision="">$PROJECT_DIR$/test/unabiz-arduino.ino</PATH>
         </FILE-GROUP>
         <FILE-GROUP>
           <option name="myUpdateName" value="Deleted" />
@@ -710,14 +692,7 @@
       <workItem from="1493511496162" duration="623000" />
       <workItem from="1493521392286" duration="102000" />
       <workItem from="1493916851836" duration="2179000" />
-      <workItem from="1513491353979" duration="4505000" />
-    </task>
-    <task id="LOCAL-00005" summary="Fixing Arduino build">
-      <created>1477936805729</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1477936805729</updated>
+      <workItem from="1513491353979" duration="6728000" />
     </task>
     <task id="LOCAL-00006" summary="Arduino build OK">
       <created>1477937220205</created>
@@ -1055,11 +1030,18 @@
       <option name="project" value="LOCAL" />
       <updated>1493917733460</updated>
     </task>
-    <option name="localTasksCounter" value="54" />
+    <task id="LOCAL-00054" summary="Adding finite state machine">
+      <created>1513496932307</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1513496932307</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="111455000" />
+    <option name="totallyTimeSpent" value="113678000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="72" y="18" width="924" height="1029" extended-state="0" />
@@ -1122,7 +1104,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Converting Akeru to follow Radiocrafts API" />
     <MESSAGE value="Akeru compiles OK" />
     <MESSAGE value="For emulation mode, send message locally to another TD module using TD LAN mode." />
     <MESSAGE value="Minor fixes" />
@@ -1147,7 +1128,8 @@
     <MESSAGE value="Before adding BeanSoftwareSerial to fix Bean serial receive issue" />
     <MESSAGE value="Adding BeanSoftwareSerial to fix Bean serial receive issue" />
     <MESSAGE value="Upgraded for UnaShieldV2S" />
-    <option name="LAST_COMMIT_MESSAGE" value="Upgraded for UnaShieldV2S" />
+    <MESSAGE value="Adding finite state machine" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adding finite state machine" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1479,8 +1461,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/multitask/multitask.ino">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="198">
-          <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+        <state relative-caret-position="432">
+          <caret line="70" column="0" lean-forward="true" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
           <folding />
         </state>
       </provider>

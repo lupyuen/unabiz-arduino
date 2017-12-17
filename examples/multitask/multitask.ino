@@ -20,18 +20,16 @@ const INPUT1_CHANGED = 1;
 const INPUT2_CHANGED = 2;
 const INPUT3_CHANGED = 3;
 
-//   State(void (*on_enter)(), void (*on_state)(), void (*on_exit)());
-State input1Idle(&idleInput1, &checkInput1, NULL);
-
-int buttonState = 0;
-
-/* state 1:  led off
- * state 2:  led on
- * transition from s1 to s2 on button press
- * transition back from s2 to s1 after 3 seconds or button press */
-State state_led_off(&led_off, &check_button, NULL);
-State state_led_on(&led_on, &check_button, NULL);
-Fsm fsm(&state_led_off);
+State input1Idle(
+    &whenInput1Idle,  //  On Enter
+    &checkInput1,  //  On State
+    NULL  //  On Exit
+);
+State input1SendingUpdate(
+    &whenInput1SendingUpdate,
+    &checkSending1,
+    NULL
+);
 
 // Transition functions
 void led_off()
@@ -44,15 +42,6 @@ void led_on()
 {
   Serial.println("led_on");
   digitalWrite(LED_PIN, HIGH);
-}
-
-void check_button()
-{
-  int buttonState = digitalRead(BUTTON_PIN);
-  if (buttonState == LOW) {
-    Serial.println("button_pressed");
-    fsm.trigger(BUTTON_EVENT);
-  }
 }
 
 int lastInputValues[] = {-1, -1, -1};
@@ -75,6 +64,10 @@ void internalCheckPin(inputNum, inputPin, pinChangedEvent) {
 void checkInput1() { internalCheckPin(0, DIGITAL_INPUT_PIN1, INPUT1_CHANGED); }
 void checkInput2() { internalCheckPin(1, DIGITAL_INPUT_PIN2, INPUT2_CHANGED); }
 void checkInput3() { internalCheckPin(2, DIGITAL_INPUT_PIN3, INPUT3_CHANGED); }
+
+void whenInput1SendingUpdate() {
+
+};
 
 ////////////////////////////////////////////
 
@@ -145,6 +138,18 @@ void setup() {  //  Will be called only once.
   //fsm_led1.add_timed_transition(&state_led1_on, &state_led1_off, 3000, NULL);
   //fsm_led2.add_timed_transition(&state_led2_off, &state_led2_on, 1000, NULL);
   //fsm_led2.add_timed_transition(&state_led2_on, &state_led2_off, 2000, NULL);
+
+  //  void Fsm::add_transition(State* state_from, State* state_to, int event,
+  //  void (*on_transition)())
+  fsm.add_transition(
+      &input1Idle,  //  From State:
+      &input1SendingUpdate,  //  To State:
+      INPUT1_CHANGED,  //  Event:
+      NULL  //  On Transition:
+  );
+
+  //  void Fsm::add_timed_transition(State* state_from, State* state_to,
+  //  unsigned long interval, void (*on_transition)())
 
   fsm.add_transition(&state_led_off, &state_led_on, BUTTON_EVENT, NULL);
   fsm.add_timed_transition(&state_led_on, &state_led_off, 3000, NULL);
