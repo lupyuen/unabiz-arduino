@@ -3,14 +3,14 @@
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
       <config projectName="unabiz-arduino" targetName="test1" />
+      <config projectName="unabiz-arduino" targetName="unabiz_arduino" />
       <config projectName="unabiz-arduino" targetName="uno_SoftwareSerial" />
       <config projectName="unabiz-arduino" targetName="Radiocrafts_lib" />
-      <config projectName="unabiz-arduino" targetName="upload" />
+      <config projectName="unabiz-arduino" targetName="unabiz-arduino-upload" />
       <config projectName="unabiz-arduino" targetName="unabiz-arduino-serial" />
       <config projectName="unabiz-arduino" targetName="unabiz_arduino-size" />
       <config projectName="unabiz-arduino" targetName="uno_CORE" />
-      <config projectName="unabiz-arduino" targetName="unabiz-arduino-upload" />
-      <config projectName="unabiz-arduino" targetName="unabiz_arduino" />
+      <config projectName="unabiz-arduino" targetName="upload" />
     </generated>
   </component>
   <component name="CMakeSettings" AUTO_RELOAD="true">
@@ -20,9 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ebffe880-3357-410a-a5f5-319df22970a3" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/send-light-level/send-light-level.ino" afterPath="$PROJECT_DIR$/examples/send-light-level/send-light-level.ino" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/multitask/multitask.ino" afterPath="$PROJECT_DIR$/examples/multitask/multitask.ino" />
     </list>
     <list id="ad55bd70-da1c-4d53-95c1-ed41b622fb2d" name="New changelist" comment="" />
     <ignored path="unabiz-arduino.iws" />
@@ -48,17 +47,7 @@
         <entry file="file://$PROJECT_DIR$/SIGFOX.h">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="450">
-              <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Radiocrafts.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Radiocrafts.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="8" column="4" lean-forward="false" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
+              <caret line="28" column="0" lean-forward="false" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -76,11 +65,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="send-light-level.ino" pinned="false" current-in-tab="true">
+      <file leaf-file-name="send-light-level.ino" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/send-light-level/send-light-level.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="20" column="0" lean-forward="true" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+            <state relative-caret-position="486">
+              <caret line="27" column="19" lean-forward="false" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="multitask.ino" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/examples/multitask/multitask.ino">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="198">
+              <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -133,7 +132,7 @@
       <file leaf-file-name="Radiocrafts.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="10440">
+            <state relative-caret-position="10512">
               <caret line="584" column="19" lean-forward="false" selection-start-line="584" selection-start-column="19" selection-end-line="584" selection-end-column="19" />
               <folding />
             </state>
@@ -143,8 +142,8 @@
       <file leaf-file-name="send-temperature.ino" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/send-temperature/send-temperature.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="377">
-              <caret line="43" column="12" lean-forward="true" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
+            <state relative-caret-position="774">
+              <caret line="43" column="12" lean-forward="false" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
               <folding />
             </state>
           </provider>
@@ -187,6 +186,7 @@
         <option value="$PROJECT_DIR$/Akeru.h" />
         <option value="$PROJECT_DIR$/Radiocrafts.cpp" />
         <option value="$PROJECT_DIR$/examples/send-light-level/send-light-level.ino" />
+        <option value="$PROJECT_DIR$/examples/multitask/multitask.ino" />
       </list>
     </option>
   </component>
@@ -200,7 +200,7 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="72" />
     <option name="y" value="18" />
-    <option name="width" value="959" />
+    <option name="width" value="924" />
     <option name="height" value="1029" />
   </component>
   <component name="ProjectLevelVcsManager">
@@ -283,6 +283,24 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="unabiz-arduino" />
+              <option name="myItemType" value="com.jetbrains.cidr.projectView.CidrFilesViewHelper$MyProjectTreeStructure$1" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="unabiz-arduino" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="examples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="multitask" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -301,6 +319,134 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\unabiz-arduino\test" />
     </key>
+  </component>
+  <component name="RestoreUpdateTree" date="Moments ago" ActionInfo="_Update">
+    <UpdatedFiles>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Updated from server" />
+        <option name="myStatusName" value="Changed on server" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="CHANGED_ON_SERVER" />
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Updated" />
+          <option name="myStatusName" value="Changed" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="UPDATED" />
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/Message.cpp</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/Message.h</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/README.md</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/SIGFOX.h</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/Wisol.cpp</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/Wisol.h</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/DemoTestUnaShieldV2S/DemoTestUnaShieldV2S.ino</PATH>
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Created" />
+          <option name="myStatusName" value="Created" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="CREATED" />
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/DemoTestUnaShieldV2SRCZ3/DemoTestUnaShieldV2SRCZ3.ino</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/downlink/downlink.ino</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/multitask/multitask.ino</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude-structured/Adafruit_BME280.cpp</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude-structured/Adafruit_BME280.h</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude-structured/Adafruit_Sensor.h</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude-structured/send-altitude-structured.ino</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude/Adafruit_BME280.cpp</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude/Adafruit_BME280.h</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude/Adafruit_Sensor.h</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/examples/send-altitude/send-altitude.ino</PATH>
+          <PATH vcs="Git" revision="">$PROJECT_DIR$/test/unabiz-arduino.ino</PATH>
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Deleted" />
+          <option name="myStatusName" value="Deleted" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="true" />
+          <option name="myId" value="REMOVED_FROM_REPOSITORY" />
+        </FILE-GROUP>
+        <FILE-GROUP>
+          <option name="myUpdateName" value="Restored" />
+          <option name="myStatusName" value="Will be restored" />
+          <option name="mySupportsDeletion" value="false" />
+          <option name="myCanBeAbsent" value="false" />
+          <option name="myId" value="RESTORED" />
+        </FILE-GROUP>
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Modified" />
+        <option name="myStatusName" value="Modified" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MODIFIED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Skipped" />
+        <option name="myStatusName" value="Skipped" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="SKIPPED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with conflicts" />
+        <option name="myStatusName" value="Will be merged with conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_CONFLICTS" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with tree conflicts" />
+        <option name="myStatusName" value="Merged with tree conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_TREE_CONFLICT" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged with property conflicts" />
+        <option name="myStatusName" value="Will be merged with property conflicts" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED_WITH_PROPERTY_CONFLICT" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Merged" />
+        <option name="myStatusName" value="Will be merged" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="MERGED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Not in repository" />
+        <option name="myStatusName" value="Not in repository" />
+        <option name="mySupportsDeletion" value="true" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="UNKNOWN" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Locally added" />
+        <option name="myStatusName" value="Locally added" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="LOCALLY_ADDED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Locally removed" />
+        <option name="myStatusName" value="Locally removed" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="LOCALLY_REMOVED" />
+      </FILE-GROUP>
+      <FILE-GROUP>
+        <option name="myUpdateName" value="Switched" />
+        <option name="myStatusName" value="Switched" />
+        <option name="mySupportsDeletion" value="false" />
+        <option name="myCanBeAbsent" value="false" />
+        <option name="myId" value="SWITCHED" />
+      </FILE-GROUP>
+    </UpdatedFiles>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -563,14 +709,8 @@
       <workItem from="1481036677489" duration="8709000" />
       <workItem from="1493511496162" duration="623000" />
       <workItem from="1493521392286" duration="102000" />
-      <workItem from="1493916851836" duration="808000" />
-    </task>
-    <task id="LOCAL-00004" summary="Fixing Arduino build">
-      <created>1477936426138</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1477936426138</updated>
+      <workItem from="1493916851836" duration="2179000" />
+      <workItem from="1513491353979" duration="4505000" />
     </task>
     <task id="LOCAL-00005" summary="Fixing Arduino build">
       <created>1477936805729</created>
@@ -908,21 +1048,28 @@
       <option name="project" value="LOCAL" />
       <updated>1481044499577</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="Upgraded for UnaShieldV2S">
+      <created>1493917733459</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1493917733460</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="105579000" />
+    <option name="totallyTimeSpent" value="111455000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="72" y="18" width="959" height="1029" extended-state="0" />
+    <frame x="72" y="18" width="924" height="1029" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22358176" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22916667" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23448277" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3277311" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3275862" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Serial Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32893157" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -975,7 +1122,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Works OK on Windows" />
     <MESSAGE value="Converting Akeru to follow Radiocrafts API" />
     <MESSAGE value="Akeru compiles OK" />
     <MESSAGE value="For emulation mode, send message locally to another TD module using TD LAN mode." />
@@ -1000,7 +1146,8 @@
     <MESSAGE value="Refactored to reduce memory footprint for Bean+" />
     <MESSAGE value="Before adding BeanSoftwareSerial to fix Bean serial receive issue" />
     <MESSAGE value="Adding BeanSoftwareSerial to fix Bean serial receive issue" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding BeanSoftwareSerial to fix Bean serial receive issue" />
+    <MESSAGE value="Upgraded for UnaShieldV2S" />
+    <option name="LAST_COMMIT_MESSAGE" value="Upgraded for UnaShieldV2S" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1015,13 +1162,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/Radiocrafts.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="29" lean-forward="false" selection-start-line="8" selection-start-column="29" selection-end-line="8" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino/WString.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1710">
@@ -1248,7 +1388,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="198">
           <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1263,7 +1402,7 @@
     <entry file="file://$PROJECT_DIR$/SIGFOX.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
-          <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+          <caret line="28" column="0" lean-forward="false" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1316,7 +1455,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Radiocrafts.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="10440">
+        <state relative-caret-position="10512">
           <caret line="584" column="19" lean-forward="false" selection-start-line="584" selection-start-column="19" selection-end-line="584" selection-end-column="19" />
           <folding />
         </state>
@@ -1324,16 +1463,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/send-temperature/send-temperature.ino">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="377">
-          <caret line="43" column="12" lean-forward="true" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
+        <state relative-caret-position="774">
+          <caret line="43" column="12" lean-forward="false" selection-start-line="43" selection-start-column="12" selection-end-line="43" selection-end-column="12" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/send-light-level/send-light-level.ino">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="20" column="0" lean-forward="true" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+        <state relative-caret-position="486">
+          <caret line="27" column="19" lean-forward="false" selection-start-line="27" selection-start-column="19" selection-end-line="27" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/multitask/multitask.ino">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
           <folding />
         </state>
       </provider>

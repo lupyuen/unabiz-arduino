@@ -14,6 +14,42 @@
 
 #define LED1_PIN 10
 #define LED2_PIN 11
+#define BUTTON_EVENT  0
+
+int buttonState = 0;
+
+/* state 1:  led off
+ * state 2:  led on
+ * transition from s1 to s2 on button press
+ * transition back from s2 to s1 after 3 seconds or button press
+ */
+State state_led_off(&led_off, &check_button, NULL);
+State state_led_on(&led_on, &check_button, NULL);
+Fsm fsm(&state_led_off);
+
+// Transition functions
+void led_off()
+{
+  Serial.println("led_off");
+  digitalWrite(LED_PIN, LOW);
+}
+
+void led_on()
+{
+  Serial.println("led_on");
+  digitalWrite(LED_PIN, HIGH);
+}
+
+void check_button()
+{
+  int buttonState = digitalRead(BUTTON_PIN);
+  if (buttonState == LOW) {
+    Serial.println("button_pressed");
+    fsm.trigger(BUTTON_EVENT);
+  }
+}
+
+////////////////////////////////////////////
 
 void on_led1_on_enter() {
   Serial.println("on_led1_on_enter");
@@ -63,89 +99,92 @@ static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assume
 ////////////////////////////////////////////////////////////
 
 void setup() {  //  Will be called only once.
-    ////////////////////////////////////////////////////////////
-    //  Begin General Setup
+  ////////////////////////////////////////////////////////////
+  //  Begin General Setup
 
-    //  Initialize console so we can see debug messages (9600 bits per second).
-    Serial.begin(9600);  Serial.println(F("Running setup..."));
+  //  Initialize console so we can see debug messages (9600 bits per second).
+  Serial.begin(9600);  Serial.println(F("Running setup..."));
 
-    //  Initialize the onboard LED at D13 for output.
-    pinMode(LED_BUILTIN, OUTPUT);
+  //  Initialize the onboard LED at D13 for output.
+  pinMode(LED_BUILTIN, OUTPUT);
 
-    //  End General Setup
-    ////////////////////////////////////////////////////////////
+  //  End General Setup
+  ////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////
-    //  Begin Sensor Setup
+  ////////////////////////////////////////////////////////////
+  //  Begin Sensor Setup
 
-    fsm_led1.add_timed_transition(&state_led1_off, &state_led1_on, 1000, NULL);
-    fsm_led1.add_timed_transition(&state_led1_on, &state_led1_off, 3000, NULL);
-    fsm_led2.add_timed_transition(&state_led2_off, &state_led2_on, 1000, NULL);
-    fsm_led2.add_timed_transition(&state_led2_on, &state_led2_off, 2000, NULL);
+  //fsm_led1.add_timed_transition(&state_led1_off, &state_led1_on, 1000, NULL);
+  //fsm_led1.add_timed_transition(&state_led1_on, &state_led1_off, 3000, NULL);
+  //fsm_led2.add_timed_transition(&state_led2_off, &state_led2_on, 1000, NULL);
+  //fsm_led2.add_timed_transition(&state_led2_on, &state_led2_off, 2000, NULL);
 
-    //  End Sensor Setup
-    ////////////////////////////////////////////////////////////
+  fsm.add_transition(&state_led_off, &state_led_on, BUTTON_EVENT, NULL);
+  fsm.add_timed_transition(&state_led_on, &state_led_off, 3000, NULL);
+  fsm.add_transition(&state_led_on, &state_led_off, BUTTON_EVENT, NULL);
 
-    ////////////////////////////////////////////////////////////
-    //  Begin SIGFOX Module Setup
+  //  End Sensor Setup
+  ////////////////////////////////////////////////////////////
 
-    //  Check whether the SIGFOX module is functioning.
-    if (!transceiver.begin()) stop("Unable to init SIGFOX module, may be missing");  //  Will never return.
+  ////////////////////////////////////////////////////////////
+  //  Begin SIGFOX Module Setup
 
-    //  End SIGFOX Module Setup
-    ////////////////////////////////////////////////////////////
+  //  Check whether the SIGFOX module is functioning.
+  if (!transceiver.begin()) stop("Unable to init SIGFOX module, may be missing");  //  Will never return.
+
+  //  End SIGFOX Module Setup
+  ////////////////////////////////////////////////////////////
 }
 
 void loop() {  //  Will be called repeatedly.
-    ////////////////////////////////////////////////////////////
-    //  Begin Sensor Loop
+  ////////////////////////////////////////////////////////////
+  //  Begin Sensor Loop
 
-    fsm_led1.run_machine();
-    fsm_led2.run_machine();
-    delay(200);
+  fsm.run_machine();
+  delay(100);
 
-    //  End Sensor Loop
-    ////////////////////////////////////////////////////////////
+  //  End Sensor Loop
+  ////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////
-    //  Begin SIGFOX Module Loop
+  ////////////////////////////////////////////////////////////
+  //  Begin SIGFOX Module Loop
 
-    //  Send temperature, pressure, altitude as a SIGFOX message.
-    static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
-    Serial.print(F("\nRunning loop #")); Serial.println(counter);
+  //  Send temperature, pressure, altitude as a SIGFOX message.
+  static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
+  Serial.print(F("\nRunning loop #")); Serial.println(counter);
 
-    //  Compose the Structured Message contain field names and values, total 12 bytes.
-    //  This requires a decoding function in the receiving cloud (e.g. Google Cloud) to decode the message.
-    //  If you wish to use Sigfox Custom Payload format, look at the sample sketch "send-altitude".
-    Message msg(transceiver);  //  Will contain the structured sensor data.
-    msg.addField("tmp", scaledTemp);  //  4 bytes for the temperature (1 decimal place).
-    msg.addField("hmd", scaledHumidity);  //  4 bytes for the humidity (1 decimal place).
-    msg.addField("alt", scaledAltitude);  //  4 bytes for the altitude (1 decimal place).
-    //  Total 12 bytes out of 12 bytes used.
+  //  Compose the Structured Message contain field names and values, total 12 bytes.
+  //  This requires a decoding function in the receiving cloud (e.g. Google Cloud) to decode the message.
+  //  If you wish to use Sigfox Custom Payload format, look at the sample sketch "send-altitude".
+  Message msg(transceiver);  //  Will contain the structured sensor data.
+  msg.addField("tmp", scaledTemp);  //  4 bytes for the temperature (1 decimal place).
+  msg.addField("hmd", scaledHumidity);  //  4 bytes for the humidity (1 decimal place).
+  msg.addField("alt", scaledAltitude);  //  4 bytes for the altitude (1 decimal place).
+  //  Total 12 bytes out of 12 bytes used.
 
-    //  Send the encoded structured message.
-    if (msg.send()) {
-        successCount++;  //  If successful, count the message sent successfully.
-    } else {
-        failCount++;  //  If failed, count the message that could not be sent.
-    }
-    counter++;
+  //  Send the encoded structured message.
+  if (msg.send()) {
+    successCount++;  //  If successful, count the message sent successfully.
+  } else {
+    failCount++;  //  If failed, count the message that could not be sent.
+  }
+  counter++;
 
-    //  Flash the LED on and off at every iteration so we know the sketch is still running.
-    if (counter % 2 == 0) {
-        digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED on (HIGH is the voltage level).
-    } else {
-        digitalWrite(LED_BUILTIN, LOW);   // Turn the LED off (LOW is the voltage level).
-    }
+  //  Flash the LED on and off at every iteration so we know the sketch is still running.
+  if (counter % 2 == 0) {
+    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED on (HIGH is the voltage level).
+  } else {
+    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED off (LOW is the voltage level).
+  }
 
-    //  Show updates every 10 messages.
-    if (counter % 10 == 0) {
-        Serial.print(F("Messages sent successfully: "));   Serial.print(successCount);
-        Serial.print(F(", failed: "));  Serial.println(failCount);
-    }
+  //  Show updates every 10 messages.
+  if (counter % 10 == 0) {
+    Serial.print(F("Messages sent successfully: "));   Serial.print(successCount);
+    Serial.print(F(", failed: "));  Serial.println(failCount);
+  }
 
-    //  End SIGFOX Module Loop
-    ////////////////////////////////////////////////////////////
+  //  End SIGFOX Module Loop
+  ////////////////////////////////////////////////////////////
 }
 /* Expected Output:
  */
