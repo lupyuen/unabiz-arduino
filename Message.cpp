@@ -41,7 +41,7 @@ static char decodeLetter(uint8_t code) {
 static String doubleToString(double d) {
   //  Convert double to string, since Bean+ doesn't support double in Strings.
   //  Assume 1 decimal place.
-  String result = String((int) (d * 10.0)) + '.' + String(((int) (d * 10.0)) % 10);
+  String result = String((int) (d)) + '.' + String(((int) (d * 10.0)) % 10);
   return result;
 }
 
@@ -144,6 +144,22 @@ bool Message::send() {
     return false;
   }
   if (wisol) return wisol->sendMessage(msg);
+  else if (radiocrafts) return radiocrafts->sendMessage(msg);
+  return false;
+}
+
+bool Message::sendAndGetResponse(String &response) {
+  //  Send the structured message and get the downlink response.
+  String msg = getEncodedMessage();
+  if (msg.length() == 0) {
+    echo("****ERROR: Nothing to send");  //  TODO: Move to Flash.
+    return false;
+  }
+  if (msg.length() > MAX_BYTES_PER_MESSAGE * 2) {
+    echo(tooLong + (encodedMessage.length() / 2) + " bytes");
+    return false;
+  }
+  if (wisol) return wisol->sendMessageAndGetResponse(msg, response);
   else if (radiocrafts) return radiocrafts->sendMessage(msg);
   return false;
 }

@@ -21,6 +21,7 @@
 #define CMD_PRESEND "AT$GI?"  //  For RCZ2, 4: Send this command before sending messages.  Returns X,Y.
 #define CMD_PRESEND2 "AT$RC"  //  For RCZ2, 4: Send this command if presend returns X=0 or Y<3.
 #define CMD_SEND_MESSAGE "AT$SF="  //  Prefix to send a message to SIGFOX cloud.
+#define CMD_SEND_MESSAGE_RESPONSE ",1"  //  Expect downlink response from SIGFOX.
 #define CMD_GET_ID "AT$I=10"  //  Get SIGFOX device ID.
 #define CMD_GET_PAC "AT$I=11"  //  Get SIGFOX device PAC, used for registering the device.
 #define CMD_GET_TEMPERATURE "AT$T?"  //  Get the module temperature.
@@ -29,11 +30,14 @@
 #define CMD_SLEEP "AT$P=1"  //  TODO: Switch to sleep mode : consumption is < 1.5uA
 #define CMD_WAKEUP "AT$P=0"  //  TODO: Switch back to normal mode : consumption is 0.5 mA
 #define CMD_END "\r"
-#define CMD_RCZ1 "AT$IF=868130000"  //  EU Frequency
-#define CMD_RCZ2 "AT$IF=902200000"  //  US Frequency
+#define CMD_RCZ1 "AT$IF=868130000"  //  EU / RCZ1 Frequency
+#define CMD_RCZ2 "AT$IF=902200000"  //  US / RCZ2 Frequency
+#define CMD_RCZ3 "AT$IF=902080000"  //  JP / RCZ3 Frequency
 #define CMD_RCZ4 "AT$IF=920800000"  //  RCZ4 Frequency
 #define CMD_MODULATION_ON "AT$CB=-1,1"  //  Modulation wave on.
 #define CMD_MODULATION_OFF "AT$CB=-1,0"  //  Modulation wave off.
+#define CMD_EMULATOR_DISABLE "ATS410=0"  //  Device will only talk to Sigfox network.
+#define CMD_EMULATOR_ENABLE "ATS410=1"  //  Device will only talk to SNEK emulator.
 
 static NullPort nullPort;
 static uint8_t markers = 0;
@@ -52,7 +56,6 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
   //  expect to see.  actualMarkerCount contains the actual number seen.
   log2(F(" - Wisol.sendBuffer: "), buffer);
   response = "";
-  if (useEmulator) return true;
 
   actualMarkerCount = 0;
   //  Start serial interface.
@@ -105,7 +108,6 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
         response.concat(String((char) rxChar));
       }
     }
-    //  TODO: Check for downlink response.
   }
   serialPort->end();
   //  Log the actual bytes sent and received.
@@ -124,7 +126,6 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
     return false;
   }
   log2(F(" - Wisol.sendBuffer: response: "), response);
-  //  TODO: Parse the downlink response.
   return true;
 }
 
@@ -147,10 +148,36 @@ bool Wisol::sendMessage(const String &payload) {
   return false;
 }
 
+bool Wisol::sendMessageAndGetResponse(const String &payload, String &response) {
+  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
+  //  We prefix with AT$SF= and send to SIGFOX.  Return response message from Sigfox in the response parameter.
+  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
+  if (!isReady()) return false;  //  Prevent user from sending too many messages.
+  //  Exit command mode and prepare to send message.
+  if (!exitCommandMode()) return false;
+  //  Set the output power for the zone.
+  if (!setOutputPower()) return false;
+  //  Send the data.
+  String message = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END, data;
+  //  Two '\r' markers expected ("OK\r RX=...\r").
+  if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 2, data, markers)) {
+    log1(data);
+    lastSend = millis();
+    response = data;
+    //  Response contains OK\nRX=01 23 45 67 89 AB CD EF
+    //  Remove the prefix and spaces.
+    response.replace("OK\nRX=", "");
+    response.replace(" ", "");
+    return true;
+  }
+  return false;
+}
+
 bool Wisol::setOutputPower() {
   //  Set the output power for the zone before sending a message.
   switch(zone) {
     case 1:  //  RCZ1
+    case 3:  //  RCZ3
       if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers)) return false;
       break;
     case 2:  //  RCZ2
@@ -163,8 +190,6 @@ bool Wisol::setOutputPower() {
       if (x == 0 || y < 3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers);
       break;
     }
-    case 3:  //  TODO: RCZ3
-      break;
     default:
       log2(F(" - Wisol.setOutputPower: Unknown zone "), zone);
       return false;
@@ -186,7 +211,6 @@ bool Wisol::exitCommandMode() {
 
 bool Wisol::getID(String &id, String &pac) {
   //  Get the SIGFOX ID and PAC for the module.
-  if (useEmulator) { id = device; return true; }
   if (!sendCommand(String(CMD_GET_ID) + CMD_END, 1, data, markers)) return false;
   id = data;
   device = id;
@@ -198,7 +222,6 @@ bool Wisol::getID(String &id, String &pac) {
 
 bool Wisol::getTemperature(float &temperature) {
   //  Returns the temperature of the SIGFOX module.
-  if (useEmulator) { temperature = 36; return true; }
   if (!sendCommand(String(CMD_GET_TEMPERATURE) + CMD_END, 1, data, markers)) return false;
   temperature = data.toInt() / 10.0;
   log2(F(" - Wisol.getTemperature: returned "), temperature);
@@ -207,7 +230,6 @@ bool Wisol::getTemperature(float &temperature) {
 
 bool Wisol::getVoltage(float &voltage) {
   //  Returns the power supply voltage.
-  if (useEmulator) { voltage = 12.3; return true; }
   if (!sendCommand(String(CMD_GET_VOLTAGE) + CMD_END, 1, data, markers)) return false;
   voltage = data.toFloat() / 1000.0;
   log2(F(" - Wisol.getVoltage: returned "), voltage);
@@ -254,6 +276,7 @@ bool Wisol::getEmulator(int &result) {
   //  0 = Emulator disabled (sending to SIGFOX network with unique ID & key)
   //  1 = Emulator enabled (sending to emulator with public ID & key)
   //  We assume not using emulator.
+  //  TODO: Return the actual value.
   result = 0;
   return true;
 }
@@ -261,14 +284,17 @@ bool Wisol::getEmulator(int &result) {
 bool Wisol::disableEmulator(String &result) {
   //  Set the module key to the unique SIGFOX key.  This is needed for sending
   //  to a real SIGFOX base station.
-  //  We assume not using emulator.
+  log1(F(" - Disabling SNEK emulation mode..."));
+  if (!sendCommand(String(CMD_EMULATOR_DISABLE) + CMD_END, 1, data, markers)) return false;
   return true;
 }
 
 bool Wisol::enableEmulator(String &result) {
   //  Set the module key to the public key.  This is needed for sending
   //  to an emulator.
-  log1(F(" - Wisol.enableEmulator: ERROR - Not implemented"));
+  log1(F(" - Enabling SNEK emulation mode..."));
+  log1(F(" - WARNING: SNEK emulation mode will NOT work with a Sigfox network"));
+  if (!sendCommand(String(CMD_EMULATOR_ENABLE) + CMD_END, 1, data, markers)) return false;
   return true;
 }
 
@@ -276,6 +302,7 @@ bool Wisol::getFrequency(String &result) {
   //  Get the frequency used for the SIGFOX module
   //  1: Europe (RCZ1)
   //  2: US (RCZ2)
+  //  3: JP (RCZ3)
   //  4: SG, TW, AU, NZ (RCZ4)
   //  log1(F(" - Wisol.getFrequency: ERROR - Not implemented"));
   result = String(zone + '0');
@@ -286,6 +313,7 @@ bool Wisol::setFrequency(int zone0, String &result) {
   //  Get the frequency used for the SIGFOX module
   //  1: Europe (RCZ1)
   //  2: US (RCZ2)
+  //  3: JP (RCZ3)
   //  4: AU/NZ (RCZ4)
   zone = zone0;
   switch(zone) {
@@ -298,11 +326,14 @@ bool Wisol::setFrequency(int zone0, String &result) {
       // if (!sendCommand(String(CMD_RCZ2) + CMD_END, 1, data, markers)) return false;
       // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
       break;
+    case 3:  //  RCZ3
+      // if (!sendCommand(String(CMD_RCZ3) + CMD_END, 1, data, markers)) return false;
+      // if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers)) return false;
+      // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
+      break;
     case 4:  //  RCZ4
       // if (!sendCommand(String(CMD_RCZ4) + CMD_END, 1, data, markers)) return false;
       // if (!sendCommand(String(CMD_MODULATION_ON) + CMD_END, 1, data, markers)) return false;
-      break;
-    case 3:  //  TODO: RCZ3
       break;
     default:
       log2(F(" - Wisol.setFrequency: Unknown zone "), zone);
@@ -332,6 +363,11 @@ bool Wisol::setFrequencyUS(String &result) {
   //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
   log1(F(" - Wisol.setFrequencyUS"));
   return setFrequency(2, result); }
+
+bool Wisol::setFrequencyJP(String &result) {
+  //  Set the frequency for the SIGFOX module to US frequency (RCZ2).
+  log1(F(" - Wisol.setFrequencyJP"));
+  return setFrequency(3, result); }
 
 bool Wisol::reboot(String &result) {
   //  Software reset the module.
@@ -393,13 +429,11 @@ bool Wisol::begin() {
       if (!enableEmulator(result)) continue;
     } else {
       //  Disable emulation mode.
-      log1(F(" - Disabling emulation mode..."));
       if (!disableEmulator(result)) continue;
-
-      //  Check whether emulator is used for transmission.
-      log1(F(" - Checking emulation mode (expecting 0)...")); int emulator = 0;
-      if (!getEmulator(emulator)) continue;
     }
+    //  TODO: Check whether emulator is used for transmission.
+    //  log1(F(" - Checking emulation mode (expecting 0)...")); int emulator = 0;
+    //  if (!getEmulator(emulator)) continue;
 
     //  Read SIGFOX ID and PAC from module.
     log1(F(" - Getting SIGFOX ID..."));  String id, pac;
@@ -411,9 +445,14 @@ bool Wisol::begin() {
     // log1(F(" - Setting frequency for country "));
     // echoPort->write((uint8_t) (country / 8));
     // echoPort->write((uint8_t) (country % 8));
-    if (country == COUNTRY_US) {  //  US runs on different frequency (RCZ2).
+    if (country == COUNTRY_JP) {  //  Set Japan frequency (RCZ3).
+      if (!setFrequencyJP(result)) continue;
+    } else if (country == COUNTRY_US) {  //  Set US frequency (RCZ2).
       if (!setFrequencyUS(result)) continue;
-    } else if (country == COUNTRY_FR) {  //  France runs on different frequency (RCZ1).
+    } else if (
+      country == COUNTRY_FR
+      || country == COUNTRY_OM
+      || country == COUNTRY_SA) {  //  Set France frequency (RCZ1).
       if (!setFrequencyETSI(result)) continue;
     } else { //  Rest of the world runs on RCZ4.
       if (!setFrequencySG(result)) continue;

@@ -20,6 +20,7 @@ public:
   bool addField(const String name, double value);  //  Add a double field with 1 decimal place.
   bool addField(const String name, const String value);  //  Add a string field with max 3 chars.
   bool send();  //  Send the structured message.
+  bool sendAndGetResponse(String &response);  //  Send the structured message and get the downlink response.
   String getEncodedMessage();  //  Return the encoded message to be transmitted.
   static String decodeMessage(String msg);  //  Decode the encoded message.
 
