@@ -43,6 +43,8 @@ void checkInput1();
 void checkInput2();
 void checkInput3();
 void checkPin(Fsm *fsm, int inputNum, int inputPin);
+void whenTransceiverIdle();
+void whenTransceiverSending();
 
 //  Declare the Finite State Machine States for each input and for the Sigfox transceiver.
 //  Each state has 3 properties:
@@ -58,10 +60,10 @@ State input1Sending(  0,     0,                  0);  // In "Sending" state, we 
 //State input2Sending(  0,     0,                  0);  // checking the input temporarily
 //State input3Sending(  0,     0,                  0);  // while the transceiver is sending.
 
-//    Name of state       When entering state       Inside   When exiting state
-State transceiverIdle(    &whenTransceiverIdle,     0,       0);  // Transceiver is idle until any input changes.
-State transceiverSending( &whenTransceiverSending,  0,       0);  // Transceiver enters "Sending" state to send changed inputs.
-State transceiverSent(    &whenTransceiverSent,     0,       0);  // After sending, it waits 2.1 seconds in "Sent" state before going to "Idle" state.
+//    Name of state       Enter  When inside state         When exiting state
+State transceiverIdle(    0,     &whenTransceiverIdle,     0);  // Transceiver is idle until any input changes.
+State transceiverSending( 0,     &whenTransceiverSending,  0);  // Transceiver enters "Sending" state to send changed inputs.
+State transceiverSent(    0,     0,                        0);  // After sending, it waits 2.1 seconds in "Sent" state before going to "Idle" state.
 
 //  Declare the Finite State Machines for each input and for the Sigfox transceiver.
 //  Name of Finite State Machine    Starting state
@@ -179,7 +181,7 @@ void whenTransceiverSending() {
   pendingResend = 0; //  Clear the pending resend count, so we will know when transceiver has been asked to resend.
   static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
   Serial.print(F("\nTransceiver Sending message #")); Serial.println(counter);
-  if (true /* msg.send() */) {
+  if (msg.send()) {
     successCount++;  //  If successful, count the message sent successfully.
   } else {
     failCount++;  //  If failed, count the message that could not be sent.
@@ -199,13 +201,8 @@ void whenTransceiverSending() {
     Serial.print(F(", failed: "));  Serial.println(failCount);
   }
   //  Switch the transceiver to the "Sent" state, which waits 2.1 seconds before next send.
-  Serial.println("Transceiver triggering INPUT_SENT");
+  Serial.println("Transceiver Sending completed, now triggering INPUT_SENT and pausing...");
   transceiverFsm.trigger(INPUT_SENT);
-}
-
-void whenTransceiverSent() {
-  //  Transceiver is now in the "Sent" state, which waits 2.1 seconds before next send.
-  Serial.println("Transceiver Sent, now pausing...");
 }
 
 void whenTransceiverIdle() {
@@ -213,8 +210,6 @@ void whenTransceiverIdle() {
   if (pendingResend > 0) {
     Serial.println("Transceiver Idle, sending pending requests...");
     transceiverFsm.trigger(INPUT_CHANGED);
-  } else {
-    Serial.println("Transceiver Idle, no pending requests");
   }
 }
 
