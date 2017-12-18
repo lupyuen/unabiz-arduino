@@ -1,6 +1,6 @@
 //  Send sensor data from 3 Digital Input ports on the Arduino as a Structured Sigfox message,
 //  using the UnaBiz UnaShield V2S Arduino Shield. Data is sent as soon as the values have
-//  changed, or when no data has been sent for 20 seconds. The Arduino Uno onboard LED will flash every
+//  changed, or when no data has been sent for 30 seconds. The Arduino Uno onboard LED will flash every
 //  few seconds when the sketch is running properly. The program manages
 //  multitasking by using a Finite State Machine: https://github.com/jonblack/arduino-fsm
 //
@@ -185,8 +185,8 @@ void addTransceiverTransitions() {
   //  From state           To state             Interval (millisecs) When transitioning states
   transceiverFsm.add_timed_transition(                               //  Wait 2.1 seconds before next send.  Else the transceiver library will reject the send.
       &transceiverSent,    &transceiverIdle,    2.1 * 1000,          &transceiverSentToIdle);
-  transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 10 seconds, send the inputs.
-      &transceiverIdle,    &transceiverSending, 10 * 1000,           &transceiverIdleToSending);
+  transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 30 seconds, send the inputs.
+      &transceiverIdle,    &transceiverSending, 30 * 1000,           &transceiverIdleToSending);
 }
 
 void whenTransceiverSending() {
