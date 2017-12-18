@@ -64,6 +64,7 @@ void whenTransceiverIdle(); void whenTransceiverSending();
 //  "When Entering State" - The function to run when entering this state
 //  "When Inside State" - The function to run repeatedly when we are in this state
 //  "When Exiting State" - The function to run when exiting this state and entering another state.
+//  Refer to the diagram: https://github.com/UnaBiz/unabiz-arduino/blob/master/examples/multiple_inputs/finite_state_machine.png
 
 //    Name of state   Enter  When inside state   Exit
 State input1Idle(     0,     &checkInput1,       0);  // In "Idle" state, we check
@@ -299,7 +300,7 @@ Running setup...
  - Wisol.sendBuffer: ATS410=0
 
 >> ATS410=0
- 
+
 << OK0x0d
  - Wisol.sendBuffer: response: OK
  - Getting SIGFOX ID...
@@ -334,13 +335,13 @@ Transceiver Sending message #0
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
- 
-<< 1,3 
+
+<< 1,3
  - Wisol.sendBuffer: response: 1,3
  - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00
 
 >> AT$SF=fc4e6400fd4e0a00fe4e0a00
- 
+
 << OK0x0d
  - Wisol.sendBuffer: response: OK
 OK
@@ -359,8 +360,8 @@ Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
- 
-<< 1,0 
+
+<< 1,0
  - Wisol.sendBuffer: response: 1,0
  - Wisol.sendBuffer: AT$RC
 
@@ -370,7 +371,7 @@ Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00
 
 >> AT$SF=fc4e6400fd4e0a00fe4e0a00
- 
+
 << OK0x0d
  - Wisol.sendBuffer: response: OK
 OK
@@ -391,13 +392,13 @@ Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
- 
-<< 1,3 
+
+<< 1,3
  - Wisol.sendBuffer: response: 1,3
  - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00
 
 >> AT$SF=fc4e0a00fd4e0a00fe4e0a00
- 
+
 << OK0x0d
  - Wisol.sendBuffer: response: OK
 OK
@@ -420,8 +421,8 @@ Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
- 
-<< 1,0 
+
+<< 1,0
  - Wisol.sendBuffer: response: 1,0
  - Wisol.sendBuffer: AT$RC
 
@@ -431,7 +432,7 @@ Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00
 
 >> AT$SF=fc4e6400fd4e0a00fe4e0a00
- 
+
 << OK0x0d
  - Wisol.sendBuffer: response: OK
 OK
@@ -452,13 +453,13 @@ Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
- 
-<< 1,3 
+
+<< 1,3
  - Wisol.sendBuffer: response: 1,3
  - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00
 
 >> AT$SF=fc4e0a00fd4e0a00fe4e0a00
- 
+
 << OK0x0d
  - Wisol.sendBuffer: response: OK
 OK
@@ -481,8 +482,8 @@ Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
- 
-<< 1,0 
+
+<< 1,0
  - Wisol.sendBuffer: response: 1,0
  - Wisol.sendBuffer: AT$RC
 
