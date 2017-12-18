@@ -29,6 +29,12 @@ static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assume
 
 #include "Fsm.h"  //  If missing, install from https://github.com/jonblack/arduino-fsm
 
+//  TODO: When sending the input data, we will multiply by SEND_INPUT_MULTIPLIER and add SEND_INPUT_OFFSET
+//  So input value "0" will be sent as "1" and input value "1" will be sent as "10".
+//  This is workaround a bug in Structured Message Decoder that doesn't decode "0" properly.
+static const int SEND_INPUT_MULTIPLIER = 9;
+static const int SEND_INPUT_OFFSET = 1;
+
 //  TODO: Enter the Digital Pins to be checked, up to three pins allowed.
 static const int DIGITAL_INPUT_PIN1 = 6;  //  Check for input on D6, which is connected to the pushbutton on the UnaShield V2S.
 static const int DIGITAL_INPUT_PIN2 = -1;  //  Currently unused.
@@ -38,13 +44,13 @@ static const int DIGITAL_INPUT_PIN3 = -1;  //  Currently unused.
 static const int INPUT_CHANGED = 1;
 static const int INPUT_SENT = 2;
 
-//  Declare the state functions that we will define later.
-void checkInput1();
-void checkInput2();
-void checkInput3();
+//  Declare the Finite State Machine Functions that we will define later.
+void checkInput1(); void checkInput2(); void checkInput3();
+void input1IdleToSending(); void input2IdleToSending(); void input3IdleToSending();
+void input1SendingToIdle(); void input2SendingToIdle(); void input3SendingToIdle();
+void input1IdleToIdle(); void input2IdleToIdle(); void input3IdleToIdle();
 void checkPin(Fsm *fsm, int inputNum, int inputPin);
-void whenTransceiverIdle();
-void whenTransceiverSending();
+void whenTransceiverIdle(); void whenTransceiverSending();
 
 //  Declare the Finite State Machine States for each input and for the Sigfox transceiver.
 //  Each state has 3 properties:
@@ -54,11 +60,11 @@ void whenTransceiverSending();
 
 //    Name of state   Enter  When inside state   Exit
 State input1Idle(     0,     &checkInput1,       0);  // In "Idle" state, we check
-//State input2Idle(    0,    &checkInput2,       0);  // the input repeatedly for changes.
-//State input3Idle(    0,    &checkInput3,       0);
+State input2Idle(     0,     &checkInput2,       0);  // the input repeatedly for changes.
+State input3Idle(     0,     &checkInput3,       0);
 State input1Sending(  0,     0,                  0);  // In "Sending" state, we stop
-//State input2Sending(  0,     0,                  0);  // checking the input temporarily
-//State input3Sending(  0,     0,                  0);  // while the transceiver is sending.
+State input2Sending(  0,     0,                  0);  // checking the input temporarily
+State input3Sending(  0,     0,                  0);  // while the transceiver is sending.
 
 //    Name of state       Enter  When inside state         When exiting state
 State transceiverIdle(    0,     &whenTransceiverIdle,     0);  // Transceiver is idle until any input changes.
@@ -68,8 +74,8 @@ State transceiverSent(    0,     0,                        0);  // After sending
 //  Declare the Finite State Machines for each input and for the Sigfox transceiver.
 //  Name of Finite State Machine    Starting state
 Fsm input1Fsm(                      &input1Idle);
-// Fsm input2Fsm(                   &input2Idle);
-// Fsm input3Fsm(                   &input3Idle);
+Fsm input2Fsm(                      &input2Idle);
+Fsm input3Fsm(                      &input3Idle);
 Fsm transceiverFsm(                 &transceiverIdle);
 
 int lastInputValues[] = {0, 0, 0};  //  Remember the last value of each input.
@@ -82,65 +88,78 @@ void addSensorTransitions() {
   //  "Triggering Event" - The event that will trigger the transition.
   //  "When Transitioning States" - The function to run when the state transition occurs.
 
-  //                        From state      To state        Triggering event When transitioning states
-  input1Fsm.add_transition( &input1Idle,    &input1Sending, INPUT_CHANGED,   0); // If the input has changed while
-  //input2Fsm.add_transition( &input2Idle,    &input2Sending, INPUT_CHANGED,   0); // in the "Idle" state, send the input
-  //input3Fsm.add_transition( &input3Idle,    &input3Sending, INPUT_CHANGED,   0); // and go to the "Sending" state, which will temporarily stop checking the input.
+  //                        From state   To state        Triggering event When transitioning states
+  input1Fsm.add_transition( &input1Idle, &input1Sending, INPUT_CHANGED,   &input1IdleToSending); // If the input has changed while
+  input2Fsm.add_transition( &input2Idle, &input2Sending, INPUT_CHANGED,   &input2IdleToSending); // in the "Idle" state, send the input
+  input3Fsm.add_transition( &input3Idle, &input3Sending, INPUT_CHANGED,   &input3IdleToSending); // and go to the "Sending" state, which will temporarily stop checking the input.
 
-  input1Fsm.add_transition( &input1Sending, &input1Idle,    INPUT_SENT,      0); // If we are in the "Sending" state and
-  //input2Fsm.add_transition( &input2Sending, &input2Idle,    INPUT_SENT,      0); // transceiver notifies us that the input
-  //input3Fsm.add_transition( &input3Sending, &input3Idle,    INPUT_SENT,      0); // has been sent, go into "Idle" state and resume checking the input.
+  input1Fsm.add_transition( &input1Sending, &input1Idle, INPUT_SENT,      &input1SendingToIdle); // If we are in the "Sending" state and
+  input2Fsm.add_transition( &input2Sending, &input2Idle, INPUT_SENT,      &input2SendingToIdle); // transceiver notifies us that the input
+  input3Fsm.add_transition( &input3Sending, &input3Idle, INPUT_SENT,      &input3SendingToIdle); // has been sent, go into "Idle" state and resume checking the input.
 
-  input1Fsm.add_transition( &input1Idle,    &input1Idle,    INPUT_SENT,      0); //  If the input has been sent and
-  //input2Fsm.add_transition( &input2Idle,    &input2Idle,    INPUT_SENT,      0); // we are in "Idle" state, do nothing.
-  //input3Fsm.add_transition( &input3Idle,    &input3Idle,    INPUT_SENT,      0);
+  input1Fsm.add_transition( &input1Idle, &input1Idle,    INPUT_SENT,      &input1IdleToIdle); //  If the input has been sent and
+  input2Fsm.add_transition( &input2Idle, &input2Idle,    INPUT_SENT,      &input2IdleToIdle); // we are in "Idle" state, do nothing.
+  input3Fsm.add_transition( &input3Idle, &input3Idle,    INPUT_SENT,      &input3IdleToIdle);
 }
 
 void initSensors() {
-  //  Initialise the sensors here.
+  //  Initialise the sensors here, if necessary.
 }
 
 //  Check the inputs #1, #2, #3.  If any input has changed, trigger the INPUT_CHANGED event.
 void checkInput1() { checkPin(&input1Fsm, 0, DIGITAL_INPUT_PIN1); }
-// void checkInput2() { checkPin(&input2Fsm, 1, DIGITAL_INPUT_PIN2); }
-// void checkInput3() { checkPin(&input3Fsm, 2, DIGITAL_INPUT_PIN3); }
+void checkInput2() { checkPin(&input2Fsm, 1, DIGITAL_INPUT_PIN2); }
+void checkInput3() { checkPin(&input3Fsm, 2, DIGITAL_INPUT_PIN3); }
 
 Message composeSensorMessage() {
   //  Compose the Structured Message contain field names and values, total 12 bytes.
   //  This requires a decoding function in the receiving cloud (e.g. Google Cloud) to decode the message.
   //  This is called when the transceiver is ready to send a message.
   //  We will send the 3 inputs as sensor fields named "sw1", "sw2", "sw3".
-
+  //  We will multply by SEND_INPUT_MULTIPLIER and add SEND_INPUT_OFFSET before sending.
   Serial.println("Composing sensor message...");
   Message msg(transceiver);  //  Will contain the structured sensor data.
-  msg.addField("sw1", lastInputValues[0]);  //  4 bytes for the first input.
-  msg.addField("sw2", lastInputValues[1]);  //  4 bytes for the second input.
-  msg.addField("sw3", lastInputValues[2]);  //  4 bytes for the third input.
+  msg.addField("sw1", (lastInputValues[0] * SEND_INPUT_MULTIPLIER) + SEND_INPUT_OFFSET);  //  4 bytes for the first input.
+  msg.addField("sw2", (lastInputValues[1] * SEND_INPUT_MULTIPLIER) + SEND_INPUT_OFFSET);  //  4 bytes for the second input.
+  msg.addField("sw3", (lastInputValues[2] * SEND_INPUT_MULTIPLIER) + SEND_INPUT_OFFSET);  //  4 bytes for the third input.
   //  Total 12 bytes out of 12 bytes used.
   return msg;
 }
 
 void checkPin(Fsm *fsm, int inputNum, int inputPin) {
   //  Check whether input #inputNum has changed. If so, trigger the INPUT_CHANGED event.
+  //  inputNum is in the range 0 to 2.
   //  Read the input pin.
   int inputValue = digitalRead(inputPin);
   int lastInputValue = lastInputValues[inputNum];
   //  Update the lastInputValues, which transceiver will use for sending.
-  lastInputValues[inputNum] = lastInputValue;
+  lastInputValues[inputNum] = inputValue;
   //  Compare the new and old values of the input.
   if (inputValue != lastInputValue) {
     //  If changed, trigger a transition.
-    Serial.print("Pin "); Serial.print(inputPin);
+    Serial.print("Input #"); Serial.print(inputNum + 1);
+    Serial.print(" Pin "); Serial.print(inputPin);
     Serial.print(" changed from "); Serial.print(lastInputValue);
     Serial.print(" to "); Serial.println(inputValue);
     //  Transition from "Idle" state to "Sending" state, which will temporarily stop checking the input.
-    Serial.print("Pin "); Serial.print(inputPin);
+    Serial.print("Input #"); Serial.print(inputNum + 1);
     Serial.println(" triggering INPUT_CHANGED to transceiver and itself");
     fsm->trigger(INPUT_CHANGED);
     //  Tell Sigfox transceiver we got something to send from input 1.
     transceiverFsm.trigger(INPUT_CHANGED);
   }
 }
+
+//  Show debug messages to trace the states of the inputs.
+void input1IdleToSending() { Serial.println("Input #1 now sending"); }
+void input2IdleToSending() { Serial.println("Input #2 now sending"); }
+void input3IdleToSending() { Serial.println("Input #3 now sending"); }
+void input1SendingToIdle() { Serial.println("Input #1 now idle"); }
+void input2SendingToIdle() { Serial.println("Input #2 now idle"); }
+void input3SendingToIdle() { Serial.println("Input #3 now idle"); }
+void input1IdleToIdle() { Serial.println("Input #1 stays idle"); }
+void input2IdleToIdle() { Serial.println("Input #2 stays idle"); }
+void input3IdleToIdle() { Serial.println("Input #3 stays idle"); }
 
 //  End Sensor Transitions
 ////////////////////////////////////////////////////////////
@@ -199,11 +218,14 @@ void whenTransceiverSending() {
 
   //  Show updates every 10 messages.
   if (counter % 10 == 0) {
-    Serial.print(F("Messages sent successfully: "));   Serial.print(successCount);
+    Serial.print(F("Transceiver Sent Messages successfully: "));   Serial.print(successCount);
     Serial.print(F(", failed: "));  Serial.println(failCount);
   }
   //  Switch the transceiver to the "Sent" state, which waits 2.1 seconds before next send.
-  Serial.println("Transceiver Sending completed, now triggering INPUT_SENT and pausing...");
+  Serial.println("Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...");
+  if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.trigger(INPUT_SENT);
+  if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.trigger(INPUT_SENT);
+  if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.trigger(INPUT_SENT);
   transceiverFsm.trigger(INPUT_SENT);
 }
 
@@ -222,8 +244,8 @@ void scheduleResend() {
 }
 
 //  Show the transceiver transitions taking place.
-void transceiverSentToIdle() { Serial.println("Transceiver is now idle"); }
-void transceiverIdleToSending() { Serial.println("Transceiver is sending after idle period..."); }
+void transceiverSentToIdle() { Serial.println("Transceiver Idle now"); }
+void transceiverIdleToSending() { Serial.println("Transceiver Idle is now sending after idle period..."); }
 
 //  End Sigfox Transceiver Transitions
 ////////////////////////////////////////////////////////////
@@ -251,8 +273,8 @@ void setup() {  //  Will be called only once.
 void loop() {  //  Will be called repeatedly.
   //  Execute the sensor and transceiver transitions for the Finite State Machine.
   if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.run_machine();
-  // if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
-  // if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
+  if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
+  if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
   transceiverFsm.run_machine();
 
   delay(0.1 * 1000);  //  Wait 0.1 seconds between loops. Easier to debug.
