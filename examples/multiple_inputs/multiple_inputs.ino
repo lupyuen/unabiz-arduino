@@ -173,6 +173,8 @@ void addTransceiverTransitions() {
 void whenTransceiverSending() {
   //  Send the sensor values to Sigfox in a single Structured message.
   //  This occurs when the transceiver enters the "Sending" state.
+  //  TODO: We may miss some changes to the input while sending a message.
+  //  The send operation should be converted to Finite State Machine too.
 
   //  Compose the message with the sensor data.
   Message msg = composeSensorMessage();
