@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////////
 //  Begin Sigfox Transceiver Declaration - Update the settings if necessary
 
-#include "SIGFOX.h"
+#include "SIGFOX.h"  //  If missing, install from https://github.com/UnaBiz/unabiz-arduino
 
 //  IMPORTANT: Check these settings with UnaBiz to use the Sigfox library correctly.
 static const String device = "";        //  Set this to your device name if you're using Sigfox Emulator.
@@ -27,7 +27,7 @@ static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assume
 //  Don't use ports D0, D1: Reserved for viewing debug output through Arduino Serial Monitor
 //  Don't use ports D4, D5: Reserved for serial comms with the Sigfox module.
 
-#include "Fsm.h"  //  Install from https://github.com/jonblack/arduino-fsm
+#include "Fsm.h"  //  If missing, install from https://github.com/jonblack/arduino-fsm
 
 //  TODO: Enter the Digital Pins to be checked, up to three pins allowed.
 static const int DIGITAL_INPUT_PIN1 = 6;  //  Check for input on D6, which is connected to the pushbutton on the UnaShield V2S.
@@ -106,8 +106,10 @@ void checkInput1() { checkPin(&input1Fsm, 0, DIGITAL_INPUT_PIN1); }
 Message composeSensorMessage() {
   //  Compose the Structured Message contain field names and values, total 12 bytes.
   //  This requires a decoding function in the receiving cloud (e.g. Google Cloud) to decode the message.
+  //  This is called when the transceiver is ready to send a message.
   //  We will send the 3 inputs as sensor fields named "sw1", "sw2", "sw3".
 
+  Serial.println("Composing sensor message...");
   Message msg(transceiver);  //  Will contain the structured sensor data.
   msg.addField("sw1", lastInputValues[0]);  //  4 bytes for the first input.
   msg.addField("sw2", lastInputValues[1]);  //  4 bytes for the second input.
@@ -130,6 +132,8 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin) {
     Serial.print(" changed from "); Serial.print(lastInputValue);
     Serial.print(" to "); Serial.println(inputValue);
     //  Transition from "Idle" state to "Sending" state, which will temporarily stop checking the input.
+    Serial.print("Pin "); Serial.print(inputPin);
+    Serial.println(" triggering INPUT_CHANGED to transceiver and itself");
     fsm->trigger(INPUT_CHANGED);
     //  Tell Sigfox transceiver we got something to send from input 1.
     transceiverFsm.trigger(INPUT_CHANGED);
@@ -148,10 +152,14 @@ void addTransceiverTransitions() {
   //  Add the Finite State Machine Transitions for the transceiver.
 
   //  From state           To state             Triggering event   When transitioning states
-  transceiverFsm.add_transition(                                   //  If inputs have changed, send the inputs.
+  transceiverFsm.add_transition(                                   //  If inputs have changed when idle, send the inputs.
       &transceiverIdle,    &transceiverSending, INPUT_CHANGED,     0);
+  transceiverFsm.add_transition(                                   //  If inputs have changed when busy, send the inputs later.
+      &transceiverSending, &transceiverSending, INPUT_CHANGED,     &scheduleResend);
   transceiverFsm.add_transition(                                   //  When inputs have been sent, go to the "Sent" state and wait 2.1 seconds.
-      &transceiverSending, &transceiverSent,    INPUT_SENT,        &scheduleResend);
+      &transceiverSending, &transceiverSent,    INPUT_SENT,        0);
+  transceiverFsm.add_transition(                                   //  If inputs have changed when busy, send the inputs later.
+      &transceiverSent,    &transceiverSent,    INPUT_CHANGED,     &scheduleResend);
 
   //  From state           To state             Interval (millisecs) When transitioning states
   transceiverFsm.add_timed_transition(                               //  Wait 2.1 seconds before next send.  Else the transceiver library will reject the send.
@@ -171,7 +179,7 @@ void whenTransceiverSending() {
   pendingResend = 0; //  Clear the pending resend count, so we will know when transceiver has been asked to resend.
   static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
   Serial.print(F("\nTransceiver Sending message #")); Serial.println(counter);
-  if (msg.send()) {
+  if (true /* msg.send() */) {
     successCount++;  //  If successful, count the message sent successfully.
   } else {
     failCount++;  //  If failed, count the message that could not be sent.
