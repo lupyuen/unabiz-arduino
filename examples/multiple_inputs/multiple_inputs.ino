@@ -284,4 +284,265 @@ void loop() {  //  Will be called repeatedly.
 ////////////////////////////////////////////////////////////
 
 /* Expected Output:
+Running setup...
+ - Disabling SNEK emulation mode...
+ - Wisol.sendBuffer: ATS410=0
+
+>> ATS410=0
+ 
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+ - Getting SIGFOX ID...
+ - Wisol.sendBuffer: AT$I=10
+
+>> AT$I=10
+<< 002C30EB0x0d
+ - Wisol.sendBuffer: response: 002C30EB
+ - Wisol.sendBuffer: AT$I=11
+
+>> AT$I=11
+<< A8664B5523B5405D0x0d
+ - Wisol.sendBuffer: response: A8664B5523B5405D
+ - Wisol.getID: returned id=002C30EB, pac=A8664B5523B5405D
+ - SIGFOX ID = 002C30EB
+ - PAC = A8664B5523B5405D
+ - Wisol.setFrequencySG
+ - Set frequency result = OK
+ - Getting frequency (expecting 3)...
+ - Frequency (expecting 3) = 52
+Input #1 Pin 6 changed from 0 to 1
+Input #1 triggering INPUT_CHANGED to transceiver and itself
+Input #1 now sending
+Transceiver Idle is now sending after idle period...
+Composing sensor message...
+ - Message.addField: sw1=10
+ - Message.addField: sw2=1
+ - Message.addField: sw3=1
+
+Transceiver Sending message #0
+ - Wisol.sendMessage: 002C30EB,fc4e6400fd4e0a00fe4e0a00
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+ 
+<< 1,3 
+ - Wisol.sendBuffer: response: 1,3
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00
+
+>> AT$SF=fc4e6400fd4e0a00fe4e0a00
+ 
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+OK
+Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+Input #1 now idle
+Input #1 Pin 6 changed from 1 to 0
+Input #1 triggering INPUT_CHANGED to transceiver and itself
+Input #1 now sending
+Transceiver is busy now, will send pending requests later
+Transceiver Idle now
+Transceiver Idle, sending pending requests...
+Composing sensor message...
+ - Message.addField: sw1=1
+ - Message.addField: sw2=1
+ - Message.addField: sw3=1
+
+Transceiver Sending message #1
+ - Wisol.sendMessage: 002C30EB,fc4e0a00fd4e0a00fe4e0a00
+Warning: Should wait 10 mins before sending the next message
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+ 
+<< 1,0 
+ - Wisol.sendBuffer: response: 1,0
+ - Wisol.sendBuffer: AT$RC
+
+>> AT$RC
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+ - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00
+
+>> AT$SF=fc4e0a00fd4e0a00fe4e0a00
+ 
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+OK
+Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+Input #1 now idle
+Input #1 Pin 6 changed from 0 to 1
+Input #1 triggering INPUT_CHANGED to transceiver and itself
+Input #1 now sending
+Transceiver is busy now, will send pending requests later
+Transceiver Idle now
+Transceiver Idle, sending pending requests...
+Composing sensor message...
+ - Message.addField: sw1=10
+ - Message.addField: sw2=1
+ - Message.addField: sw3=1
+
+Transceiver Sending message #2
+ - Wisol.sendMessage: 002C30EB,fc4e6400fd4e0a00fe4e0a00
+Warning: Should wait 10 mins before sending the next message
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+ 
+<< 1,3 
+ - Wisol.sendBuffer: response: 1,3
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00
+
+>> AT$SF=fc4e6400fd4e0a00fe4e0a00
+ 
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+OK
+Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+Input #1 now idle
+Transceiver Idle now
+Transceiver Idle is now sending after idle period...
+Composing sensor message...
+ - Message.addField: sw1=10
+ - Message.addField: sw2=1
+ - Message.addField: sw3=1
+
+Transceiver Sending message #3
+ - Wisol.sendMessage: 002C30EB,fc4e6400fd4e0a00fe4e0a00
+Warning: Should wait 10 mins before sending the next message
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+ 
+<< 1,0 
+ - Wisol.sendBuffer: response: 1,0
+ - Wisol.sendBuffer: AT$RC
+
+>> AT$RC
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00
+
+>> AT$SF=fc4e6400fd4e0a00fe4e0a00
+ 
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+OK
+Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+Input #1 stays idle
+Transceiver Idle now
+Input #1 Pin 6 changed from 1 to 0
+Input #1 triggering INPUT_CHANGED to transceiver and itself
+Input #1 now sending
+Composing sensor message...
+ - Message.addField: sw1=1
+ - Message.addField: sw2=1
+ - Message.addField: sw3=1
+
+Transceiver Sending message #4
+ - Wisol.sendMessage: 002C30EB,fc4e0a00fd4e0a00fe4e0a00
+Warning: Should wait 10 mins before sending the next message
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+ 
+<< 1,3 
+ - Wisol.sendBuffer: response: 1,3
+ - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00
+
+>> AT$SF=fc4e0a00fd4e0a00fe4e0a00
+ 
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+OK
+Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+Input #1 now idle
+Input #1 Pin 6 changed from 0 to 1
+Input #1 triggering INPUT_CHANGED to transceiver and itself
+Input #1 now sending
+Transceiver is busy now, will send pending requests later
+Transceiver Idle now
+Transceiver Idle, sending pending requests...
+Composing sensor message...
+ - Message.addField: sw1=10
+ - Message.addField: sw2=1
+ - Message.addField: sw3=1
+
+Transceiver Sending message #5
+ - Wisol.sendMessage: 002C30EB,fc4e6400fd4e0a00fe4e0a00
+Warning: Should wait 10 mins before sending the next message
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+ 
+<< 1,0 
+ - Wisol.sendBuffer: response: 1,0
+ - Wisol.sendBuffer: AT$RC
+
+>> AT$RC
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00
+
+>> AT$SF=fc4e6400fd4e0a00fe4e0a00
+ 
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+OK
+Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+Input #1 now idle
+Input #1 Pin 6 changed from 1 to 0
+Input #1 triggering INPUT_CHANGED to transceiver and itself
+Input #1 now sending
+Transceiver is busy now, will send pending requests later
+Transceiver Idle now
+Transceiver Idle, sending pending requests...
+Composing sensor message...
+ - Message.addField: sw1=1
+ - Message.addField: sw2=1
+ - Message.addField: sw3=1
+
+Transceiver Sending message #6
+ - Wisol.sendMessage: 002C30EB,fc4e0a00fd4e0a00fe4e0a00
+Warning: Should wait 10 mins before sending the next message
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+ 
+<< 1,3 
+ - Wisol.sendBuffer: response: 1,3
+ - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00
+
+>> AT$SF=fc4e0a00fd4e0a00fe4e0a00
+ 
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+OK
+Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+Input #1 now idle
+Input #1 Pin 6 changed from 0 to 1
+Input #1 triggering INPUT_CHANGED to transceiver and itself
+Input #1 now sending
+Transceiver is busy now, will send pending requests later
+Transceiver Idle now
+Transceiver Idle, sending pending requests...
+Composing sensor message...
+ - Message.addField: sw1=10
+ - Message.addField: sw2=1
+ - Message.addField: sw3=1
+
+Transceiver Sending message #7
+ - Wisol.sendMessage: 002C30EB,fc4e6400fd4e0a00fe4e0a00
+Warning: Should wait 10 mins before sending the next message
+ - Wisol.sendBuffer: AT$GI?
+
+>> AT$GI?
+ 
+<< 1,0 
+ - Wisol.sendBuffer: response: 1,0
+ - Wisol.sendBuffer: AT$RC
+
+>> AT$RC
+<< OK0x0d
+ - Wisol.sendBuffer: response: OK
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00
  */
