@@ -44,8 +44,8 @@ static const int SEND_INPUT_OFFSET = 1;
 
 //  TODO: Enter the Digital Pins to be checked, up to three pins allowed.
 static const int DIGITAL_INPUT_PIN1 = 6;  //  Check for input on D6, which is connected to the pushbutton on the UnaShield V2S.
-static const int DIGITAL_INPUT_PIN2 = -1;  //  Currently unused.
-static const int DIGITAL_INPUT_PIN3 = -1;  //  Currently unused.
+static const int DIGITAL_INPUT_PIN2 = -1;  //  "-1" means currently unused.
+static const int DIGITAL_INPUT_PIN3 = -1;  //  "-1" means currently unused.
 
 //  Finite State Machine Events that will be triggered.  Assign a unique value to each event.
 static const int INPUT_CHANGED = 1;
@@ -114,9 +114,10 @@ void initSensors() {
 }
 
 //  Check the inputs #1, #2, #3.  If any input has changed, trigger the INPUT_CHANGED event.
-void checkInput1() { checkPin(&input1Fsm, 0, DIGITAL_INPUT_PIN1); }
-void checkInput2() { checkPin(&input2Fsm, 1, DIGITAL_INPUT_PIN2); }
-void checkInput3() { checkPin(&input3Fsm, 2, DIGITAL_INPUT_PIN3); }
+//                             Finite State Machine   Input Number - 1  Digital Input Pin
+void checkInput1() { checkPin( &input1Fsm,            0,                DIGITAL_INPUT_PIN1); }
+void checkInput2() { checkPin( &input2Fsm,            1,                DIGITAL_INPUT_PIN2); }
+void checkInput3() { checkPin( &input3Fsm,            2,                DIGITAL_INPUT_PIN3); }
 
 Message composeSensorMessage() {
   //  Compose the Structured Message contain field names and values, total 12 bytes.
