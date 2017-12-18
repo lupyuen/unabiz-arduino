@@ -38,7 +38,7 @@ static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assume
 
 //  TODO: When sending the input data, we will multiply by SEND_INPUT_MULTIPLIER and add SEND_INPUT_OFFSET
 //  So input value "0" will be sent as "1" and input value "1" will be sent as "10".
-//  This is workaround a bug in Structured Message Decoder that doesn't decode "0" properly.
+//  This is to work around a bug in Structured Message Decoder that doesn't decode "0" properly.
 static const int SEND_INPUT_MULTIPLIER = 9;
 static const int SEND_INPUT_OFFSET = 1;
 
