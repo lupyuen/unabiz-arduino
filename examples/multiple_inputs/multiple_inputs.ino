@@ -6,6 +6,13 @@
 //
 //  The data is sent in the Structured Message Format, which requires a decoding function in the receiving cloud:
 //  https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/decodeStructuredMessage/structuredMessage.js
+//
+//  Demo Video: https://drive.google.com/file/d/1y6yPo5PJF9wsHoF76aTMvHjijkOc60Pn/view?usp=sharing
+//  - The program sends sw1=10 when it starts up
+//  - Pressing the push button on the UnaShield sends sw1=1 immediately upon pressing
+//  - Releasing the push button sends sw1=10 immediately upon release
+//  - If no messages sent in 30 seconds, it will send the last value of sw1
+//  - There is a lag before the value appears in Ubidots, we will be doing some optimisation
 
 ////////////////////////////////////////////////////////////
 //  Begin Sigfox Transceiver Declaration - Update the settings if necessary
