@@ -98,11 +98,13 @@ void addSensorTransitions() {
   //                        From state   To state        Triggering event When transitioning states
   input1Fsm.add_transition( &input1Idle, &input1Sending, INPUT_CHANGED,   &input1IdleToSending); // If the input has changed while
   input2Fsm.add_transition( &input2Idle, &input2Sending, INPUT_CHANGED,   &input2IdleToSending); // in the "Idle" state, send the input
-  input3Fsm.add_transition( &input3Idle, &input3Sending, INPUT_CHANGED,   &input3IdleToSending); // and go to the "Sending" state, which will temporarily stop checking the input.
+  input3Fsm.add_transition( &input3Idle, &input3Sending, INPUT_CHANGED,   &input3IdleToSending); // and go to the "Sending" state,
+                                                                                                 // which will temporarily stop checking the input.
 
   input1Fsm.add_transition( &input1Sending, &input1Idle, INPUT_SENT,      &input1SendingToIdle); // If we are in the "Sending" state and
   input2Fsm.add_transition( &input2Sending, &input2Idle, INPUT_SENT,      &input2SendingToIdle); // transceiver notifies us that the input
-  input3Fsm.add_transition( &input3Sending, &input3Idle, INPUT_SENT,      &input3SendingToIdle); // has been sent, go into "Idle" state and resume checking the input.
+  input3Fsm.add_transition( &input3Sending, &input3Idle, INPUT_SENT,      &input3SendingToIdle); // has been sent, go into "Idle" state
+                                                                                                 // and resume checking the input.
 
   input1Fsm.add_transition( &input1Idle, &input1Idle,    INPUT_SENT,      &input1IdleToIdle); //  If the input has been sent and
   input2Fsm.add_transition( &input2Idle, &input2Idle,    INPUT_SENT,      &input2IdleToIdle); // we are in "Idle" state, do nothing.
@@ -185,16 +187,16 @@ void addTransceiverTransitions() {
       &transceiverIdle,    &transceiverSending, INPUT_CHANGED,     0);
   transceiverFsm.add_transition(                                   //  If inputs have changed when busy, send the inputs later.
       &transceiverSending, &transceiverSending, INPUT_CHANGED,     &scheduleResend);
-  transceiverFsm.add_transition(                                   //  When inputs have been sent, go to the "Sent" state and wait 2.1 seconds.
-      &transceiverSending, &transceiverSent,    INPUT_SENT,        0);
+  transceiverFsm.add_transition(                                   //  When inputs have been sent, go to the "Sent" state
+      &transceiverSending, &transceiverSent,    INPUT_SENT,        0);  //  and wait 2.1 seconds.
   transceiverFsm.add_transition(                                   //  If inputs have changed when busy, send the inputs later.
       &transceiverSent,    &transceiverSent,    INPUT_CHANGED,     &scheduleResend);
 
   //  From state           To state             Interval (millisecs) When transitioning states
-  transceiverFsm.add_timed_transition(                               //  Wait 2.1 seconds before next send.  Else the transceiver library will reject the send.
-      &transceiverSent,    &transceiverIdle,    2.1 * 1000,          &transceiverSentToIdle);
-  transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 30 seconds, send the inputs.
-      &transceiverIdle,    &transceiverSending, 30 * 1000,           &transceiverIdleToSending);
+  transceiverFsm.add_timed_transition(                               //  Wait 2.1 seconds before next send.  Else the transceiver library
+      &transceiverSent,    &transceiverIdle,    2.1 * 1000,          &transceiverSentToIdle);  //  will reject the send.
+  transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 30 seconds,
+      &transceiverIdle,    &transceiverSending, 30 * 1000,           &transceiverIdleToSending);  //  send the inputs.
 }
 
 void whenTransceiverSending() {
