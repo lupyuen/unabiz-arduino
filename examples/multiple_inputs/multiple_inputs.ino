@@ -117,7 +117,7 @@ Message composeSensorMessage() {
   //  This is called when the transceiver is ready to send a message.
   //  We will send the 3 inputs as sensor fields named "sw1", "sw2", "sw3".
   //  We will multply by SEND_INPUT_MULTIPLIER and add SEND_INPUT_OFFSET before sending.
-  Serial.println("Composing sensor message...");
+  Serial.println(F("Composing sensor message..."));
   Message msg(transceiver);  //  Will contain the structured sensor data.
   msg.addField("sw1", (lastInputValues[0] * SEND_INPUT_MULTIPLIER) + SEND_INPUT_OFFSET);  //  4 bytes for the first input.
   msg.addField("sw2", (lastInputValues[1] * SEND_INPUT_MULTIPLIER) + SEND_INPUT_OFFSET);  //  4 bytes for the second input.
@@ -137,13 +137,13 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin) {
   //  Compare the new and old values of the input.
   if (inputValue != lastInputValue) {
     //  If changed, trigger a transition.
-    Serial.print("Input #"); Serial.print(inputNum + 1);
-    Serial.print(" Pin "); Serial.print(inputPin);
-    Serial.print(" changed from "); Serial.print(lastInputValue);
-    Serial.print(" to "); Serial.println(inputValue);
+    Serial.print(F("Input #")); Serial.print(inputNum + 1);
+    Serial.print(F(" Pin ")); Serial.print(inputPin);
+    Serial.print(F(" changed from ")); Serial.print(lastInputValue);
+    Serial.print(F(" to ")); Serial.println(inputValue);
     //  Transition from "Idle" state to "Sending" state, which will temporarily stop checking the input.
-    Serial.print("Input #"); Serial.print(inputNum + 1);
-    Serial.println(" triggering INPUT_CHANGED to transceiver and itself");
+    Serial.print(F("Input #")); Serial.print(inputNum + 1);
+    Serial.println(F(" triggering INPUT_CHANGED to transceiver and itself"));
     fsm->trigger(INPUT_CHANGED);
     //  Tell Sigfox transceiver we got something to send from input 1.
     transceiverFsm.trigger(INPUT_CHANGED);
@@ -151,15 +151,15 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin) {
 }
 
 //  Show debug messages to trace the states of the inputs.
-void input1IdleToSending() { Serial.println("Input #1 now sending"); }
-void input2IdleToSending() { Serial.println("Input #2 now sending"); }
-void input3IdleToSending() { Serial.println("Input #3 now sending"); }
-void input1SendingToIdle() { Serial.println("Input #1 now idle"); }
-void input2SendingToIdle() { Serial.println("Input #2 now idle"); }
-void input3SendingToIdle() { Serial.println("Input #3 now idle"); }
-void input1IdleToIdle() { Serial.println("Input #1 stays idle"); }
-void input2IdleToIdle() { Serial.println("Input #2 stays idle"); }
-void input3IdleToIdle() { Serial.println("Input #3 stays idle"); }
+void input1IdleToSending() { Serial.println(F("Input #1 requested to send")); }
+void input2IdleToSending() { Serial.println(F("Input #2 requested to send")); }
+void input3IdleToSending() { Serial.println(F("Input #3 requested to send")); }
+void input1SendingToIdle() { Serial.println(F("Input #1 Idle now")); }
+void input2SendingToIdle() { Serial.println(F("Input #2 Idle now")); }
+void input3SendingToIdle() { Serial.println(F("Input #3 Idle now")); }
+void input1IdleToIdle() { Serial.println(F("Input #1 stays idle")); }
+void input2IdleToIdle() { Serial.println(F("Input #2 stays idle")); }
+void input3IdleToIdle() { Serial.println(F("Input #3 stays idle")); }
 
 //  End Sensor Transitions
 ////////////////////////////////////////////////////////////
@@ -222,7 +222,7 @@ void whenTransceiverSending() {
     Serial.print(F(", failed: "));  Serial.println(failCount);
   }
   //  Switch the transceiver to the "Sent" state, which waits 2.1 seconds before next send.
-  Serial.println("Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...");
+  Serial.println(F("Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing..."));
   if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.trigger(INPUT_SENT);
   if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.trigger(INPUT_SENT);
   if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.trigger(INPUT_SENT);
@@ -232,20 +232,20 @@ void whenTransceiverSending() {
 void whenTransceiverIdle() {
   //  The transceiver has just finished waiting 2.1 seconds.  If there are pending resend requests, send now.
   if (pendingResend > 0) {
-    Serial.println("Transceiver Idle, sending pending requests...");
+    Serial.println(F("Transceiver Idle, sending pending requests..."));
     transceiverFsm.trigger(INPUT_CHANGED);
   }
 }
 
 void scheduleResend() {
   //  The transceiver is already sending now, can't resend now.  Wait till idle in 2.1 seconds to resend.
-  Serial.println("Transceiver is busy now, will send pending requests later");
+  Serial.println(F("Transceiver is busy now, will send pending requests later"));
   pendingResend++;
 }
 
 //  Show the transceiver transitions taking place.
-void transceiverSentToIdle() { Serial.println("Transceiver Idle now"); }
-void transceiverIdleToSending() { Serial.println("Transceiver Idle is now sending after idle period..."); }
+void transceiverSentToIdle() { Serial.println(F("Transceiver Idle now")); }
+void transceiverIdleToSending() { Serial.println(F("Transceiver Idle is now sending after idle period...")); }
 
 //  End Sigfox Transceiver Transitions
 ////////////////////////////////////////////////////////////
