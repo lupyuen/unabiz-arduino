@@ -1,9 +1,11 @@
 //  Send sensor data from 3 Digital Input ports on the Arduino as a Structured Sigfox message,
 //  using the UnaBiz UnaShield V2S Arduino Shield. Data is sent as soon as the values have
 //  changed, or when no data has been sent for 20 seconds. The Arduino Uno onboard LED will flash every
-//  few seconds when the sketch is running properly. The data is sent in the Structured Message
-//  Format, which requires a decoding function in the receiving cloud.  The program manages
+//  few seconds when the sketch is running properly. The program manages
 //  multitasking by using a Finite State Machine: https://github.com/jonblack/arduino-fsm
+//
+//  The data is sent in the Structured Message Format, which requires a decoding function in the receiving cloud:
+//  https://github.com/UnaBiz/sigfox-iot-cloud/blob/master/decodeStructuredMessage/structuredMessage.js
 
 ////////////////////////////////////////////////////////////
 //  Begin Sigfox Transceiver Declaration - Update the settings if necessary
@@ -28,7 +30,7 @@ static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assume
 #include "Fsm.h"  //  Install from https://github.com/jonblack/arduino-fsm
 
 //  TODO: Enter the Digital Pins to be checked, up to three pins allowed.
-static const int DIGITAL_INPUT_PIN1 = 6;  //  Check for input on D6.
+static const int DIGITAL_INPUT_PIN1 = 6;  //  Check for input on D6, which is connected to the pushbutton on the UnaShield V2S.
 static const int DIGITAL_INPUT_PIN2 = -1;  //  Currently unused.
 static const int DIGITAL_INPUT_PIN3 = -1;  //  Currently unused.
 
@@ -59,7 +61,7 @@ State input1Sending(  0,     0,                  0);  // In "Sending" state, we 
 //    Name of state       When entering state       Inside   When exiting state
 State transceiverIdle(    &whenTransceiverIdle,     0,       0);  // Transceiver is idle until any input changes.
 State transceiverSending( &whenTransceiverSending,  0,       0);  // Transceiver enters "Sending" state to send changed inputs.
-State transceiverSent(    0,                        0,       0);  // After sending, it waits 2.1 seconds in "Sent" state before going to "Idle" state.
+State transceiverSent(    &whenTransceiverSent,     0,       0);  // After sending, it waits 2.1 seconds in "Sent" state before going to "Idle" state.
 
 //  Declare the Finite State Machines for each input and for the Sigfox transceiver.
 //  Name of Finite State Machine    Starting state
@@ -68,7 +70,7 @@ Fsm input1Fsm(                      &input1Idle);
 // Fsm input3Fsm(                   &input3Idle);
 Fsm transceiverFsm(                 &transceiverIdle);
 
-int lastInputValues[] = {-1, -1, -1};  //  Remember the last value of each input.
+int lastInputValues[] = {0, 0, 0};  //  Remember the last value of each input.
 
 void addSensorTransitions() {
   //  Add the Finite State Machine Transitions for the sensors.
@@ -168,7 +170,7 @@ void whenTransceiverSending() {
   //  Send the encoded structured message.
   pendingResend = 0; //  Clear the pending resend count, so we will know when transceiver has been asked to resend.
   static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
-  Serial.print(F("\nSending message #")); Serial.println(counter);
+  Serial.print(F("\nTransceiver Sending message #")); Serial.println(counter);
   if (msg.send()) {
     successCount++;  //  If successful, count the message sent successfully.
   } else {
@@ -189,17 +191,30 @@ void whenTransceiverSending() {
     Serial.print(F(", failed: "));  Serial.println(failCount);
   }
   //  Switch the transceiver to the "Sent" state, which waits 2.1 seconds before next send.
-  Serial.println("Transceiver is pausing after sending...");
+  Serial.println("Transceiver triggering INPUT_SENT");
   transceiverFsm.trigger(INPUT_SENT);
 }
 
-//  The transceiver has just finished waiting 2.1 seconds.  If there are pending resend requests, send now.
-void whenTransceiverIdle() {
-  if (pendingResend > 0) transceiverFsm.trigger(INPUT_CHANGED);
+void whenTransceiverSent() {
+  //  Transceiver is now in the "Sent" state, which waits 2.1 seconds before next send.
+  Serial.println("Transceiver Sent, now pausing...");
 }
 
-//  The transceiver is already sending now, can't resend now.  Wait till idle in 2.1 seconds to resend.
-void scheduleResend() { pendingResend++; }
+void whenTransceiverIdle() {
+  //  The transceiver has just finished waiting 2.1 seconds.  If there are pending resend requests, send now.
+  if (pendingResend > 0) {
+    Serial.println("Transceiver Idle, sending pending requests...");
+    transceiverFsm.trigger(INPUT_CHANGED);
+  } else {
+    Serial.println("Transceiver Idle, no pending requests");
+  }
+}
+
+void scheduleResend() {
+  //  The transceiver is already sending now, can't resend now.  Wait till idle in 2.1 seconds to resend.
+  Serial.println("Transceiver is busy now, will send pending requests later");
+  pendingResend++;
+}
 
 //  Show the transceiver transitions taking place.
 void transceiverSentToIdle() { Serial.println("Transceiver is now idle"); }
