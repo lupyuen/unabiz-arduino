@@ -1,0 +1,25 @@
+digraph finite_state_machine {
+	rankdir=LR;
+	size="80,50"
+	node [shape = doublecircle]; input1Idle input2Idle input3Idle transceiverIdle;
+	node [shape = circle];
+
+	input1Idle -> input1Sending [ label = "INPUT_CHANGED" ];
+	input1Sending -> input1Idle [ label = "INPUT_SENT" ];
+	input1Idle -> input1Idle [ label = "INPUT_SENT" ];
+
+	input2Idle -> input2Sending [ label = "INPUT_CHANGED" ];
+	input2Sending -> input2Idle [ label = "INPUT_SENT" ];
+	input2Idle -> input2Idle [ label = "INPUT_SENT" ];
+
+	input3Idle -> input3Sending [ label = "INPUT_CHANGED" ];
+	input3Sending -> input3Idle [ label = "INPUT_SENT" ];
+	input3Idle -> input3Idle [ label = "INPUT_SENT" ];
+
+	transceiverIdle -> transceiverSending [ label = "INPUT_CHANGED" ];
+	transceiverSending -> transceiverSending [ label = "INPUT_CHANGED / scheduleResend" ];
+	transceiverSending -> transceiverSent [ label = "INPUT_SENT" ];
+	transceiverSent -> transceiverSent [ label = "INPUT_CHANGED / scheduleResend" ];
+	transceiverSent -> transceiverIdle [ label = "After 2.1 seconds" ];
+	transceiverIdle -> transceiverSending [ label = "After 30 seconds" ];
+}
