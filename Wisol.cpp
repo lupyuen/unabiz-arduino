@@ -42,7 +42,6 @@
 static NullPort nullPort;
 static uint8_t markers = 0;
 static String data;
-static uint8_t fsmMode = 1;
 
 //  Remember where in response the '>' markers were seen.
 const uint8_t markerPosMax = 5;
@@ -56,26 +55,53 @@ static void sleep(int milliSeconds) {
 #endif // BEAN_BEAN_BEAN_H
 }
 
+static bool useStateMachine = true;
+static uint8_t nextStep = 0;
+
+static int savedSendIndex = 0;
+static unsigned long savedSentTime = 0;
+
 static const uint8_t stepStart = 1;
 static const uint8_t stepListen = 2;
 static const uint8_t stepSend = 3;
 static const uint8_t stepReceive = 4;
 static const uint8_t stepEnd = 5;
 
+static const uint16_t delayAfterStart = 200;
+static const uint16_t delayAfterSend = 10;
+
 bool Wisol::sendBuffer(const String &buffer, const int timeout,
                        uint8_t expectedMarkerCount, String &response,
-                       uint8_t &actualMarkerCount, uint8_t step = 0) {
+                       uint8_t &actualMarkerCount, uint8_t step) {
   //  buffer contains a string of ASCII chars to be sent to the modem.
   //  We send the buffer to the modem.  Return true if successful.
   //  expectedMarkerCount is the number of end-of-command markers '\r' we
   //  expect to see.  actualMarkerCount contains the actual number seen.
 
-  //  FSM Begin
-  switch(step)
-  {
-    case stepSend: goto labelSend;
+  int sendIndex = 0;  //  Index of next char to be sent.
+  unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
+
+  //  State Machine Begin
+  if (step > 0) {
+    if (step == stepStart) {
+      //  Clear the saved state at the first step.
+      savedSendIndex = sendIndex;
+      savedSentTime = sentTime;
+    } else {
+      //  Restore the saved state at subsequent steps.
+      sendIndex = savedSendIndex;
+      sentTime = savedSentTime;
+    }
+    switch(step)
+    {
+      case stepStart: goto labelStart;
+      case stepListen: goto labelListen;
+      case stepReceive: goto labelReceive;
+      case stepEnd: goto labelEnd;
+      case stepSend: goto labelSend;
+    }
   }
-  //  FSM End
+  //  State Machine End
 
 labelStart:  //  Start the serial interface.
 
@@ -83,38 +109,36 @@ labelStart:  //  Start the serial interface.
   serialPort->begin(MODEM_BITS_PER_SECOND);
   response = "";
   actualMarkerCount = 0;
-  static unsigned long sentTime;  sentTime = 0;
-  static int sendIndex;  sendIndex = 0;
 
-  if (step > 0) { return true; }  //  For FSM Mode: exit now and continue later.
-  sleep(200);
+  if (step > 0) { nextStep = stepListen; return true; }  //  For State Machine: exit now and continue later.
+  sleep(delayAfterStart);
 
 labelListen:  //  Start listening for responses.
 
   serialPort->flush();
   serialPort->listen();
-  if (step > 0) { return true; }  //  For FSM Mode: exit now and continue later.
+  if (step > 0) { nextStep = stepSend; return true; }  //  For State Machine: exit now and continue later.
 
-labelSend: //  Start sending the data.
-  //  Send the buffer: need to write/read char by char because of echo.
-  //  Send buffer and read response.  Loop until timeout or we see the end of response marker.
+labelSend:  //  Send the buffer: need to write/read char by char because of echo.
+
+  //  If there is data to send, send it.
+  if (sendIndex < buffer.length()) {
+    //  Send the char.
+    const char *rawBuffer = buffer.c_str();
+    uint8_t sendChar = (uint8_t) rawBuffer[sendIndex];
+    serialPort->write(sendChar);
+    sendIndex = sendIndex + 1;
+    sentTime = millis();  //  Start the timer only when all data has been sent.
+    // echoSend.concat(toHex((char) sendChar) + ' ');
+
+    if (step > 0) { savedSendIndex = sendIndex; savedSentTime = sentTime; return true; }  //  For State Machine: exit now and continue later.
+    sleep(delayAfterSend);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
+  }
+  if (step > 0) { nextStep = stepReceive; return true; }  //  For State Machine: exit now and continue at receive step.
+
+labelReceive:  //  Read response.  Loop until timeout or we see the end of response marker.
 
   for (;;) {
-
-    //  If there is data to send, send it.
-    if (sendIndex < buffer.length()) {
-      //  Send the char.
-      const char *rawBuffer = buffer.c_str();
-      uint8_t sendChar = (uint8_t) rawBuffer[sendIndex];
-      serialPort->write(sendChar);
-      sendIndex = sendIndex + 1;
-      sentTime = millis();  //  Start the timer only when all data has been sent.
-      // echoSend.concat(toHex((char) sendChar) + ' ');
-
-      if (step > 0) { return true; }  //  For FSM Mode: exit now and continue later.
-      sleep(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
-    }
-
     //  If timeout, quit.
     const unsigned long currentTime = millis();
     if (currentTime - sentTime > timeout) break;
