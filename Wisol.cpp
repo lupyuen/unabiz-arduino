@@ -42,7 +42,7 @@
 static NullPort nullPort;
 static uint8_t markers = 0;
 static String data;
-static int fsmMode = 1;
+static uint8_t fsmMode = 1;
 
 //  Remember where in response the '>' markers were seen.
 const uint8_t markerPosMax = 5;
@@ -56,54 +56,68 @@ static void sleep(int milliSeconds) {
 #endif // BEAN_BEAN_BEAN_H
 }
 
+static const uint8_t stepStart = 1;
+static const uint8_t stepListen = 2;
+static const uint8_t stepSend = 3;
+static const uint8_t stepReceive = 4;
+static const uint8_t stepEnd = 5;
+
 bool Wisol::sendBuffer(const String &buffer, const int timeout,
                        uint8_t expectedMarkerCount, String &response,
-                       uint8_t &actualMarkerCount) {
+                       uint8_t &actualMarkerCount, uint8_t step = 0) {
   //  buffer contains a string of ASCII chars to be sent to the modem.
   //  We send the buffer to the modem.  Return true if successful.
   //  expectedMarkerCount is the number of end-of-command markers '\r' we
   //  expect to see.  actualMarkerCount contains the actual number seen.
 
-  ////for(;;) {
+  //  FSM Begin
+  switch(step)
+  {
+    case stepSend: goto labelSend;
+  }
+  //  FSM End
 
-  ////}
+labelStart:  //  Start the serial interface.
 
   log2(F(" - Wisol.sendBuffer: "), buffer);
-  response = "";
-
-  //// START
-  actualMarkerCount = 0;
-  //  Start serial interface.
   serialPort->begin(MODEM_BITS_PER_SECOND);
+  response = "";
+  actualMarkerCount = 0;
+  static unsigned long sentTime;  sentTime = 0;
+  static int sendIndex;  sendIndex = 0;
+
+  if (step > 0) { return true; }  //  For FSM Mode: exit now and continue later.
   sleep(200);
 
-  //// INIT SERIAL
+labelListen:  //  Start listening for responses.
 
   serialPort->flush();
   serialPort->listen();
+  if (step > 0) { return true; }  //  For FSM Mode: exit now and continue later.
 
-  //// SENDING
-
+labelSend: //  Start sending the data.
   //  Send the buffer: need to write/read char by char because of echo.
-  const char *rawBuffer = buffer.c_str();
   //  Send buffer and read response.  Loop until timeout or we see the end of response marker.
-  unsigned long startTime = millis(); int i = 0;
-  //  Previous code for verifying that data was sent correctly.
-  //static String echoSend = "", echoReceive = "";
+
   for (;;) {
+
     //  If there is data to send, send it.
-    if (i < buffer.length()) {
+    if (sendIndex < buffer.length()) {
       //  Send the char.
-      uint8_t txChar = rawBuffer[i];
-      //echoSend.concat(toHex((char) txChar) + ' ');
-      serialPort->write(txChar);
+      const char *rawBuffer = buffer.c_str();
+      uint8_t sendChar = (uint8_t) rawBuffer[sendIndex];
+      serialPort->write(sendChar);
+      sendIndex = sendIndex + 1;
+      sentTime = millis();  //  Start the timer only when all data has been sent.
+      // echoSend.concat(toHex((char) sendChar) + ' ');
+
+      if (step > 0) { return true; }  //  For FSM Mode: exit now and continue later.
       sleep(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
-      i = i + 1;
-      startTime = millis();  //  Start the timer only when all data has been sent.
     }
+
     //  If timeout, quit.
     const unsigned long currentTime = millis();
-    if (currentTime - startTime > timeout) break;
+    if (currentTime - sentTime > timeout) break;
 
     //// RECEIVE
 
@@ -124,6 +138,7 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
     }
   }
   serialPort->end();
+
   //  Log the actual bytes sent and received.
   //log2(F(">> "), echoSend);
   //  if (echoReceive.length() > 0) { log2(F("<< "), echoReceive); }
