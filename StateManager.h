@@ -104,6 +104,7 @@ public:
     Serial.print(F("Suspend state ")); Serial.println(currentState->functionName + ", step " + currentState->currentStep + ", next step " + nextStep);
     popState(currentState->currentStep, nextStep);
     currentState->delay = delay;
+    //  Check for transitions if the child has completed.
     transitionState();
     if (currentState->currentStep == stepFailure) return false;
     return true;
@@ -121,6 +122,8 @@ public:
     //  Status will be propagated to the parent function state.  Returns the status value.
     if (status) popState(stepSuccess);
     else popState(stepFailure);
+    //  Check for transitions if the child has completed.
+    transitionState();
     return status;
   }
 
@@ -146,35 +149,31 @@ private:
   void popState(uint8_t currentStep0, uint8_t nextStep0 = 0) {
     //  Pop the current function state and resume with the parent function state.
     if (!currentState) return;
+    //  Save the currrent and next steps and transition later when the child has completed.
+    currentState->currentStep = currentStep0;
+    currentState->nextStep = nextStep0;
     //  If current state has no child, proceed to next step.
-    if (!currentState->childState) {
-      if (nextStep0) {
-        Serial.print(F("Go to next step: ")); Serial.println(nextStep0);
-        currentState->currentStep = nextStep0;
-        currentState->nextStep = 0;
-      }
-    } else {
-      //  Else save the next step and transition later when the child has completed.
-      currentState->currentStep = currentStep0;
-      currentState->nextStep = nextStep0;
+    if (nextStep0 && !currentState->childState) {
+      Serial.print(F("Go to next step: ")); Serial.println(nextStep0);
+      currentState->currentStep = nextStep0;
+      currentState->nextStep = 0;
     }
     //  Make parent state the current state, if the parent exists.
     if (currentState->parentState) {
       currentState = currentState->parentState;
-      Serial.print(F("After pop state: ")); Serial.println(currentState->functionName);
     }
+    Serial.print(F("After pop state: ")); Serial.println(currentState->functionName);
   }
 
   bool transitionState() {
     //  Transition the current state to next step if child has completed.
     //  Propate the child delay to current state.
 
-    //  TODO: If child state has completed, delete child state and move to next step.
+    //  If child state has completed, delete child state and move to next step.
     //  Return true if we have transitioned.
     FunctionState *childState = currentState->childState;
     if (!childState) return false;
-    //  If child requested for delay, propagate to root.
-    //  TODO: Delay
+    //  If child requested for delay, propagate to root and wait at the Finite State Machine.
     if (childState->delay) {
       currentState->delay = childState->delay;
       childState->delay = 0;
@@ -184,10 +183,12 @@ private:
 
     if (childState->currentStep == stepFailure) {
       //  If child has failed, mark my state as failed too.  This will propagate to root.
+      Serial.print(F("Child has failed: ")); Serial.println(currentState->functionName);
       currentState->currentStep = stepFailure;
     }
     else {
       //  If child has succeeded, proceed to the next step.
+      Serial.print(F("Child has succeeded: ")); Serial.println(currentState->functionName);
       currentState->currentStep = currentState->nextStep;
       currentState->nextStep = 0;
     }

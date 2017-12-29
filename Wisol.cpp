@@ -63,8 +63,8 @@ static void sleep(int milliSeconds) {
 bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
                        uint8_t expectedMarkerCount, String &response,
                        uint8_t &actualMarkerCount, StateManager *state) {
-  //  buffer contains a string of ASCII chars to be sent to the modem.
-  //  We send the buffer to the modem.  Return true if successful.
+  //  buffer contains a string of ASCII chars to be sent to the transceiver.
+  //  We send the buffer to the transceiver.  Return true if successful.
   //  expectedMarkerCount is the number of end-of-command markers '\r' we
   //  expect to see.  actualMarkerCount contains the actual number seen.
 
@@ -74,6 +74,9 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
   //  as controlled by the Finite State Machine and the step paramter.
   //  The Finite State Machine sets the step parameter to a non-zero value
   //  to indicate the step to jump to.
+
+  //  We add 1 to expectedMarkerCount to account for the first '\r' at the end of the sent command.
+  uint8_t adjustedMarkerCount = expectedMarkerCount + 1;
 
   int sendIndex = 0;  //  Index of next char to be sent.
   unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
@@ -91,7 +94,7 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
     }
     Serial.print("sendIndex="); Serial.println(sendIndex);
     Serial.print("sentTime="); Serial.println(sentTime);
-    //  Jump to the specified step and continue.
+    //  For State Machine: Jump to the specified step and continue.
     switch(step) {
       case stepStart: goto labelStart;
       case stepListen: goto labelListen;
@@ -108,9 +111,9 @@ labelStart:  //  Start the serial interface for the transceiver.
   log2(F(" - Wisol.sendBuffer: "), buffer);
   log2(F("response / expectedMarkerCount / timeout: "), response + " / " + expectedMarkerCount + " / " + timeout);
 
-  serialPort->begin(MODEM_BITS_PER_SECOND);
   response = "";
   actualMarkerCount = 0;
+  serialPort->begin(MODEM_BITS_PER_SECOND);
 
   if (state) return state->suspend(stepListen, delayAfterStart);  //  For State Machine: exit now and continue at listen step.
   sleep(delayAfterStart);
@@ -121,15 +124,14 @@ labelListen:  //  Start listening for responses from the transceiver.
   serialPort->listen();
   if (state) return state->suspend(stepSend);  //  For State Machine: exit now and continue at send step.
 
-labelSend:  //  Send the buffer: need to write/read char by char because of echo.
+labelSend:  //  Send the buffer char by char.
 
   for (;;) {
-    //  If there is no data to send, continue to next step.
+    //  If there is no data left to send, continue to next step.
     if (sendIndex >= buffer.length()) break;
 
     //  Send the next char.
-    const char *rawBuffer = buffer.c_str();
-    uint8_t sendChar = (uint8_t) rawBuffer[sendIndex];
+    uint8_t sendChar = (uint8_t) buffer.charAt(sendIndex);
     serialPort->write(sendChar);
     sendIndex++;
     // echoSend.concat(toHex((char) sendChar) + ' ');
@@ -153,6 +155,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
     //  If receive step has timed out, quit.
     const unsigned long currentTime = millis();
     if (currentTime - sentTime > timeout) {
+      logBuffer(F("<< Timeout"), 0, 0, 0);
       if (state) return state->suspend(stepTimeout);  //  For State Machine: exit now and continue at timeout step.
       break;
     }
@@ -179,7 +182,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
       actualMarkerCount++;  //  Count the number of end markers.
 
       //  We have encountered all the markers we need.  Stop receiving.
-      if (actualMarkerCount >= expectedMarkerCount) break;
+      if (actualMarkerCount >= adjustedMarkerCount) break;
 
       if (state) return state->suspend();  //  For State Machine: exit now and continue at receive step.
       continue;  //  Continue to receive next char.
@@ -203,9 +206,9 @@ labelTimeout:  //  In case of timeout, also close the serial port.
   logBuffer(F(">> "), buffer.c_str(), 0, 0);
   logBuffer(F("<< "), response.c_str(), markerPos, actualMarkerCount);
 
-  //  If we did not see the terminating '\r', something is wrong.
+  //  If we did not see the expected number of '\r', something is wrong.
   bool status = false;
-  if (actualMarkerCount < expectedMarkerCount) {
+  if (actualMarkerCount < adjustedMarkerCount) {
     status = false;  //  Return failure.
     if (response.length() == 0) {
       log1(F(" - Wisol.sendBuffer: Error: No response"));  //  Response timeout.
