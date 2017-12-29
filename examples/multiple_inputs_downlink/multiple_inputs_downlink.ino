@@ -210,7 +210,7 @@ void addTransceiverTransitions() {
 }
 
 static StateManager transceiverState;  //  Function state of the transceiver. Lets us suspend and resume the transceiver functions.
-static Message msg;  //  Message currently being sent.
+static Message msg(transceiver);  //  Message currently being sent.
 static String response = "";  //  Downlink response currently being received.
 static unsigned long delayUntil = 0;  //  When requested by transceiver function, delay until this timestamp.
 static int messageCounter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
@@ -241,7 +241,7 @@ void whenTransceiverSending() {
   delayUntil = 0;
 
   //  Send the encoded structured message in multiple steps until success or failure.
-  msg.sendAndGetResponse(response, transceiverState);
+  msg.sendAndGetResponse(response, &transceiverState);
   uint8_t status = transceiverState.getStatus();
 
   //  Update the delay if requested by transceiver function.
@@ -264,14 +264,14 @@ void whenTransceiverCompleted(uint8_t status) {
   else if (status == stepFailure) failCount++;
 
   //  Flash the LED on and off at every message sent so we know the sketch is still running.
-  if (counter % 2 == 0) {
+  if (messageCounter % 2 == 0) {
     digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED on (HIGH is the voltage level).
   } else {
     digitalWrite(LED_BUILTIN, LOW);   // Turn the LED off (LOW is the voltage level).
   }
 
   //  Show updates every 10 messages.
-  if (counter % 10 == 0) {
+  if (messageCounter % 10 == 0) {
     Serial.print(F("Transceiver Sent Messages successfully: "));   Serial.print(successCount);
     Serial.print(F(", failed: "));  Serial.println(failCount);
   }

@@ -62,7 +62,7 @@ static void sleep(int milliSeconds) {
 
 bool Wisol::sendBuffer(const String &buffer, const int timeout,
                        uint8_t expectedMarkerCount, String &response,
-                       uint8_t &actualMarkerCount, StateManager *state = 0) {
+                       uint8_t &actualMarkerCount, StateManager *state) {
   //  buffer contains a string of ASCII chars to be sent to the modem.
   //  We send the buffer to the modem.  Return true if successful.
   //  expectedMarkerCount is the number of end-of-command markers '\r' we
@@ -214,59 +214,38 @@ labelTimeout:  //  In case of timeout, also close the serial port.
   return true;
 }
 
-bool Wisol::sendMessage(const String &payload, StateManager *state = 0) {
-  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
-  //  We prefix with AT$SF= and send to the transceiver.  Return true if successful.
+bool Wisol::sendMessageCommand(const String &command, uint8_t expectedMarkerCount, String &response, StateManager *state) {
+  //  Called by sendMessage and sendMessageAndGetResponse to send a message.
+  //  Parameter command contains the complete Wisol command, including message payload.
+  //  expectedMarkerCount is the number of end-of-command markers '\r' we
+  //  expect to see.  Downlink message will be returned in response parameter, if downlink is requested.
+  //  Optional parameter state, if specified, contains the state manager for running in
+  //  Finite State Machine mode.
   if (state) {  //  For State Machine: Init the state and jump to the right step.
-    uint8_t step = state->begin(F("sendMessage"), stepStart);
-    if (step == stepSend) goto labelSend;
-    else if (step == stepEnd) goto labelEnd;
+    uint8_t step = state->begin(F("sendMessageCommand"), stepStart);
+    //  Jump to the specified step and continue.
+    switch(step) {
+      case stepStart: goto labelStart;
+      case stepPower: goto labelPower;
+      case stepSend: goto labelSend;
+      case stepEnd: goto labelEnd;
+      default: log2(F("***Unknown step: "), step); return false;
+    }
   }
-
-  log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
+labelStart:
   if (!isReady()) return state ? state->endWithFailure() : false;  //  Prevent user from sending too many messages.
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return state ? state->endWithFailure() : false;
+  if (state) return state->suspend(stepPower);  //  For State Machine: exit now and continue at power step.
 
+labelPower:
   //  Set the output power for the zone.
   if (!setOutputPower(state)) return state ? state->endWithFailure() : false;
   if (state) return state->suspend(stepSend);  //  For State Machine: Wait for setOutputPower to complete then resume at send step.
 
 labelSend: //  Send the data.
-  String message = String(CMD_SEND_MESSAGE) + payload + CMD_END, data;
-  if (!sendBuffer(message, (int) WISOL_COMMAND_TIMEOUT, 1, data, markers, state)) {  //  One '\r' marker expected ("OK\r").
-    return state ? state->endWithFailure() : false;
-  }
-  if (state) return state->suspend(stepEnd);  //  For State Machine: Wait for sendBuffer to complete then resume at end step.
-
-labelEnd:  //  Return the result.
-  log1(data);
-  lastSend = millis();
-  return state ? state->end() : true;
-}
-
-bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, StateManager *state = 0) {
-  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
-  //  We prefix with AT$SF= and send to the transceiver.  Return response message from Sigfox in the response parameter.
-  if (state) {  //  For State Machine: Init the state and jump to the right step.
-    uint8_t step = state->begin(F("sendMessageAndGetResponse"), stepStart);
-    if (step == stepSend) goto labelSend;
-    else if (step == stepEnd) goto labelEnd;
-  }
-
-  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
-  if (!isReady()) return state ? state->endWithFailure() : false;  //  Prevent user from sending too many messages.
-  //  Exit command mode and prepare to send message.
-  if (!exitCommandMode()) return state ? state->endWithFailure() : false;
-
-  //  Set the output power for the zone.
-  if (!setOutputPower(state)) return state ? state->endWithFailure() : false;
-  if (state) return state->suspend(stepSend);  //  For State Machine: Wait for setOutputPower to complete then resume at send step.
-
-labelSend: //  Send the data.
-  String message = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END, data;
   //  Two '\r' markers expected ("OK\r RX=...\r").
-  if (!sendBuffer(message, (int) WISOL_COMMAND_TIMEOUT, 2, data, markers, state)) {
+  if (!sendBuffer(command, (int) WISOL_COMMAND_TIMEOUT, expectedMarkerCount, data, markers, state)) {
     return state ? state->endWithFailure() : false;
   }
   if (state) return state->suspend(stepEnd);  //  For State Machine: Wait for sendBuffer to complete then resume at end step.
@@ -275,14 +254,36 @@ labelEnd:  //  Return the result.
   log1(data);
   lastSend = millis();
   response = data;
+  return state ? state->end() : true;
+}
+
+bool Wisol::sendMessage(const String &payload, StateManager *state) {
+  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
+  //  We prefix with AT$SF= and send to the transceiver.  Return true if successful.
+  log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
+  //  Compose the Wisol command and send to the transceiver.
+  String command = String(CMD_SEND_MESSAGE) + payload + CMD_END, response;
+  return sendMessageCommand(command, 1, response, state);  //  One '\r' marker expected ("OK\r").
+}
+
+bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, StateManager *state) {
+  //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
+  //  We prefix with AT$SF= and send to the transceiver.  Return response message from Sigfox in the response parameter.
+  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
+  //  Compose the Wisol command and send to the transceiver.
+  String command = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END, response;
+  //  Two '\r' markers expected ("OK\r RX=...\r").
+  if (!sendBuffer(command, (int) WISOL_COMMAND_TIMEOUT, 2, data, markers, state)) {
+    return false;  //  In case of error, return false.
+  }
   //  Response contains OK\nRX=01 23 45 67 89 AB CD EF
   //  Remove the prefix and spaces.
   response.replace("OK\nRX=", "");
   response.replace(" ", "");
-  return state ? state->end() : true;
+  return true;
 }
 
-bool Wisol::setOutputPower(StateManager *state = 0) {
+bool Wisol::setOutputPower(StateManager *state) {
   //  Set the output power for the zone before sending a message.
   switch(zone) {
     case 1:  //  RCZ1
@@ -578,7 +579,7 @@ bool Wisol::begin() {
 }
 
 bool Wisol::sendCommand(const String &cmd, uint8_t expectedMarkerCount,
-                        String &result, uint8_t &actualMarkerCount, StateManager *state = 0) {
+                        String &result, uint8_t &actualMarkerCount, StateManager *state) {
   //  We send the command string in cmd to the transceiver.  Return true if successful.
   //  Enter command mode.
   if (!enterCommandMode()) return false;

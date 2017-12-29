@@ -5,8 +5,9 @@ static const uint8_t stepStart = 1;
 static const uint8_t stepListen = 2;
 static const uint8_t stepSend = 3;
 static const uint8_t stepReceive = 4;
-static const uint8_t stepTimeout = 5;
-static const uint8_t stepEnd = 6;
+static const uint8_t stepPower = 5;
+static const uint8_t stepTimeout = 6;
+static const uint8_t stepEnd = 7;
 
 static const uint8_t stepSuccess = 101;
 static const uint8_t stepFailure = 102;

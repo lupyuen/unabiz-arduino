@@ -87,6 +87,7 @@ public:
 private:
   bool sendCommand(const String &cmd, uint8_t expectedMarkers, String &result, uint8_t &actualMarkers, StateManager *state = 0);
   bool sendBuffer(const String &buffer, int timeout, uint8_t expectedMarkers, String &dataOut, uint8_t &actualMarkers, StateManager *state = 0);
+  bool sendMessageCommand(const String &command, uint8_t expectedMarkerCount, String &response, StateManager *state = 0);
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
   void logBuffer(const __FlashStringHelper *prefix, const char *buffer, uint8_t markerPos[], uint8_t markerCount);
