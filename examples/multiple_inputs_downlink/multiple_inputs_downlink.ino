@@ -85,7 +85,8 @@ State input3Sending(  0,     0,                  0);  // while the transceiver i
 
 //    Name of state       Enter  When inside state         When exiting state
 State transceiverIdle(    0,     &whenTransceiverIdle,     0);  // Transceiver is idle until any input changes.
-State transceiverSending( 0,     &whenTransceiverSending,  0);  // Transceiver enters "Sending" state to send changed inputs.
+State transceiverSending( &prepareToSend,                       // Transceiver enters "Sending" state to
+                                 &whenTransceiverSending,  0);  // send changed inputs.
 State transceiverSent(    0,     0,                        0);  // After sending, it waits 2.1 seconds in "Sent" state before going to "Idle" state.
 
 //  Declare the Finite State Machines for each input and for the Sigfox transceiver.
@@ -194,7 +195,7 @@ void addTransceiverTransitions() {
 
   //  From state           To state             Triggering event   When transitioning states
   transceiverFsm.add_transition(                                   //  If inputs have changed when idle, send the inputs.
-      &transceiverIdle,    &transceiverSending, INPUT_CHANGED,     &prepareToSend);
+      &transceiverIdle,    &transceiverSending, INPUT_CHANGED,     0);
   transceiverFsm.add_transition(                                   //  If inputs have changed when busy, send the inputs later.
       &transceiverSending, &transceiverSending, INPUT_CHANGED,     &scheduleResend);
   transceiverFsm.add_transition(                                   //  When inputs have been sent, go to the "Sent" state
@@ -218,10 +219,10 @@ static int messageCounter = 0, successCount = 0, failCount = 0;  //  Count messa
 void prepareToSend() {
   //  Prepare a single Structured message containing the sensor values to Sigfox,
   //  This occurs when the transceiver enters the "Sending" state.
+  Serial.print(F("\nTransceiver Sending message #")); Serial.println(messageCounter);
 
   //  Init the transceiver state.
   transceiverState.init();
-  Serial.print(F("\nTransceiver Sending message #")); Serial.println(messageCounter);
 
   //  Compose the message with the sensor data.  Clear the downlink response.
   msg = composeSensorMessage();
@@ -234,6 +235,7 @@ void prepareToSend() {
 void whenTransceiverSending() {
   //  Send the previously prepared message to Sigfox.  The transceiver functions are called
   //  repeatedly in Finite State Machine mode until completion.
+  //  Serial.print(F("\nwhenTransceiverSending #")); Serial.println(messageCounter);
 
   //  If the transceiver function has requested to delay and the delay has not been completed, retry later.
   const unsigned long currentTime = millis();

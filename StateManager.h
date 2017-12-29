@@ -74,7 +74,7 @@ public:
       currentState = createState(functionName, firstStep, 0);
     } else if (currentState->functionName == functionName) {
       //  Reuse the root state. Do nothing.
-      Serial.print(F("Found state")); Serial.println(functionName);
+      Serial.print(F("Found state ")); Serial.println(functionName);
     } else {
       FunctionState *childState = currentState->childState;
       if (!childState || childState->functionName != functionName) {
@@ -85,7 +85,7 @@ public:
         currentState = childState;
       } else {
         //  Else switch to the child state.
-        Serial.print(F("Found state")); Serial.println(functionName);
+        Serial.print(F("Found state ")); Serial.println(functionName);
         currentState = childState;
       }
     }
@@ -133,7 +133,7 @@ public:
 private:
   FunctionState *createState(const String &functionName, uint8_t firstStep, FunctionState *parentState) {
     //  Create a new function state.
-    Serial.print(F("New state")); Serial.println(functionName);
+    Serial.print(F("New state ")); Serial.println(functionName);
     FunctionState *state = new FunctionState();
     state->functionName = functionName;
     state->currentStep = firstStep;
@@ -157,7 +157,7 @@ private:
     }
     //  Make parent state the current state.
     currentState = currentState->parentState;
-    Serial.print(F("Pop state")); Serial.println(currentState->functionName);
+    Serial.print(F("Pop state ")); Serial.println(currentState->functionName);
   }
 
   bool transitionState() {
