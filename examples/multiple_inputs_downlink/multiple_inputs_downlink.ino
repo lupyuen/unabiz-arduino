@@ -211,7 +211,7 @@ void addTransceiverTransitions() {
 
 static StateManager transceiverState;  //  Function state of the transceiver. Lets us suspend and resume the transceiver functions.
 static Message msg(transceiver);  //  Message currently being sent.
-static String response = "";  //  Downlink response currently being received.
+static String response = "";  //  Downlink response currently being received. Must be declared as static so that updates are preserved between steps.
 static unsigned long delayUntil = 0;  //  When requested by transceiver function, delay until this timestamp.
 static int messageCounter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
 

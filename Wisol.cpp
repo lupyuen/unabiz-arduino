@@ -271,7 +271,7 @@ bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, S
   //  We prefix with AT$SF= and send to the transceiver.  Return response message from Sigfox in the response parameter.
   log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
   //  Compose the Wisol command and send to the transceiver.
-  String command = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END, response;
+  String command = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END;
   //  Two '\r' markers expected ("OK\r RX=...\r").
   if (!sendBuffer(command, (int) WISOL_COMMAND_TIMEOUT, 2, data, markers, state)) {
     return false;  //  In case of error, return false.

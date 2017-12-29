@@ -22,10 +22,7 @@
     <list id="ad55bd70-da1c-4d53-95c1-ed41b622fb2d" name="New changelist" comment="" />
     <list default="true" id="ebffe880-3357-410a-a5f5-319df22970a3" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/Message.cpp" afterPath="$PROJECT_DIR$/Message.cpp" />
-      <change beforePath="$PROJECT_DIR$/StateManager.h" afterPath="$PROJECT_DIR$/StateManager.h" />
       <change beforePath="$PROJECT_DIR$/Wisol.cpp" afterPath="$PROJECT_DIR$/Wisol.cpp" />
-      <change beforePath="$PROJECT_DIR$/Wisol.h" afterPath="$PROJECT_DIR$/Wisol.h" />
       <change beforePath="$PROJECT_DIR$/examples/multiple_inputs_downlink/multiple_inputs_downlink.ino" afterPath="$PROJECT_DIR$/examples/multiple_inputs_downlink/multiple_inputs_downlink.ino" />
     </list>
     <ignored path="unabiz-arduino.iws" />
@@ -46,11 +43,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="multiple_inputs_downlink.ino" pinned="false" current-in-tab="false">
+      <file leaf-file-name="multiple_inputs_downlink.ino" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/examples/multiple_inputs_downlink/multiple_inputs_downlink.ino">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="472">
-              <caret line="271" column="0" lean-forward="true" selection-start-line="271" selection-start-column="0" selection-end-line="271" selection-end-column="0" />
+            <state relative-caret-position="216">
+              <caret line="216" column="0" lean-forward="true" selection-start-line="216" selection-start-column="0" selection-end-line="216" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -86,11 +83,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Wisol.cpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Wisol.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Wisol.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="237" column="0" lean-forward="false" selection-start-line="237" selection-start-column="0" selection-end-line="237" selection-end-column="0" />
+            <state relative-caret-position="378">
+              <caret line="267" column="0" lean-forward="true" selection-start-line="267" selection-start-column="0" selection-end-line="267" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -152,11 +149,11 @@
         <option value="$PROJECT_DIR$/Radiocrafts.cpp" />
         <option value="$PROJECT_DIR$/examples/send-light-level/send-light-level.ino" />
         <option value="$PROJECT_DIR$/examples/multitask/multitask.ino" />
-        <option value="$PROJECT_DIR$/examples/multiple_inputs_downlink/multiple_inputs_downlink.ino" />
         <option value="$PROJECT_DIR$/Message.cpp" />
         <option value="$PROJECT_DIR$/Wisol.h" />
         <option value="$PROJECT_DIR$/StateManager.h" />
         <option value="$PROJECT_DIR$/Wisol.cpp" />
+        <option value="$PROJECT_DIR$/examples/multiple_inputs_downlink/multiple_inputs_downlink.ino" />
       </list>
     </option>
   </component>
@@ -477,14 +474,7 @@
       <workItem from="1513491353979" duration="7336000" />
       <workItem from="1514568509584" duration="48000" />
       <workItem from="1514568802336" duration="106000" />
-      <workItem from="1514568936348" duration="6558000" />
-    </task>
-    <task id="LOCAL-00007" summary="Added upload command">
-      <created>1477938682978</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1477938682978</updated>
+      <workItem from="1514568936348" duration="7031000" />
     </task>
     <task id="LOCAL-00008" summary="Added library build">
       <created>1477939601363</created>
@@ -822,11 +812,18 @@
       <option name="project" value="LOCAL" />
       <updated>1513502353318</updated>
     </task>
-    <option name="localTasksCounter" value="56" />
+    <task id="LOCAL-00056" summary="Compiling">
+      <created>1514575529098</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1514575529099</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="120998000" />
+    <option name="totallyTimeSpent" value="121471000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="85" y="6" width="1048" height="1029" extended-state="0" />
@@ -889,7 +886,6 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Akeru compiles OK" />
     <MESSAGE value="For emulation mode, send message locally to another TD module using TD LAN mode." />
     <MESSAGE value="Minor fixes" />
     <MESSAGE value="Working OK in TD LAN mode" />
@@ -914,7 +910,8 @@
     <MESSAGE value="Adding BeanSoftwareSerial to fix Bean serial receive issue" />
     <MESSAGE value="Upgraded for UnaShieldV2S" />
     <MESSAGE value="Adding finite state machine" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding finite state machine" />
+    <MESSAGE value="Compiling" />
+    <option name="LAST_COMMIT_MESSAGE" value="Compiling" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1195,22 +1192,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/examples/multiple_inputs_downlink/multiple_inputs_downlink.ino">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
-          <caret line="271" column="0" lean-forward="true" selection-start-line="271" selection-start-column="0" selection-end-line="271" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Message.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="98">
-          <caret line="191" column="24" lean-forward="true" selection-start-line="191" selection-start-column="24" selection-end-line="191" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Wisol.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="540">
@@ -1229,8 +1210,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Wisol.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="237" column="0" lean-forward="false" selection-start-line="237" selection-start-column="0" selection-end-line="237" selection-end-column="0" />
+        <state relative-caret-position="378">
+          <caret line="267" column="0" lean-forward="true" selection-start-line="267" selection-start-column="0" selection-end-line="267" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Message.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="98">
+          <caret line="191" column="24" lean-forward="true" selection-start-line="191" selection-start-column="24" selection-end-line="191" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/multiple_inputs_downlink/multiple_inputs_downlink.ino">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="216" column="0" lean-forward="true" selection-start-line="216" selection-start-column="0" selection-end-line="216" selection-end-column="0" />
           <folding />
         </state>
       </provider>
