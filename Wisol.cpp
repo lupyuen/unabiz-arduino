@@ -48,11 +48,12 @@ const uint8_t markerPosMax = 5;
 static uint8_t markerPos[markerPosMax];
 
 static void sleep(int milliSeconds) {
-#ifdef BEAN_BEAN_BEAN_H
-  Bean.sleep(milliSeconds);
-#else  // BEAN_BEAN_BEAN_H
-  delay(milliSeconds);
-#endif // BEAN_BEAN_BEAN_H
+  //  Sleep for the specified number of milliseconds.
+  #ifdef BEAN_BEAN_BEAN_H
+    Bean.sleep(milliSeconds);
+  #else  // BEAN_BEAN_BEAN_H
+    delay(milliSeconds);
+  #endif // BEAN_BEAN_BEAN_H
 }
 
 static bool useStateMachine = true;
@@ -100,13 +101,15 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
       sendIndex = savedSendIndex;
       sentTime = savedSentTime;
     }
-    switch(step)
-    {
+    //  Jump to the specified step and continue.
+    switch(step) {
       case stepStart: goto labelStart;
       case stepListen: goto labelListen;
       case stepReceive: goto labelReceive;
       case stepEnd: goto labelEnd;
+      case stepTimeout: goto labelTimeout;
       case stepSend: goto labelSend;
+      default: log2(F("***Unknown step: "), step); return false;
     }
   }
 
@@ -189,8 +192,8 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
   }
   if (step > 0) { nextStep = stepEnd; return true; }  //  For State Machine: exit now and continue at end step.
 
-labelTimeout:
-labelEnd:
+labelEnd:  //  Finished the send and receive.  We close the serial port.
+labelTimeout:  //  In case of timeout, also close the serial port.
   serialPort->end();
 
   //  Log the actual bytes sent and received.
@@ -212,18 +215,18 @@ labelEnd:
   return true;
 }
 
-bool Wisol::sendMessage(const String &payload) {
+bool Wisol::sendMessage(const String &payload, uint8_t step = 0) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
-  //  We prefix with AT$SF= and send to SIGFOX.  Return true if successful.
+  //  We prefix with AT$SF= and send to the transceiver.  Return true if successful.
   log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
   if (!isReady()) return false;  //  Prevent user from sending too many messages.
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return false;
   //  Set the output power for the zone.
-  if (!setOutputPower()) return false;
+  if (!setOutputPower(step)) return false;
   //  Send the data.
   String message = String(CMD_SEND_MESSAGE) + payload + CMD_END, data;
-  if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 1, data, markers)) {  //  One '\r' marker expected ("OK\r").
+  if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 1, data, markers, step)) {  //  One '\r' marker expected ("OK\r").
     log1(data);
     lastSend = millis();
     return true;
@@ -231,19 +234,19 @@ bool Wisol::sendMessage(const String &payload) {
   return false;
 }
 
-bool Wisol::sendMessageAndGetResponse(const String &payload, String &response) {
+bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, uint8_t step = 0) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
-  //  We prefix with AT$SF= and send to SIGFOX.  Return response message from Sigfox in the response parameter.
+  //  We prefix with AT$SF= and send to the transceiver.  Return response message from Sigfox in the response parameter.
   log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
   if (!isReady()) return false;  //  Prevent user from sending too many messages.
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return false;
   //  Set the output power for the zone.
-  if (!setOutputPower()) return false;
+  if (!setOutputPower(step)) return false;
   //  Send the data.
   String message = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END, data;
   //  Two '\r' markers expected ("OK\r RX=...\r").
-  if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 2, data, markers)) {
+  if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 2, data, markers, step)) {
     log1(data);
     lastSend = millis();
     response = data;
@@ -256,21 +259,21 @@ bool Wisol::sendMessageAndGetResponse(const String &payload, String &response) {
   return false;
 }
 
-bool Wisol::setOutputPower() {
+bool Wisol::setOutputPower(uint8_t step = 0) {
   //  Set the output power for the zone before sending a message.
   switch(zone) {
     case 1:  //  RCZ1
     case 3:  //  RCZ3
-      if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers)) return false;
+      if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers, step)) return false;
       break;
     case 2:  //  RCZ2
     case 4: {  //  RCZ4
-      if (!sendCommand(String(CMD_PRESEND) + CMD_END, 1, data, markers)) return false;
+      if (!sendCommand(String(CMD_PRESEND) + CMD_END, 1, data, markers, step)) return false;
       //  Parse the returned X,Y.
       int x = data.charAt(0) - '0';
       int y = data.charAt(2) - '0';
       // log4("x,y=", String(x), ',', String(y));
-      if (x == 0 || y < 3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers);
+      if (x == 0 || y < 3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers, step);
       break;
     }
     default:
@@ -552,12 +555,12 @@ bool Wisol::begin() {
 }
 
 bool Wisol::sendCommand(const String &cmd, uint8_t expectedMarkerCount,
-                              String &result, uint8_t &actualMarkerCount) {
-  //  We send the command string in cmd to SIGFOX.  Return true if successful.
+                        String &result, uint8_t &actualMarkerCount, uint8_t step = 0) {
+  //  We send the command string in cmd to the transceiver.  Return true if successful.
   //  Enter command mode.
   if (!enterCommandMode()) return false;
   if (!sendBuffer(cmd, WISOL_COMMAND_TIMEOUT, expectedMarkerCount,
-                  data, actualMarkerCount)) return false;
+                  data, actualMarkerCount, step)) return false;
   result = data;
   return true;
 }

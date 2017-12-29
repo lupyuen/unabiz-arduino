@@ -31,8 +31,7 @@ class Wisol
 {
 public:
   Wisol(Country country, bool useEmulator, const String device, bool echo);
-  Wisol(Country country, bool useEmulator, const String device, bool echo,
-              uint8_t rx, uint8_t tx);
+  Wisol(Country country, bool useEmulator, const String device, bool echo, uint8_t rx, uint8_t tx);
   bool begin();
   void echoOn();  //  Turn on send/receive echo.
   void echoOff();  //  Turn off send/receive echo.
@@ -40,7 +39,7 @@ public:
   void echo(const String &msg);  //  Echo the debug message.
   bool isReady();
   bool sendMessage(const String &payload);  //  Send the payload of hex digits to the network, max 12 bytes.
-  bool sendMessageAndGetResponse(const String &payload, String &response);  //  Send the payload of hex digits to the network and get response.
+  bool sendMessageAndGetResponse(const String &payload, String &response, uint8_t step = 0);  //  Send the payload of hex digits to the network and get response.
   bool sendString(const String &str);  //  Sending a text string, max 12 characters allowed.
   bool receive(String &data);  //  Receive a message.
   bool enterCommandMode();  //  Enter Command Mode for sending module commands, not data.
@@ -84,14 +83,11 @@ public:
   String toHex(char *c, int length);
 
 private:
-  bool sendCommand(const String &cmd, uint8_t expectedMarkers,
-                   String &result, uint8_t &actualMarkers);
-  bool sendBuffer(const String &buffer, int timeout, uint8_t expectedMarkers,
-                  String &dataOut, uint8_t &actualMarkers);
+  bool sendCommand(const String &cmd, uint8_t expectedMarkers, String &result, uint8_t &actualMarkers, uint8_t step = 0);
+  bool sendBuffer(const String &buffer, int timeout, uint8_t expectedMarkers, String &dataOut, uint8_t &actualMarkers, uint8_t step = 0);
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
-  void logBuffer(const __FlashStringHelper *prefix, const char *buffer,
-                 uint8_t markerPos[], uint8_t markerCount);
+  void logBuffer(const __FlashStringHelper *prefix, const char *buffer, uint8_t markerPos[], uint8_t markerCount);
 
   int zone;  //  1 to 4 representing SIGFOX frequencies RCZ 1 to 4.
   Country country;   //  Country to be set for SIGFOX transmission frequencies.
@@ -101,7 +97,7 @@ private:
   Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
   Print *lastEchoPort;  //  Last port used for sending echo output.
   unsigned long lastSend;  //  Timestamp of last send.
-  bool setOutputPower();
+  bool setOutputPower(uint8_t step = 0);
 };
 
 #endif // UNABIZ_ARDUINO_WISOL_H
