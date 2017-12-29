@@ -74,7 +74,7 @@ public:
       currentState = createState(functionName, firstStep, 0);
     } else if (currentState->functionName == functionName) {
       //  Reuse the root state. Do nothing.
-      Serial.print(F("Resume state ")); Serial.print(functionName + ", step "); Serial.println(currentState->currentStep);
+      Serial.print(F("Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
     } else {
       FunctionState *childState = currentState->childState;
       if (!childState || childState->functionName != functionName) {
@@ -86,7 +86,7 @@ public:
       } else {
         //  Else switch to the child state.
         currentState = childState;
-        Serial.print(F("Resume state ")); Serial.println(functionName + ", step "); Serial.println(currentState->currentStep);
+        Serial.print(F("Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
       }
     }
     //  Return the current step for this function.
@@ -101,6 +101,7 @@ public:
     //  Suspend the current function and continue execution later at that step
     //  after that delay.
     //  Remember the next step and pop the current state.
+    Serial.print(F("Suspend state ")); Serial.println(currentState->functionName + ", step " + currentState->currentStep + ", next step " + nextStep);
     popState(currentState->currentStep, nextStep);
     currentState->delay = delay;
     transitionState();
@@ -158,7 +159,7 @@ private:
     }
     //  Make parent state the current state.
     currentState = currentState->parentState;
-    Serial.print(F("Pop state ")); Serial.println(currentState->functionName);
+    Serial.print(F("After pop state: ")); Serial.println(currentState->functionName);
   }
 
   bool transitionState() {
