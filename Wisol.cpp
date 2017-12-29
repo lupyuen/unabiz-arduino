@@ -47,6 +47,14 @@ static String data;
 const uint8_t markerPosMax = 5;
 static uint8_t markerPos[markerPosMax];
 
+void sleep(int milliSeconds) {
+#ifdef BEAN_BEAN_BEAN_H
+  Bean.sleep(milliSeconds);
+#else  // BEAN_BEAN_BEAN_H
+  delay(milliSeconds);
+#endif // BEAN_BEAN_BEAN_H
+}
+
 bool Wisol::sendBuffer(const String &buffer, const int timeout,
                        uint8_t expectedMarkerCount, String &response,
                        uint8_t &actualMarkerCount) {
@@ -60,11 +68,7 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
   actualMarkerCount = 0;
   //  Start serial interface.
   serialPort->begin(MODEM_BITS_PER_SECOND);
-#ifdef BEAN_BEAN_BEAN_H
-  Bean.sleep(200);
-#else  // BEAN_BEAN_BEAN_H
-  delay(200);
-#endif // BEAN_BEAN_BEAN_H
+  sleep(200);
   serialPort->flush();
   serialPort->listen();
 
@@ -81,11 +85,7 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
       uint8_t txChar = rawBuffer[i];
       //echoSend.concat(toHex((char) txChar) + ' ');
       serialPort->write(txChar);
-#ifdef BEAN_BEAN_BEAN_H
-      Bean.sleep(10);
-#else  // BEAN_BEAN_BEAN_H
-      delay(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
-#endif // BEAN_BEAN_BEAN_H
+      sleep(10);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
       i = i + 1;
       startTime = millis();  //  Start the timer only when all data has been sent.
     }
