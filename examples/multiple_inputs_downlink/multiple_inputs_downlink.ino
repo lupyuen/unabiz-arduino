@@ -343,7 +343,7 @@ void loop() {  //  Will be called repeatedly.
   if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
   if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
 
-  delay(100);  //  Wait 10 milliseconds between loops.  If we wait longer, we may miss incoming transceiver data.
+  delay(1000);  //  Wait 10 milliseconds between loops.  If we wait longer, we may miss incoming transceiver data.
 }
 
 //  End Main Program

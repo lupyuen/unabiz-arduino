@@ -149,6 +149,7 @@ private:
     //  If current state has no child, proceed to next step.
     if (!currentState->childState) {
       if (nextStep0) {
+        Serial.print(F("Go to next step: ")); Serial.println(nextStep0);
         currentState->currentStep = nextStep0;
         currentState->nextStep = 0;
       }
@@ -157,9 +158,11 @@ private:
       currentState->currentStep = currentStep0;
       currentState->nextStep = nextStep0;
     }
-    //  Make parent state the current state.
-    currentState = currentState->parentState;
-    Serial.print(F("After pop state: ")); Serial.println(currentState->functionName);
+    //  Make parent state the current state, if the parent exists.
+    if (currentState->parentState) {
+      currentState = currentState->parentState;
+      Serial.print(F("After pop state: ")); Serial.println(currentState->functionName);
+    }
   }
 
   bool transitionState() {

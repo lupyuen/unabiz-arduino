@@ -60,7 +60,7 @@ static void sleep(int milliSeconds) {
   #endif // BEAN_BEAN_BEAN_H
 }
 
-bool Wisol::sendBuffer(const String &buffer, const int timeout,
+bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
                        uint8_t expectedMarkerCount, String &response,
                        uint8_t &actualMarkerCount, StateManager *state) {
   //  buffer contains a string of ASCII chars to be sent to the modem.

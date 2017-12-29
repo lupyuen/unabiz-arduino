@@ -25,7 +25,7 @@
 
 const uint8_t WISOL_TX = 4;  //  Transmit port for For UnaBiz / Wisol Dev Kit
 const uint8_t WISOL_RX = 5;  //  Receive port for UnaBiz / Wisol Dev Kit
-const unsigned int WISOL_COMMAND_TIMEOUT = 60000;  //  Wait up to 60 seconds for response from SIGFOX module.  Includes downlink response.
+const unsigned long WISOL_COMMAND_TIMEOUT = 60000;  //  Wait up to 60 seconds for response from SIGFOX module.  Includes downlink response.
 
 class StateManager;
 
@@ -86,7 +86,7 @@ public:
 
 private:
   bool sendCommand(const String &cmd, uint8_t expectedMarkers, String &result, uint8_t &actualMarkers, StateManager *state = 0);
-  bool sendBuffer(const String &buffer, int timeout, uint8_t expectedMarkers, String &dataOut, uint8_t &actualMarkers, StateManager *state = 0);
+  bool sendBuffer(const String &buffer, unsigned long timeout, uint8_t expectedMarkers, String &dataOut, uint8_t &actualMarkers, StateManager *state = 0);
   bool sendMessageCommand(const String &command, uint8_t expectedMarkerCount, String &response, StateManager *state = 0);
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
