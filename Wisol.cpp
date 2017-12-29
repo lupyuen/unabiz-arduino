@@ -177,14 +177,17 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
     }
 
     if (receiveChar == END_OF_RESPONSE) {
-      //  We see the ">" marker. Remember the marker location so we can format the debug output.
+      //  We see the "\r" marker. Remember the marker location so we can format the debug output.
       if (actualMarkerCount < markerPosMax) markerPos[actualMarkerCount] = response.length();
       actualMarkerCount++;  //  Count the number of end markers.
 
       //  We have encountered all the markers we need.  Stop receiving.
       if (actualMarkerCount >= adjustedMarkerCount) break;
 
-      if (state) return state->suspend();  //  For State Machine: exit now and continue at receive step.
+      if (state) {   //  For State Machine: exit now and continue at receive step.
+        log2(F("<< "), response + " / " + adjustedMarkerCount + " markers");
+        return state->suspend();
+      }
       continue;  //  Continue to receive next char.
     }
 
