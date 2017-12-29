@@ -65,7 +65,8 @@ static const uint8_t stepStart = 1;
 static const uint8_t stepListen = 2;
 static const uint8_t stepSend = 3;
 static const uint8_t stepReceive = 4;
-static const uint8_t stepEnd = 5;
+static const uint8_t stepTimeout = 5;
+static const uint8_t stepEnd = 6;
 
 static const uint16_t delayAfterStart = 200;
 static const uint16_t delayAfterSend = 10;
@@ -78,10 +79,17 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
   //  expectedMarkerCount is the number of end-of-command markers '\r' we
   //  expect to see.  actualMarkerCount contains the actual number seen.
 
+  //  This function runs in normal sequential mode (like a normal function)
+  //  as well as Finite State Machine mode.  In State Machine mode,
+  //  we run each step of this function as a separate function call,
+  //  as controlled by the Finite State Machine and the step paramter.
+  //  The Finite State Machine sets the step parameter to a non-zero value
+  //  to indicate the step to jump to.
+
   int sendIndex = 0;  //  Index of next char to be sent.
   unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
 
-  //  State Machine Begin
+  //  For State Machine: Set the state and jump to the specified step.
   if (step > 0) {
     if (step == stepStart) {
       //  Clear the saved state at the first step.
@@ -101,7 +109,6 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
       case stepSend: goto labelSend;
     }
   }
-  //  State Machine End
 
 labelStart:  //  Start the serial interface.
 
@@ -121,52 +128,75 @@ labelListen:  //  Start listening for responses.
 
 labelSend:  //  Send the buffer: need to write/read char by char because of echo.
 
-  //  If there is data to send, send it.
-  if (sendIndex < buffer.length()) {
-    //  Send the char.
+  for (;;) {
+    //  If there is no data to send, continue to next step.
+    if (sendIndex >= buffer.length()) break;
+
+    //  Send the next char.
     const char *rawBuffer = buffer.c_str();
     uint8_t sendChar = (uint8_t) rawBuffer[sendIndex];
     serialPort->write(sendChar);
-    sendIndex = sendIndex + 1;
-    sentTime = millis();  //  Start the timer only when all data has been sent.
+    sendIndex++;
     // echoSend.concat(toHex((char) sendChar) + ' ');
 
-    if (step > 0) { savedSendIndex = sendIndex; savedSentTime = sentTime; return true; }  //  For State Machine: exit now and continue later.
+    if (step > 0) { savedSendIndex = sendIndex; return true; }  //  For State Machine: exit now and continue later.
     sleep(delayAfterSend);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
   }
-  if (step > 0) { nextStep = stepReceive; return true; }  //  For State Machine: exit now and continue at receive step.
+  sentTime = millis();  //  Start the timer for detecting receive timeout.
+  if (step > 0) { nextStep = stepReceive; savedSentTime = sentTime; return true; }  //  For State Machine: exit now and continue at receive step.
 
 labelReceive:  //  Read response.  Loop until timeout or we see the end of response marker.
 
   for (;;) {
-    //  If timeout, quit.
+    //  If receive step has timed out, quit.
     const unsigned long currentTime = millis();
-    if (currentTime - sentTime > timeout) break;
-
-    //// RECEIVE
-
-    //  If data is available to receive, receive it.
-    if (serialPort->available() > 0) {
-      int rxChar = serialPort->read();
-      //  echoReceive.concat(toHex((char) rxChar) + ' ');
-      if (rxChar == -1) continue;
-      if (rxChar == END_OF_RESPONSE) {
-        if (actualMarkerCount < markerPosMax)
-          markerPos[actualMarkerCount] = response.length();  //  Remember the marker pos.
-        actualMarkerCount++;  //  Count the number of end markers.
-        if (actualMarkerCount >= expectedMarkerCount) break;  //  Seen all markers already.
-      } else {
-        // log2(F("rxChar "), rxChar);
-        response.concat(String((char) rxChar));
-      }
+    if (currentTime - sentTime > timeout) {
+      if (step > 0) { nextStep = stepTimeout; return true; }  //  For State Machine: exit now and continue at timeout step.
+      break;
     }
+
+    if (serialPort->available() <= 0) {
+      //  No data is available to receive now.  We retry.
+      if (step > 0) { return true; }  //  For State Machine: exit now and continue at receive step.
+      continue;
+    }
+
+    //  Attempt to read the data.
+    int receiveChar = serialPort->read();
+    //  echoReceive.concat(toHex((char) receiveChar) + ' ');
+
+    if (receiveChar == -1) {
+      //  No data is available now.  We retry.
+      if (step > 0) { return true; }  //  For State Machine: exit now and continue at receive step.
+      continue;
+    }
+
+    if (receiveChar == END_OF_RESPONSE) {
+      //  We see the ">" marker. Remember the marker location so we can format the debug output.
+      if (actualMarkerCount < markerPosMax) markerPos[actualMarkerCount] = response.length();
+      actualMarkerCount++;  //  Count the number of end markers.
+
+      //  We have encountered all the markers we need.  Stop receiving.
+      if (actualMarkerCount >= expectedMarkerCount) break;
+      continue;  //  Continue to receive next char.
+    }
+
+    //  Else append the received char to the response.
+    response.concat(String((char) receiveChar));
+    // log2(F("receiveChar "), receiveChar);
+
+    if (step > 0) { return true; }  //  For State Machine: exit now and continue at receive step.
   }
+  if (step > 0) { nextStep = stepEnd; return true; }  //  For State Machine: exit now and continue at end step.
+
+labelTimeout:
+labelEnd:
   serialPort->end();
 
   //  Log the actual bytes sent and received.
-  //log2(F(">> "), echoSend);
+  //  log2(F(">> "), echoSend);
   //  if (echoReceive.length() > 0) { log2(F("<< "), echoReceive); }
-  logBuffer(F(">> "), rawBuffer, 0, 0);
+  logBuffer(F(">> "), buffer.c_str(), 0, 0);
   logBuffer(F("<< "), response.c_str(), markerPos, actualMarkerCount);
 
   //  If we did not see the terminating '\r', something is wrong.
