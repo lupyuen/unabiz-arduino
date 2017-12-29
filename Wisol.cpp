@@ -71,9 +71,19 @@ static const uint16_t delayAfterSend = 10;
 
 class State {
 public:
-  uint8_t getStep() { return step; }
-  bool setStep() { return setStep(step); }
-  bool setStep(uint8_t step0, uint32_t delay = 0) { step = step0; return true; }
+  uint8_t begin(const String &functionName, uint8_t firstStep) {
+    return step;
+  }
+  bool end() {
+    //  TODO
+    return true;
+  }
+  bool endWithFailure() {
+    //  TODO
+    return false;
+  }
+  bool suspend() { return suspend(step); }
+  bool suspend(uint8_t step0, uint32_t delay = 0) { step = step0; return true; }
   void setState(int int1, unsigned long ulong1) { state.int1 = int1; state.ulong1 = ulong1; }
   void getState(int &int1, unsigned long &ulong1) { int1 = state.int1; ulong1 = state.ulong1; }
 
@@ -106,7 +116,7 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
   //  For State Machine: Set the state and jump to the specified step.
   uint8_t step = 0;
   if (state) {
-    step = state->getStep();
+    step = state->begin(F("sendBuffer"), stepStart);
     if (step == stepStart) {
       //  Clear the saved state at the first step.
       state->setState(sendIndex, sentTime);
@@ -133,14 +143,14 @@ labelStart:  //  Start the serial interface.
   response = "";
   actualMarkerCount = 0;
 
-  if (state) return state->setStep(stepListen, delayAfterStart);  //  For State Machine: exit now and continue at listen step.
+  if (state) return state->suspend(stepListen, delayAfterStart);  //  For State Machine: exit now and continue at listen step.
   sleep(delayAfterStart);
 
 labelListen:  //  Start listening for responses.
 
   serialPort->flush();
   serialPort->listen();
-  if (state) return state->setStep(stepSend);  //  For State Machine: exit now and continue at send step.
+  if (state) return state->suspend(stepSend);  //  For State Machine: exit now and continue at send step.
 
 labelSend:  //  Send the buffer: need to write/read char by char because of echo.
 
@@ -157,7 +167,7 @@ labelSend:  //  Send the buffer: need to write/read char by char because of echo
 
     if (state) {  //  For State Machine: exit now and continue at send step.
       state->setState(sendIndex, sentTime);  //  Save the changed state.
-      return state->setStep(stepSend, delayAfterSend);
+      return state->suspend(stepSend, delayAfterSend);
     }
     sleep(delayAfterSend);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
   }
@@ -165,7 +175,7 @@ labelSend:  //  Send the buffer: need to write/read char by char because of echo
 
   if (state) {  //  For State Machine: exit now and continue at receive step.
     state->setState(sendIndex, sentTime);  //  Save the changed state.
-    return state->setStep(stepReceive);
+    return state->suspend(stepReceive);
   }
 
 labelReceive:  //  Read response.  Loop until timeout or we see the end of response marker.
@@ -174,13 +184,13 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
     //  If receive step has timed out, quit.
     const unsigned long currentTime = millis();
     if (currentTime - sentTime > timeout) {
-      if (state) return state->setStep(stepTimeout);  //  For State Machine: exit now and continue at timeout step.
+      if (state) return state->suspend(stepTimeout);  //  For State Machine: exit now and continue at timeout step.
       break;
     }
 
     if (serialPort->available() <= 0) {
       //  No data is available to receive now.  We retry.
-      if (state) return state->setStep();  //  For State Machine: exit now and continue at receive step.
+      if (state) return state->suspend();  //  For State Machine: exit now and continue at receive step.
       continue;
     }
 
@@ -190,7 +200,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
 
     if (receiveChar == -1) {
       //  No data is available now.  We retry.
-      if (state) return state->setStep();  //  For State Machine: exit now and continue at receive step.
+      if (state) return state->suspend();  //  For State Machine: exit now and continue at receive step.
       continue;
     }
 
@@ -202,7 +212,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
       //  We have encountered all the markers we need.  Stop receiving.
       if (actualMarkerCount >= expectedMarkerCount) break;
 
-      if (state) return state->setStep();  //  For State Machine: exit now and continue at receive step.
+      if (state) return state->suspend();  //  For State Machine: exit now and continue at receive step.
       continue;  //  Continue to receive next char.
     }
 
@@ -210,9 +220,9 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
     response.concat(String((char) receiveChar));
     // log2(F("receiveChar "), receiveChar);
 
-    if (state) return state->setStep();  //  For State Machine: exit now and continue at receive step.
+    if (state) return state->suspend();  //  For State Machine: exit now and continue at receive step.
   }
-  if (state) return state->setStep(stepEnd);  //  For State Machine: exit now and continue at end step.
+  if (state) return state->suspend(stepEnd);  //  For State Machine: exit now and continue at end step.
 
 labelEnd:  //  Finished the send and receive.  We close the serial port.
 labelTimeout:  //  In case of timeout, also close the serial port.
@@ -231,9 +241,11 @@ labelTimeout:  //  In case of timeout, also close the serial port.
     } else {
       log2(F(" - Wisol.sendBuffer: Error: Unknown response: "), response);
     }
+    if (state) return state->endWithFailure();  //  For State Machine: exit with failed status.
     return false;
   }
   log2(F(" - Wisol.sendBuffer: response: "), response);
+  if (state) return state->end();  //  For State Machine: exit with success status.
   return true;
 }
 
@@ -266,11 +278,9 @@ bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, S
 
   //  Set the output power for the zone.
   if (state) state->push();
-  if (!setOutputPower(state)) return false;
-  if (state) {
-    //// if (state->isComplete())
-    state->pop();
-  }
+  bool status = setOutputPower(state);
+  if (state) state->pop();
+  if (!status) return false;
 
   //  Send the data.
   String message = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END, data;
