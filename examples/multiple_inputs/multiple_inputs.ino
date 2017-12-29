@@ -290,10 +290,11 @@ void setup() {  //  Will be called only once.
 
 void loop() {  //  Will be called repeatedly.
   //  Execute the sensor and transceiver transitions for the Finite State Machine.
+  //  Must start the transceiver before the sensors, or transceiver will lose the first input changed trigger.
+  transceiverFsm.run_machine();
   if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.run_machine();
   if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
   if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
-  transceiverFsm.run_machine();
 
   delay(0.1 * 1000);  //  Wait 0.1 seconds between loops. Easier to debug.
 }

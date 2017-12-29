@@ -75,6 +75,8 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
   //  The Finite State Machine sets the step parameter to a non-zero value
   //  to indicate the step to jump to.
 
+  log2(F(" - Wisol.sendBuffer: "), buffer);
+  log2(F("response / expectedMarkerCount / timeout"), response + " / " + expectedMarkerCount + " / " + timeout);
   int sendIndex = 0;  //  Index of next char to be sent.
   unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
 
@@ -89,6 +91,8 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
       //  Restore the saved state at subsequent steps.
       state->getState(sendIndex, sentTime);
     }
+    Serial.print("sendIndex="); Serial.println(sendIndex);
+    Serial.print("sentTime="); Serial.println(sentTime);
     //  Jump to the specified step and continue.
     switch(step) {
       case stepStart: goto labelStart;
@@ -103,7 +107,6 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
 
 labelStart:  //  Start the serial interface.
 
-  log2(F(" - Wisol.sendBuffer: "), buffer);
   serialPort->begin(MODEM_BITS_PER_SECOND);
   response = "";
   actualMarkerCount = 0;
@@ -200,18 +203,73 @@ labelTimeout:  //  In case of timeout, also close the serial port.
   logBuffer(F("<< "), response.c_str(), markerPos, actualMarkerCount);
 
   //  If we did not see the terminating '\r', something is wrong.
+  bool status = false;
   if (actualMarkerCount < expectedMarkerCount) {
+    status = false;  //  Return failure.
     if (response.length() == 0) {
       log1(F(" - Wisol.sendBuffer: Error: No response"));  //  Response timeout.
     } else {
       log2(F(" - Wisol.sendBuffer: Error: Unknown response: "), response);
     }
-    if (state) return state->endWithFailure();  //  For State Machine: exit with failed status.
-    return false;
+  } else {
+    status = true;  //  Return success.
+    log2(F(" - Wisol.sendBuffer: response: "), response);
   }
-  log2(F(" - Wisol.sendBuffer: response: "), response);
-  if (state) return state->end();  //  For State Machine: exit with success status.
-  return true;
+  if (state) return state->end(status);  //  For State Machine: exit with success or failure status.
+  return status;
+}
+
+bool Wisol::setOutputPower(StateManager *state) {
+  //  Set the output power for the zone before sending a message.
+  log2(F(" - Wisol.setOutputPower: zone "), String(zone));
+  bool status = false;
+  int x, y;
+  if (state) {  //  For State Machine: Init the state and jump to the right step.
+    uint8_t step = state->begin(F("setOutputPower"), stepStart);
+    //  Jump to the specified step and continue.
+    switch(step) {
+      case stepStart: goto labelStart;
+      case stepPower: goto labelPower;
+      case stepSend: goto labelSend;
+      case stepEnd: goto labelEnd;
+      default: log2(F("***Unknown step: "), step); return false;
+    }
+  }
+labelStart:
+  switch(zone) {
+    case 1:  //  RCZ1
+    case 3:  //  RCZ3
+      status = sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers, state);
+      if (state) return state->suspend(stepEnd);  //  For State Machine: Wait for sendCommand to complete then resume at end step.
+      break;
+    case 2:  //  RCZ2
+    case 4: {  //  RCZ4
+      status = sendCommand(String(CMD_PRESEND) + CMD_END, 1, data, markers, state);
+      if (state) return state->suspend(stepPower);  //  For State Machine: Wait for sendCommand to complete then resume at send step.
+
+labelPower:  //  Parse the returned "X,Y" to determine if we need to send the second power command.
+      if (data.length() < 3) {  //  If too short, return error.
+        log2(F(" - Wisol.setOutputPower: Unknown response "), data);
+        status = false;
+        break;
+      }
+      x = data.charAt(0) - '0';
+      y = data.charAt(2) - '0';
+      if (x != 0 && y >= 3) break; //  No need to send second power command.
+      if (state) return state->suspend(stepSend);  //  For State Machine: Exit now and resume at send step.
+
+labelSend:  //  Send second power command.
+      status = sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers, state);
+      if (state) return state->suspend(stepEnd);  //  For State Machine: Wait for sendCommand to complete then resume at end step.
+      break;
+    }
+    default:
+      log2(F(" - Wisol.setOutputPower: Unknown zone "), zone);
+      status = false;
+  }
+labelEnd:  //  Return the status to the caller.
+  if (state) return state->end(status);  //  For State Machine: Return the success/failure status.
+  return status;
 }
 
 bool Wisol::sendMessageCommand(const String &command, uint8_t expectedMarkerCount, String &response, StateManager *state) {
@@ -221,6 +279,8 @@ bool Wisol::sendMessageCommand(const String &command, uint8_t expectedMarkerCoun
   //  expect to see.  Downlink message will be returned in response parameter, if downlink is requested.
   //  Optional parameter state, if specified, contains the state manager for running in
   //  Finite State Machine mode.
+  log2(F(" - Wisol.sendMessageCommand: "), device + ',' + command + ',' + expectedMarkerCount);
+  bool status;
   if (state) {  //  For State Machine: Init the state and jump to the right step.
     uint8_t step = state->begin(F("sendMessageCommand"), stepStart);
     //  Jump to the specified step and continue.
@@ -232,21 +292,34 @@ bool Wisol::sendMessageCommand(const String &command, uint8_t expectedMarkerCoun
       default: log2(F("***Unknown step: "), step); return false;
     }
   }
-labelStart:
-  if (!isReady()) return state ? state->endWithFailure() : false;  //  Prevent user from sending too many messages.
+labelStart:  //  Prevent user from sending too many messages within a short interval.
+  status = isReady();
+  if (!status) {  //  If error, return false to caller.
+    if (state) return state->end(status);  //  For State Machine: Return the failed status.
+    return false;
+  }
   //  Exit command mode and prepare to send message.
-  if (!exitCommandMode()) return state ? state->endWithFailure() : false;
+  status = exitCommandMode();
+  if (!status) {  //  If error, return false to caller.
+    if (state) return state->end(status);  //  For State Machine: Return the failed status.
+    return false;
+  }
   if (state) return state->suspend(stepPower);  //  For State Machine: exit now and continue at power step.
 
 labelPower:
-  //  Set the output power for the zone.
-  if (!setOutputPower(state)) return state ? state->endWithFailure() : false;
+  //  Set the output power for the zone.  If error, return false to caller.
+  status = setOutputPower(state);
+  if (!status) {  //  If error, return false to caller.
+    if (state) return state->end(status);  //  For State Machine: Return the failed status.
+    return false;
+  }
   if (state) return state->suspend(stepSend);  //  For State Machine: Wait for setOutputPower to complete then resume at send step.
 
-labelSend: //  Send the data.
-  //  Two '\r' markers expected ("OK\r RX=...\r").
-  if (!sendBuffer(command, (int) WISOL_COMMAND_TIMEOUT, expectedMarkerCount, data, markers, state)) {
-    return state ? state->endWithFailure() : false;
+labelSend: //  Send the command to the transceiver and wait for the expected markers.
+  status = sendBuffer(command, (int) WISOL_COMMAND_TIMEOUT, expectedMarkerCount, data, markers, state);
+  if (!status) {  //  If error, return false to caller.
+    if (state) return state->end(status);  //  For State Machine: Return the failed status.
+    return false;
   }
   if (state) return state->suspend(stepEnd);  //  For State Machine: Wait for sendBuffer to complete then resume at end step.
 
@@ -254,7 +327,9 @@ labelEnd:  //  Return the result.
   log1(data);
   lastSend = millis();
   response = data;
-  return state ? state->end() : true;
+  //  Return true to caller.
+  if (state) return state->end();  //  For State Machine: Return the success status.
+  return true;
 }
 
 bool Wisol::sendMessage(const String &payload, StateManager *state) {
@@ -263,7 +338,8 @@ bool Wisol::sendMessage(const String &payload, StateManager *state) {
   log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
   //  Compose the Wisol command and send to the transceiver.
   String command = String(CMD_SEND_MESSAGE) + payload + CMD_END, response;
-  return sendMessageCommand(command, 1, response, state);  //  One '\r' marker expected ("OK\r").
+  //  We are expecting only one '\r' marker, e.g. "OK\r".
+  return sendMessageCommand(command, 1, response, state);  //  Return status to caller.
 }
 
 bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, StateManager *state) {
@@ -272,38 +348,14 @@ bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, S
   log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
   //  Compose the Wisol command and send to the transceiver.
   String command = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END;
-  //  Two '\r' markers expected ("OK\r RX=...\r").
-  if (!sendBuffer(command, (int) WISOL_COMMAND_TIMEOUT, 2, data, markers, state)) {
+  //  We are expecting two '\r' markers, e.g. "OK\r RX=...\r".
+  if (!sendMessageCommand(command, 2, response, state)) {
     return false;  //  In case of error, return false.
   }
   //  Response contains OK\nRX=01 23 45 67 89 AB CD EF
   //  Remove the prefix and spaces.
   response.replace("OK\nRX=", "");
   response.replace(" ", "");
-  return true;
-}
-
-bool Wisol::setOutputPower(StateManager *state) {
-  //  Set the output power for the zone before sending a message.
-  switch(zone) {
-    case 1:  //  RCZ1
-    case 3:  //  RCZ3
-      if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers, state)) return false;
-      break;
-    case 2:  //  RCZ2
-    case 4: {  //  RCZ4
-      if (!sendCommand(String(CMD_PRESEND) + CMD_END, 1, data, markers, state)) return false;
-      //  Parse the returned X,Y.
-      int x = data.charAt(0) - '0';
-      int y = data.charAt(2) - '0';
-      // log4("x,y=", String(x), ',', String(y));
-      if (x == 0 || y < 3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers, state);
-      break;
-    }
-    default:
-      log2(F(" - Wisol.setOutputPower: Unknown zone "), zone);
-      return false;
-  }
   return true;
 }
 

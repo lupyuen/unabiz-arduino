@@ -74,7 +74,7 @@ public:
       currentState = createState(functionName, firstStep, 0);
     } else if (currentState->functionName == functionName) {
       //  Reuse the root state. Do nothing.
-      Serial.print(F("Found state ")); Serial.println(functionName);
+      Serial.print(F("Resume state ")); Serial.print(functionName + ", step "); Serial.println(currentState->currentStep);
     } else {
       FunctionState *childState = currentState->childState;
       if (!childState || childState->functionName != functionName) {
@@ -85,8 +85,8 @@ public:
         currentState = childState;
       } else {
         //  Else switch to the child state.
-        Serial.print(F("Found state ")); Serial.println(functionName);
         currentState = childState;
+        Serial.print(F("Resume state ")); Serial.println(functionName + ", step "); Serial.println(currentState->currentStep);
       }
     }
     //  Return the current step for this function.
@@ -114,21 +114,22 @@ public:
     return suspend(currentState->currentStep);
   }
 
-  bool end() {
+  bool end(bool status = true) {
     //  Called at the end of a function to terminate the function state
-    //  and return a success status, which will be propagated to the parent
-    //  function state.  Returns true.
-    popState(stepSuccess);
-    return true;
+    //  and return a success or failure status, depending on the status parameter (default to true)
+    //  Status will be propagated to the parent function state.  Returns the status value.
+    if (status) popState(stepSuccess);
+    else popState(stepFailure);
+    return status;
   }
 
-  bool endWithFailure() {
+  /* bool endWithFailure() {
     //  Called at the end of a function to terminate the function state
     //  and return a failure status, which will be propagated to the root
     //  function state.  Returns false.
     popState(stepFailure);
     return false;
-  }
+  } */
 
 private:
   FunctionState *createState(const String &functionName, uint8_t firstStep, FunctionState *parentState) {

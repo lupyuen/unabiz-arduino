@@ -68,6 +68,13 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin);
 void whenTransceiverIdle(); void whenTransceiverSending(); void whenTransceiverCompleted(uint8_t status);
 void prepareToSend();
 
+//  TODO
+void enterIdle() { Serial.println(F("--> Transceiver idle")); }
+void exitIdle() { Serial.println(F("<-- Transceiver idle")); }
+void exitSending() { Serial.println(F("<-- Transceiver sending")); }
+void enterSent() { Serial.println(F("--> Transceiver sent")); }
+void exitSent() { Serial.println(F("<-- Transceiver sent")); }
+
 //  Declare the Finite State Machine States for each input and for the Sigfox transceiver.
 //  Each state has 3 properties:
 //  "When Entering State" - The function to run when entering this state
@@ -84,10 +91,11 @@ State input2Sending(  0,     0,                  0);  // checking the input temp
 State input3Sending(  0,     0,                  0);  // while the transceiver is sending.
 
 //    Name of state       Enter  When inside state         When exiting state
-State transceiverIdle(    0,     &whenTransceiverIdle,     0);  // Transceiver is idle until any input changes.
-State transceiverSending( &prepareToSend,                       // Transceiver enters "Sending" state to
-                                 &whenTransceiverSending,  0);  // send changed inputs.
-State transceiverSent(    0,     0,                        0);  // After sending, it waits 2.1 seconds in "Sent" state before going to "Idle" state.
+State transceiverIdle(    &enterIdle,
+                                 &whenTransceiverIdle,     &exitIdle);  // Transceiver is idle until any input changes.
+State transceiverSending( &prepareToSend,                                  // Transceiver enters "Sending" state to
+                                 &whenTransceiverSending,  &exitSending);  // send changed inputs.
+State transceiverSent(    &enterSent,     0,               &exitSent);  // After sending, it waits 2.1 seconds in "Sent" state before going to "Idle" state.
 
 //  Declare the Finite State Machines for each input and for the Sigfox transceiver.
 //  Name of Finite State Machine    Starting state
@@ -165,9 +173,9 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin) {
     //  Transition from "Idle" state to "Sending" state, which will temporarily stop checking the input.
     Serial.print(F("Input #")); Serial.print(inputNum + 1);
     Serial.println(F(" triggering INPUT_CHANGED to transceiver and itself"));
-    fsm->trigger(INPUT_CHANGED);
     //  Tell Sigfox transceiver we got something to send from input 1.
     transceiverFsm.trigger(INPUT_CHANGED);
+    fsm->trigger(INPUT_CHANGED);
   }
 }
 
@@ -219,6 +227,7 @@ static int messageCounter = 0, successCount = 0, failCount = 0;  //  Count messa
 void prepareToSend() {
   //  Prepare a single Structured message containing the sensor values to Sigfox,
   //  This occurs when the transceiver enters the "Sending" state.
+  Serial.println(F("--> Transceiver sending"));
   Serial.print(F("\nTransceiver Sending message #")); Serial.println(messageCounter);
 
   //  Init the transceiver state.
@@ -328,12 +337,13 @@ void setup() {  //  Will be called only once.
 
 void loop() {  //  Will be called repeatedly.
   //  Execute the sensor and transceiver transitions for the Finite State Machine.
+  //  Must start the transceiver before the sensors, or transceiver will lose the first input changed trigger.
+  transceiverFsm.run_machine();
   if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.run_machine();
   if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
   if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
-  transceiverFsm.run_machine();
 
-  delay(10);  //  Wait 10 milliseconds between loops.  If we wait longer, we may miss incoming transceiver data.
+  delay(100);  //  Wait 10 milliseconds between loops.  If we wait longer, we may miss incoming transceiver data.
 }
 
 //  End Main Program
