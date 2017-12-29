@@ -42,12 +42,13 @@
 static NullPort nullPort;
 static uint8_t markers = 0;
 static String data;
+static int fsmMode = 1;
 
 //  Remember where in response the '>' markers were seen.
 const uint8_t markerPosMax = 5;
 static uint8_t markerPos[markerPosMax];
 
-void sleep(int milliSeconds) {
+static void sleep(int milliSeconds) {
 #ifdef BEAN_BEAN_BEAN_H
   Bean.sleep(milliSeconds);
 #else  // BEAN_BEAN_BEAN_H
@@ -62,15 +63,26 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
   //  We send the buffer to the modem.  Return true if successful.
   //  expectedMarkerCount is the number of end-of-command markers '\r' we
   //  expect to see.  actualMarkerCount contains the actual number seen.
+
+  ////for(;;) {
+
+  ////}
+
   log2(F(" - Wisol.sendBuffer: "), buffer);
   response = "";
 
+  //// START
   actualMarkerCount = 0;
   //  Start serial interface.
   serialPort->begin(MODEM_BITS_PER_SECOND);
   sleep(200);
+
+  //// INIT SERIAL
+
   serialPort->flush();
   serialPort->listen();
+
+  //// SENDING
 
   //  Send the buffer: need to write/read char by char because of echo.
   const char *rawBuffer = buffer.c_str();
@@ -92,6 +104,8 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
     //  If timeout, quit.
     const unsigned long currentTime = millis();
     if (currentTime - startTime > timeout) break;
+
+    //// RECEIVE
 
     //  If data is available to receive, receive it.
     if (serialPort->available() > 0) {
