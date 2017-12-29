@@ -8,6 +8,7 @@
 #endif  //  ARDUINO
 
 #include "SIGFOX.h"
+#include "State.h"
 
 //  Use a macro for logging because Flash strings not supported with String class in Bean+
 #define log1(x) { echoPort->println(x); }

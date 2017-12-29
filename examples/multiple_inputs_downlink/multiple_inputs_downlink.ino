@@ -192,7 +192,7 @@ void addTransceiverTransitions() {
 
   //  From state           To state             Triggering event   When transitioning states
   transceiverFsm.add_transition(                                   //  If inputs have changed when idle, send the inputs.
-      &transceiverIdle,    &transceiverSending, INPUT_CHANGED,     0);
+      &transceiverIdle,    &transceiverSending, INPUT_CHANGED,     &prepareToSend);
   transceiverFsm.add_transition(                                   //  If inputs have changed when busy, send the inputs later.
       &transceiverSending, &transceiverSending, INPUT_CHANGED,     &scheduleResend);
   transceiverFsm.add_transition(                                   //  When inputs have been sent, go to the "Sent" state
@@ -207,18 +207,35 @@ void addTransceiverTransitions() {
       &transceiverIdle,    &transceiverSending, 30 * 1000,           &transceiverIdleToSending);  //  send the inputs.
 }
 
+static Message msg;  //  Message currently being sent.
+static String response = "";  //  Downlink response currently being received.
+static State transceiverState;  //  Function state of the transceiver. Lets us suspend and resume the transceiver functions.
+static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
+
+void prepareToSend() {
+  //  Prepare to send the sensor values to Sigfox in a single Structured message.
+  //  This occurs when the transceiver enters the "Sending" state.
+
+  //  Compose the message with the sensor data.  Clear the downlink response.
+  msg = composeSensorMessage();
+  response = "";
+
+  //  Clear the pending resend count, so we will know when transceiver has been asked to resend.
+  pendingResend = 0;
+
+  //  Init the transceiver state.
+  transceiverState.init();
+}
+
 void whenTransceiverSending() {
   //  Send the sensor values to Sigfox in a single Structured message.
   //  This occurs when the transceiver enters the "Sending" state.
-  //  TODO: We may miss some changes to the input while sending a message.
-  //  The send operation should be converted to Finite State Machine too.
-
-  //  Compose the message with the sensor data.
-  Message msg = composeSensorMessage();
+  //  The transceiver functions are called repeated in Finite State Machine mode until completion.
 
   //  Send the encoded structured message.
-  pendingResend = 0; //  Clear the pending resend count, so we will know when transceiver has been asked to resend.
-  static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
+  bool sendWasSuccessful = msg.sendAndGetResponse(response, transceiverState);
+  if (!sendWasSuccessful)
+
   Serial.print(F("\nTransceiver Sending message #")); Serial.println(counter);
   if (msg.send()) {
     successCount++;  //  If successful, count the message sent successfully.

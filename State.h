@@ -18,12 +18,39 @@ struct FunctionState {
   FunctionState *childState = 0;
   uint8_t currentStep = 0;
   uint8_t nextStep = 0;
+  uint32_t delay = 0;
   int int1 = 0;
   unsigned long ulong1 = 0;
 };
 
 class State {
 public:
+  State() {
+    init();
+  }
+
+  ~State() {
+    destroy();
+  }
+
+  void destroy() {
+    if (!currentState) return;
+    FunctionState *childState = currentState->childState;
+    if (childState) {
+      delete childState;
+      currentState->childState = 0;
+    }
+    delete currentState;
+    currentState = 0;
+  }
+
+  void init() {
+    //  Construct a root state.
+    destroy();
+    currentState = new FunctionState();
+    currentState->functionName = "root";
+  }
+
   uint8_t begin(const String &functionName, uint8_t firstStep) {
     //  If we don't have a child state for this function name, create a new state and reset to the first step.
     FunctionState *childState = currentState->childState;
@@ -71,8 +98,24 @@ public:
 
   bool suspend(uint8_t nextStep, uint32_t delay = 0) {
     //  Remember the next step and pop the current state.
-    popState(currentState->currentStep, nextStep);
     //  TODO: Delay
+    popState(currentState->currentStep, nextStep);
+    currentState->delay = delay;
+    transitionState();
+    if (currentState->currentStep == stepFailure) return false;
+    return true;
+  }
+
+  bool transitionState() {
+    //  TODO: If child state has completed, delete child state and move to next step.
+    //  Return true if we have transitioned.
+    FunctionState *childState = currentState->childState;
+    if (!childState) return false;
+    if (childState->currentStep != stepSuccess && childState->currentStep != stepFailure) return false;
+    if (childState->currentStep == stepFailure) currentState->currentStep = stepFailure;
+    else currentState->currentStep = currentState->nextStep;
+    delete childState;
+    currentState->childState = 0;
     return true;
   }
 
