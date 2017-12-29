@@ -75,8 +75,6 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
   //  The Finite State Machine sets the step parameter to a non-zero value
   //  to indicate the step to jump to.
 
-  log2(F(" - Wisol.sendBuffer: "), buffer);
-  log2(F("response / expectedMarkerCount / timeout"), response + " / " + expectedMarkerCount + " / " + timeout);
   int sendIndex = 0;  //  Index of next char to be sent.
   unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
 
@@ -105,7 +103,10 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
     }
   }
 
-labelStart:  //  Start the serial interface.
+labelStart:  //  Start the serial interface for the transceiver.
+
+  log2(F(" - Wisol.sendBuffer: "), buffer);
+  log2(F("response / expectedMarkerCount / timeout: "), response + " / " + expectedMarkerCount + " / " + timeout);
 
   serialPort->begin(MODEM_BITS_PER_SECOND);
   response = "";
@@ -114,7 +115,7 @@ labelStart:  //  Start the serial interface.
   if (state) return state->suspend(stepListen, delayAfterStart);  //  For State Machine: exit now and continue at listen step.
   sleep(delayAfterStart);
 
-labelListen:  //  Start listening for responses.
+labelListen:  //  Start listening for responses from the transceiver.
 
   serialPort->flush();
   serialPort->listen();
@@ -221,7 +222,6 @@ labelTimeout:  //  In case of timeout, also close the serial port.
 
 bool Wisol::setOutputPower(StateManager *state) {
   //  Set the output power for the zone before sending a message.
-  log2(F(" - Wisol.setOutputPower: zone "), String(zone));
   bool status = false;
   int x, y;
   if (state) {  //  For State Machine: Init the state and jump to the right step.
@@ -235,7 +235,9 @@ bool Wisol::setOutputPower(StateManager *state) {
       default: log2(F("***Unknown step: "), step); return false;
     }
   }
-labelStart:
+labelStart:  //  Get the command based on the zone.
+  log2(F(" - Wisol.setOutputPower: zone "), String(zone));
+  data = "";
   switch(zone) {
     case 1:  //  RCZ1
     case 3:  //  RCZ3
@@ -279,7 +281,6 @@ bool Wisol::sendMessageCommand(const String &command, uint8_t expectedMarkerCoun
   //  expect to see.  Downlink message will be returned in response parameter, if downlink is requested.
   //  Optional parameter state, if specified, contains the state manager for running in
   //  Finite State Machine mode.
-  log2(F(" - Wisol.sendMessageCommand: "), device + ',' + command + ',' + expectedMarkerCount);
   bool status;
   if (state) {  //  For State Machine: Init the state and jump to the right step.
     uint8_t step = state->begin(F("sendMessageCommand"), stepStart);
@@ -293,6 +294,8 @@ bool Wisol::sendMessageCommand(const String &command, uint8_t expectedMarkerCoun
     }
   }
 labelStart:  //  Prevent user from sending too many messages within a short interval.
+  log2(F(" - Wisol.sendMessageCommand: "), device + ',' + command + ',' + expectedMarkerCount);
+  response = "";
   status = isReady();
   if (!status) {  //  If error, return false to caller.
     if (state) return state->end(status);  //  For State Machine: Return the failed status.
