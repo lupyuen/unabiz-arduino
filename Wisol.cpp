@@ -75,16 +75,16 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
   //  The Finite State Machine sets the step parameter to a non-zero value
   //  to indicate the step to jump to.
 
-  //  We add 1 to expectedMarkerCount to account for the first '\r' at the end of the sent command.
-  uint8_t adjustedMarkerCount = expectedMarkerCount + 1;
+  uint8_t adjustedMarkerCount = expectedMarkerCount;
 
   int sendIndex = 0;  //  Index of next char to be sent.
   unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
 
   //  For State Machine: Set the state and jump to the specified step.
-  uint8_t step = 0;
   if (state) {
-    step = state->begin(F("sendBuffer"), stepStart);
+    //  For State Machine: We add 1 to expectedMarkerCount to account for the first '\r' at the end of the sent command.
+    adjustedMarkerCount++;
+    uint8_t step = state->begin(F("sendBuffer"), stepStart);
     if (step == stepStart) {
       //  Clear the saved state at the first step.
       state->setState(sendIndex, sentTime);
