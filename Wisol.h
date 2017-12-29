@@ -27,6 +27,8 @@ const uint8_t WISOL_TX = 4;  //  Transmit port for For UnaBiz / Wisol Dev Kit
 const uint8_t WISOL_RX = 5;  //  Receive port for UnaBiz / Wisol Dev Kit
 const unsigned int WISOL_COMMAND_TIMEOUT = 60000;  //  Wait up to 60 seconds for response from SIGFOX module.  Includes downlink response.
 
+class State;
+
 class Wisol
 {
 public:
@@ -38,8 +40,8 @@ public:
   void setEchoPort(Print *port);  //  Set the port for sending echo output.
   void echo(const String &msg);  //  Echo the debug message.
   bool isReady();
-  bool sendMessage(const String &payload);  //  Send the payload of hex digits to the network, max 12 bytes.
-  bool sendMessageAndGetResponse(const String &payload, String &response, uint8_t step = 0);  //  Send the payload of hex digits to the network and get response.
+  bool sendMessage(const String &payload, State *state = 0);  //  Send the payload of hex digits to the network, max 12 bytes.
+  bool sendMessageAndGetResponse(const String &payload, String &response, State *state = 0);  //  Send the payload of hex digits to the network and get response.
   bool sendString(const String &str);  //  Sending a text string, max 12 characters allowed.
   bool receive(String &data);  //  Receive a message.
   bool enterCommandMode();  //  Enter Command Mode for sending module commands, not data.
@@ -83,8 +85,8 @@ public:
   String toHex(char *c, int length);
 
 private:
-  bool sendCommand(const String &cmd, uint8_t expectedMarkers, String &result, uint8_t &actualMarkers, uint8_t step = 0);
-  bool sendBuffer(const String &buffer, int timeout, uint8_t expectedMarkers, String &dataOut, uint8_t &actualMarkers, uint8_t step = 0);
+  bool sendCommand(const String &cmd, uint8_t expectedMarkers, String &result, uint8_t &actualMarkers, State *state = 0);
+  bool sendBuffer(const String &buffer, int timeout, uint8_t expectedMarkers, String &dataOut, uint8_t &actualMarkers, State *state = 0);
   bool setFrequency(int zone, String &result);
   uint8_t hexDigitToDecimal(char ch);
   void logBuffer(const __FlashStringHelper *prefix, const char *buffer, uint8_t markerPos[], uint8_t markerCount);
@@ -97,7 +99,7 @@ private:
   Print *echoPort;  //  Port for sending echo output.  Defaults to Serial.
   Print *lastEchoPort;  //  Last port used for sending echo output.
   unsigned long lastSend;  //  Timestamp of last send.
-  bool setOutputPower(uint8_t step = 0);
+  bool setOutputPower(State *state = 0);
 };
 
 #endif // UNABIZ_ARDUINO_WISOL_H

@@ -59,9 +59,6 @@ static void sleep(int milliSeconds) {
 static bool useStateMachine = true;
 static uint8_t nextStep = 0;
 
-static int savedSendIndex = 0;
-static unsigned long savedSentTime = 0;
-
 static const uint8_t stepStart = 1;
 static const uint8_t stepListen = 2;
 static const uint8_t stepSend = 3;
@@ -72,9 +69,25 @@ static const uint8_t stepEnd = 6;
 static const uint16_t delayAfterStart = 200;
 static const uint16_t delayAfterSend = 10;
 
+class State {
+public:
+  uint8_t getStep() { return step; }
+  bool setStep() { return setStep(step); }
+  bool setStep(uint8_t step0, uint32_t delay = 0) { step = step0; return true; }
+  void setState(int int1, unsigned long ulong1) { state.int1 = int1; state.ulong1 = ulong1; }
+  void getState(int &int1, unsigned long &ulong1) { int1 = state.int1; ulong1 = state.ulong1; }
+
+private:
+  uint8_t step = 0;
+  struct {
+    int int1 = 0;
+    unsigned long ulong1 = 0;
+  } state;
+};
+
 bool Wisol::sendBuffer(const String &buffer, const int timeout,
                        uint8_t expectedMarkerCount, String &response,
-                       uint8_t &actualMarkerCount, uint8_t step) {
+                       uint8_t &actualMarkerCount, State *state = 0) {
   //  buffer contains a string of ASCII chars to be sent to the modem.
   //  We send the buffer to the modem.  Return true if successful.
   //  expectedMarkerCount is the number of end-of-command markers '\r' we
@@ -91,15 +104,15 @@ bool Wisol::sendBuffer(const String &buffer, const int timeout,
   unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
 
   //  For State Machine: Set the state and jump to the specified step.
-  if (step > 0) {
+  uint8_t step = 0;
+  if (state) {
+    step = state->getStep();
     if (step == stepStart) {
       //  Clear the saved state at the first step.
-      savedSendIndex = sendIndex;
-      savedSentTime = sentTime;
+      state->setState(sendIndex, sentTime);
     } else {
       //  Restore the saved state at subsequent steps.
-      sendIndex = savedSendIndex;
-      sentTime = savedSentTime;
+      state->getState(sendIndex, sentTime);
     }
     //  Jump to the specified step and continue.
     switch(step) {
@@ -120,14 +133,14 @@ labelStart:  //  Start the serial interface.
   response = "";
   actualMarkerCount = 0;
 
-  if (step > 0) { nextStep = stepListen; return true; }  //  For State Machine: exit now and continue later.
+  if (state) return state->setStep(stepListen, delayAfterStart);  //  For State Machine: exit now and continue at listen step.
   sleep(delayAfterStart);
 
 labelListen:  //  Start listening for responses.
 
   serialPort->flush();
   serialPort->listen();
-  if (step > 0) { nextStep = stepSend; return true; }  //  For State Machine: exit now and continue later.
+  if (state) return state->setStep(stepSend);  //  For State Machine: exit now and continue at send step.
 
 labelSend:  //  Send the buffer: need to write/read char by char because of echo.
 
@@ -142,11 +155,18 @@ labelSend:  //  Send the buffer: need to write/read char by char because of echo
     sendIndex++;
     // echoSend.concat(toHex((char) sendChar) + ' ');
 
-    if (step > 0) { savedSendIndex = sendIndex; return true; }  //  For State Machine: exit now and continue later.
+    if (state) {  //  For State Machine: exit now and continue at send step.
+      state->setState(sendIndex, sentTime);  //  Save the changed state.
+      return state->setStep(stepSend, delayAfterSend);
+    }
     sleep(delayAfterSend);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
   }
   sentTime = millis();  //  Start the timer for detecting receive timeout.
-  if (step > 0) { nextStep = stepReceive; savedSentTime = sentTime; return true; }  //  For State Machine: exit now and continue at receive step.
+
+  if (state) {  //  For State Machine: exit now and continue at receive step.
+    state->setState(sendIndex, sentTime);  //  Save the changed state.
+    return state->setStep(stepReceive);
+  }
 
 labelReceive:  //  Read response.  Loop until timeout or we see the end of response marker.
 
@@ -154,13 +174,13 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
     //  If receive step has timed out, quit.
     const unsigned long currentTime = millis();
     if (currentTime - sentTime > timeout) {
-      if (step > 0) { nextStep = stepTimeout; return true; }  //  For State Machine: exit now and continue at timeout step.
+      if (state) return state->setStep(stepTimeout);  //  For State Machine: exit now and continue at timeout step.
       break;
     }
 
     if (serialPort->available() <= 0) {
       //  No data is available to receive now.  We retry.
-      if (step > 0) { return true; }  //  For State Machine: exit now and continue at receive step.
+      if (state) return state->setStep();  //  For State Machine: exit now and continue at receive step.
       continue;
     }
 
@@ -170,7 +190,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
 
     if (receiveChar == -1) {
       //  No data is available now.  We retry.
-      if (step > 0) { return true; }  //  For State Machine: exit now and continue at receive step.
+      if (state) return state->setStep();  //  For State Machine: exit now and continue at receive step.
       continue;
     }
 
@@ -181,6 +201,8 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
 
       //  We have encountered all the markers we need.  Stop receiving.
       if (actualMarkerCount >= expectedMarkerCount) break;
+
+      if (state) return state->setStep();  //  For State Machine: exit now and continue at receive step.
       continue;  //  Continue to receive next char.
     }
 
@@ -188,9 +210,9 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
     response.concat(String((char) receiveChar));
     // log2(F("receiveChar "), receiveChar);
 
-    if (step > 0) { return true; }  //  For State Machine: exit now and continue at receive step.
+    if (state) return state->setStep();  //  For State Machine: exit now and continue at receive step.
   }
-  if (step > 0) { nextStep = stepEnd; return true; }  //  For State Machine: exit now and continue at end step.
+  if (state) return state->setStep(stepEnd);  //  For State Machine: exit now and continue at end step.
 
 labelEnd:  //  Finished the send and receive.  We close the serial port.
 labelTimeout:  //  In case of timeout, also close the serial port.
@@ -215,7 +237,7 @@ labelTimeout:  //  In case of timeout, also close the serial port.
   return true;
 }
 
-bool Wisol::sendMessage(const String &payload, uint8_t step = 0) {
+bool Wisol::sendMessage(const String &payload, State *state = 0) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We prefix with AT$SF= and send to the transceiver.  Return true if successful.
   log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
@@ -223,10 +245,10 @@ bool Wisol::sendMessage(const String &payload, uint8_t step = 0) {
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return false;
   //  Set the output power for the zone.
-  if (!setOutputPower(step)) return false;
+  if (!setOutputPower(state)) return false;
   //  Send the data.
   String message = String(CMD_SEND_MESSAGE) + payload + CMD_END, data;
-  if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 1, data, markers, step)) {  //  One '\r' marker expected ("OK\r").
+  if (sendBuffer(message, (int) WISOL_COMMAND_TIMEOUT, 1, data, markers, state)) {  //  One '\r' marker expected ("OK\r").
     log1(data);
     lastSend = millis();
     return true;
@@ -234,19 +256,26 @@ bool Wisol::sendMessage(const String &payload, uint8_t step = 0) {
   return false;
 }
 
-bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, uint8_t step = 0) {
+bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, State *state = 0) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We prefix with AT$SF= and send to the transceiver.  Return response message from Sigfox in the response parameter.
   log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
   if (!isReady()) return false;  //  Prevent user from sending too many messages.
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return false;
+
   //  Set the output power for the zone.
-  if (!setOutputPower(step)) return false;
+  if (state) state->push();
+  if (!setOutputPower(state)) return false;
+  if (state) {
+    //// if (state->isComplete())
+    state->pop();
+  }
+
   //  Send the data.
   String message = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END, data;
   //  Two '\r' markers expected ("OK\r RX=...\r").
-  if (sendBuffer(message, WISOL_COMMAND_TIMEOUT, 2, data, markers, step)) {
+  if (sendBuffer(message, (int) WISOL_COMMAND_TIMEOUT, 2, data, markers, state)) {
     log1(data);
     lastSend = millis();
     response = data;
@@ -259,21 +288,21 @@ bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, u
   return false;
 }
 
-bool Wisol::setOutputPower(uint8_t step = 0) {
+bool Wisol::setOutputPower(State *state = 0) {
   //  Set the output power for the zone before sending a message.
   switch(zone) {
     case 1:  //  RCZ1
     case 3:  //  RCZ3
-      if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers, step)) return false;
+      if (!sendCommand(String(CMD_OUTPUT_POWER_MAX) + CMD_END, 1, data, markers, state)) return false;
       break;
     case 2:  //  RCZ2
     case 4: {  //  RCZ4
-      if (!sendCommand(String(CMD_PRESEND) + CMD_END, 1, data, markers, step)) return false;
+      if (!sendCommand(String(CMD_PRESEND) + CMD_END, 1, data, markers, state)) return false;
       //  Parse the returned X,Y.
       int x = data.charAt(0) - '0';
       int y = data.charAt(2) - '0';
       // log4("x,y=", String(x), ',', String(y));
-      if (x == 0 || y < 3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers, step);
+      if (x == 0 || y < 3) sendCommand(String(CMD_PRESEND2) + CMD_END, 1, data, markers, state);
       break;
     }
     default:
@@ -555,12 +584,12 @@ bool Wisol::begin() {
 }
 
 bool Wisol::sendCommand(const String &cmd, uint8_t expectedMarkerCount,
-                        String &result, uint8_t &actualMarkerCount, uint8_t step = 0) {
+                        String &result, uint8_t &actualMarkerCount, State *state = 0) {
   //  We send the command string in cmd to the transceiver.  Return true if successful.
   //  Enter command mode.
   if (!enterCommandMode()) return false;
   if (!sendBuffer(cmd, WISOL_COMMAND_TIMEOUT, expectedMarkerCount,
-                  data, actualMarkerCount, step)) return false;
+                  data, actualMarkerCount, state)) return false;
   result = data;
   return true;
 }

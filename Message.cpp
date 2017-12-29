@@ -132,7 +132,7 @@ bool Message::addName(const String name) {
   return true;
 }
 
-bool Message::send(uint8_t step = 0) {
+bool Message::send(State *state = 0) {
   //  Send the encoded message to SIGFOX.
   String msg = getEncodedMessage();
   if (msg.length() == 0) {
@@ -143,12 +143,12 @@ bool Message::send(uint8_t step = 0) {
     echo(tooLong + (encodedMessage.length() / 2) + " bytes");
     return false;
   }
-  if (wisol) return wisol->sendMessage(msg, step);
+  if (wisol) return wisol->sendMessage(msg, state);
   else if (radiocrafts) return radiocrafts->sendMessage(msg);
   return false;
 }
 
-bool Message::sendAndGetResponse(String &response, uint8_t step = 0) {
+bool Message::sendAndGetResponse(String &response, State *state = 0) {
   //  Send the structured message and get the downlink response.
   String msg = getEncodedMessage();
   if (msg.length() == 0) {
@@ -159,7 +159,7 @@ bool Message::sendAndGetResponse(String &response, uint8_t step = 0) {
     echo(tooLong + (encodedMessage.length() / 2) + " bytes");
     return false;
   }
-  if (wisol) return wisol->sendMessageAndGetResponse(msg, response, step);
+  if (wisol) return wisol->sendMessageAndGetResponse(msg, response, state);
   else if (radiocrafts) return radiocrafts->sendMessage(msg);
   return false;
 }
