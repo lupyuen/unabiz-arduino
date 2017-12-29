@@ -8,7 +8,7 @@
 #endif  //  ARDUINO
 
 #include "SIGFOX.h"
-#include "State.h"
+#include "StateManager.h"
 
 //  Use a macro for logging because Flash strings not supported with String class in Bean+
 #define log1(x) { echoPort->println(x); }
@@ -40,6 +40,9 @@
 #define CMD_EMULATOR_DISABLE "ATS410=0"  //  Device will only talk to Sigfox network.
 #define CMD_EMULATOR_ENABLE "ATS410=1"  //  Device will only talk to SNEK emulator.
 
+static const uint16_t delayAfterStart = 200;
+static const uint16_t delayAfterSend = 10;
+
 static NullPort nullPort;
 static uint8_t markers = 0;
 static String data;
@@ -57,12 +60,9 @@ static void sleep(int milliSeconds) {
   #endif // BEAN_BEAN_BEAN_H
 }
 
-static const uint16_t delayAfterStart = 200;
-static const uint16_t delayAfterSend = 10;
-
 bool Wisol::sendBuffer(const String &buffer, const int timeout,
                        uint8_t expectedMarkerCount, String &response,
-                       uint8_t &actualMarkerCount, State *state = 0) {
+                       uint8_t &actualMarkerCount, StateManager *state = 0) {
   //  buffer contains a string of ASCII chars to be sent to the modem.
   //  We send the buffer to the modem.  Return true if successful.
   //  expectedMarkerCount is the number of end-of-command markers '\r' we
@@ -214,16 +214,16 @@ labelTimeout:  //  In case of timeout, also close the serial port.
   return true;
 }
 
-bool Wisol::sendMessage(const String &payload, State *state = 0) {
+bool Wisol::sendMessage(const String &payload, StateManager *state = 0) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We prefix with AT$SF= and send to the transceiver.  Return true if successful.
-  log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
-  if (state) {  //  For State Machine: Init the state.
+  if (state) {  //  For State Machine: Init the state and jump to the right step.
     uint8_t step = state->begin(F("sendMessage"), stepStart);
     if (step == stepSend) goto labelSend;
     else if (step == stepEnd) goto labelEnd;
   }
 
+  log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
   if (!isReady()) return state ? state->endWithFailure() : false;  //  Prevent user from sending too many messages.
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return state ? state->endWithFailure() : false;
@@ -245,16 +245,16 @@ labelEnd:  //  Return the result.
   return state ? state->end() : true;
 }
 
-bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, State *state = 0) {
+bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, StateManager *state = 0) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We prefix with AT$SF= and send to the transceiver.  Return response message from Sigfox in the response parameter.
-  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
-  if (state) {  //  For State Machine: Init the state.
+  if (state) {  //  For State Machine: Init the state and jump to the right step.
     uint8_t step = state->begin(F("sendMessageAndGetResponse"), stepStart);
     if (step == stepSend) goto labelSend;
     else if (step == stepEnd) goto labelEnd;
   }
 
+  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
   if (!isReady()) return state ? state->endWithFailure() : false;  //  Prevent user from sending too many messages.
   //  Exit command mode and prepare to send message.
   if (!exitCommandMode()) return state ? state->endWithFailure() : false;
@@ -282,7 +282,7 @@ labelEnd:  //  Return the result.
   return state ? state->end() : true;
 }
 
-bool Wisol::setOutputPower(State *state = 0) {
+bool Wisol::setOutputPower(StateManager *state = 0) {
   //  Set the output power for the zone before sending a message.
   switch(zone) {
     case 1:  //  RCZ1
@@ -578,7 +578,7 @@ bool Wisol::begin() {
 }
 
 bool Wisol::sendCommand(const String &cmd, uint8_t expectedMarkerCount,
-                        String &result, uint8_t &actualMarkerCount, State *state = 0) {
+                        String &result, uint8_t &actualMarkerCount, StateManager *state = 0) {
   //  We send the command string in cmd to the transceiver.  Return true if successful.
   //  Enter command mode.
   if (!enterCommandMode()) return false;

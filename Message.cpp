@@ -132,7 +132,7 @@ bool Message::addName(const String name) {
   return true;
 }
 
-bool Message::send(State *state = 0) {
+bool Message::send(StateManager *state = 0) {
   //  Send the encoded message to SIGFOX.
   String msg = getEncodedMessage();
   if (msg.length() == 0) {
@@ -148,7 +148,7 @@ bool Message::send(State *state = 0) {
   return false;
 }
 
-bool Message::sendAndGetResponse(String &response, State *state = 0) {
+bool Message::sendAndGetResponse(String &response, StateManager *state = 0) {
   //  Send the structured message and get the downlink response.
   String msg = getEncodedMessage();
   if (msg.length() == 0) {

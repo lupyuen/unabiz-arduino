@@ -42,6 +42,7 @@ static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assume
 //  Don't use ports D4, D5: Reserved for serial comms with the Sigfox module.
 
 #include "Fsm.h"  //  If missing, install from https://github.com/jonblack/arduino-fsm
+#include "StateManager.h"  //  If missing, install from https://github.com/UnaBiz/unabiz-arduino
 
 //  TODO: When sending the input data, we will multiply by SEND_INPUT_MULTIPLIER and add SEND_INPUT_OFFSET
 //  So input value "0" will be sent as "1" and input value "1" will be sent as "10".
@@ -64,7 +65,8 @@ void input1IdleToSending(); void input2IdleToSending(); void input3IdleToSending
 void input1SendingToIdle(); void input2SendingToIdle(); void input3SendingToIdle();
 void input1IdleToIdle(); void input2IdleToIdle(); void input3IdleToIdle();
 void checkPin(Fsm *fsm, int inputNum, int inputPin);
-void whenTransceiverIdle(); void whenTransceiverSending();
+void whenTransceiverIdle(); void whenTransceiverSending(); void whenTransceiverCompleted(uint8_t status);
+void prepareToSend();
 
 //  Declare the Finite State Machine States for each input and for the Sigfox transceiver.
 //  Each state has 3 properties:
@@ -207,44 +209,61 @@ void addTransceiverTransitions() {
       &transceiverIdle,    &transceiverSending, 30 * 1000,           &transceiverIdleToSending);  //  send the inputs.
 }
 
+static StateManager transceiverState;  //  Function state of the transceiver. Lets us suspend and resume the transceiver functions.
 static Message msg;  //  Message currently being sent.
 static String response = "";  //  Downlink response currently being received.
-static State transceiverState;  //  Function state of the transceiver. Lets us suspend and resume the transceiver functions.
-static int counter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
+static unsigned long delayUntil = 0;  //  When requested by transceiver function, delay until this timestamp.
+static int messageCounter = 0, successCount = 0, failCount = 0;  //  Count messages sent and failed.
 
 void prepareToSend() {
-  //  Prepare to send the sensor values to Sigfox in a single Structured message.
+  //  Prepare a single Structured message containing the sensor values to Sigfox,
   //  This occurs when the transceiver enters the "Sending" state.
+
+  //  Init the transceiver state.
+  transceiverState.init();
+  Serial.print(F("\nTransceiver Sending message #")); Serial.println(messageCounter);
 
   //  Compose the message with the sensor data.  Clear the downlink response.
   msg = composeSensorMessage();
   response = "";
 
-  //  Clear the pending resend count, so we will know when transceiver has been asked to resend.
+  //  Clear the pending resend count, so we will know when the transceiver has been asked to resend.
   pendingResend = 0;
-
-  //  Init the transceiver state.
-  transceiverState.init();
 }
 
 void whenTransceiverSending() {
-  //  Send the sensor values to Sigfox in a single Structured message.
-  //  This occurs when the transceiver enters the "Sending" state.
-  //  The transceiver functions are called repeated in Finite State Machine mode until completion.
+  //  Send the previously prepared message to Sigfox.  The transceiver functions are called
+  //  repeatedly in Finite State Machine mode until completion.
 
-  //  Send the encoded structured message.
-  bool sendWasSuccessful = msg.sendAndGetResponse(response, transceiverState);
-  if (!sendWasSuccessful)
+  //  If the transceiver function has requested to delay and the delay has not been completed, retry later.
+  const unsigned long currentTime = millis();
+  if (delayUntil > 0 && currentTime < delayUntil) return;
+  delayUntil = 0;
 
-  Serial.print(F("\nTransceiver Sending message #")); Serial.println(counter);
-  if (msg.send()) {
-    successCount++;  //  If successful, count the message sent successfully.
-  } else {
-    failCount++;  //  If failed, count the message that could not be sent.
+  //  Send the encoded structured message in multiple steps until success or failure.
+  msg.sendAndGetResponse(response, transceiverState);
+  uint8_t status = transceiverState.getStatus();
+
+  //  Update the delay if requested by transceiver function.
+  uint32_t delay = transceiverState.resetDelay();
+  if (delay) delayUntil = currentTime + delay;
+
+  //  If function has not completed, exit now and continue later.
+  if (status != stepSuccess && status != stepFailure) {
+    Serial.println(F("Transceiver is still sending"));
+    return;
   }
-  counter++;
+  //  Update the message counters and transition to "Sent" state to wait 2.1 seconds.
+  whenTransceiverCompleted(status);
+}
 
-  //  Flash the LED on and off at every iteration so we know the sketch is still running.
+void whenTransceiverCompleted(uint8_t status) {
+  //  Update the message counters and transition to "Sent" state to wait 2.1 seconds.
+  messageCounter++;
+  if (status == stepSuccess) successCount++;
+  else if (status == stepFailure) failCount++;
+
+  //  Flash the LED on and off at every message sent so we know the sketch is still running.
   if (counter % 2 == 0) {
     digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED on (HIGH is the voltage level).
   } else {
@@ -312,7 +331,7 @@ void loop() {  //  Will be called repeatedly.
   if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
   transceiverFsm.run_machine();
 
-  delay(0.1 * 1000);  //  Wait 0.1 seconds between loops. Easier to debug.
+  delay(10);  //  Wait 10 milliseconds between loops.  If we wait longer, we may miss incoming transceiver data.
 }
 
 //  End Main Program
