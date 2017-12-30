@@ -170,6 +170,7 @@ labelSend:  //  Send the buffer char by char.
   sentTime = millis();  //  Start the timer for detecting receive timeout.
 
   if (state) {  //  For State Machine: exit now and continue at receive step.
+    // Serial.println(String("sentTime: ") + String(sentTime) + ", timeout " + String(timeout)); ////
     state->setState(sentTime);  //  Save the changed state.
     return state->suspend(stepReceive);
   }
@@ -179,7 +180,6 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
   for (;;) {
     //  If receive step has timed out, quit.
     const unsigned long currentTime = millis();
-    Serial.println(String("sentTime: ") + String(sentTime) + ", timeout " + String(timeout)); ////
     if (currentTime - sentTime > timeout) {
       logBuffer(F("<< (Timeout)"), "", 0, 0);
       if (state) return state->suspend(stepTimeout);  //  For State Machine: exit now and continue at timeout step.
@@ -194,7 +194,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
 
     //  Attempt to read the data.
     int receiveChar = serialPort->read();
-    Serial.println(String("receive: ") + String((char) receiveChar) + " / " + String(toHex((char)receiveChar))); ////
+    // Serial.println(String("receive: ") + String((char) receiveChar) + " / " + String(toHex((char)receiveChar))); ////
 
     if (receiveChar == -1) {
       //  No data is available now.  We retry.
@@ -355,7 +355,7 @@ labelPower:
   if (state) return state->suspend(stepSend);  //  For State Machine: Wait for setOutputPower to complete then resume at send step.
 
 labelSend: //  Send the command to the transceiver and wait for the expected markers.
-  status = sendBuffer(command, (int) WISOL_COMMAND_TIMEOUT, expectedMarkerCount, data, markers, state);
+  status = sendBuffer(command, WISOL_COMMAND_TIMEOUT, expectedMarkerCount, data, markers, state);
   if (!status) {  //  If error, return false to caller.
     if (state) return state->end(status);  //  For State Machine: Return the failed status.
     return false;
