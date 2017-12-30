@@ -68,11 +68,11 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin);
 void whenTransceiverIdle(); void whenTransceiverSending(); void whenTransceiverCompleted(uint8_t status);
 void prepareToSend();
 
-//  TODO
-void enterIdle() { /* Serial.println(F("--> Transceiver idle")); */ }
+//  TODO: Move this code with the rest of the transceiver code.
+void enterIdle() { Serial.println(F("--> Transceiver idle")); }
 void exitIdle() { /* Serial.println(F("<-- Transceiver idle")); */ }
 void exitSending() { /* Serial.println(F("<-- Transceiver sending")); */ }
-void enterSent() { /* Serial.println(F("--> Transceiver sent")); */ }
+void enterSent() { Serial.println(F("--> Transceiver sent")); }
 void exitSent() { /* Serial.println(F("<-- Transceiver sent")); */ }
 
 //  Declare the Finite State Machine States for each input and for the Sigfox transceiver.
@@ -216,8 +216,8 @@ void addTransceiverTransitions() {
   //  From state           To state             Interval (millisecs) When transitioning states
   transceiverFsm.add_timed_transition(                               //  Wait 2.1 seconds before next send.  Else the transceiver library
       &transceiverSent,    &transceiverIdle,    2.1 * 1000,          &transceiverSentToIdle);  //  will reject the send.
-  transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 30 seconds,
-      &transceiverIdle,    &transceiverSending, 5 * 1000,           &transceiverIdleToSending);  //  send the inputs.
+  transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 10 seconds,
+      &transceiverIdle,    &transceiverSending, 10 * 1000,           &transceiverIdleToSending);  //  send the inputs.
 }
 
 static StateManager transceiverState;  //  Function state of the transceiver. Lets us suspend and resume the transceiver functions.
