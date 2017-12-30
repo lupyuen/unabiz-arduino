@@ -162,7 +162,7 @@ private:
     if (currentState->parentState) {
       currentState = currentState->parentState;
     }
-    Serial.print(F("After pop state: ")); Serial.println(currentState->functionName);
+    // Serial.print(F("After pop state: ")); Serial.println(currentState->functionName);
   }
 
   bool transitionState() {

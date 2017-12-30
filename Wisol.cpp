@@ -76,14 +76,13 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
   //  to indicate the step to jump to.
 
   uint8_t adjustedMarkerCount = expectedMarkerCount;
-
   int sendIndex = 0;  //  Index of next char to be sent.
   unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
 
   //  For State Machine: Set the state and jump to the specified step.
   if (state) {
     //  For State Machine: We add 1 to expectedMarkerCount to account for the first '\r' at the end of the sent command.
-    adjustedMarkerCount++;
+    //  adjustedMarkerCount++;
     uint8_t step = state->begin(F("sendBuffer"), stepStart);
     if (step == stepStart) {
       //  Clear the saved state at the first step.
@@ -92,8 +91,8 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
       //  Restore the saved state at subsequent steps.
       state->getState(sendIndex, sentTime);
     }
-    Serial.print("sendIndex="); Serial.println(sendIndex);
-    Serial.print("sentTime="); Serial.println(sentTime);
+    Serial.print("sendIndex="); Serial.print(sendIndex);
+    Serial.print(", sentTime="); Serial.println(sentTime);
     //  For State Machine: Jump to the specified step and continue.
     switch(step) {
       case stepStart: goto labelStart;
@@ -185,7 +184,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
       if (actualMarkerCount >= adjustedMarkerCount) break;
 
       if (state) {   //  For State Machine: exit now and continue at receive step.
-        log2(F("<< "), response + " / " + adjustedMarkerCount + " markers");
+        log2(F("<< "), response + " / " + actualMarkerCount + " markers");
         return state->suspend();
       }
       continue;  //  Continue to receive next char.
@@ -242,7 +241,7 @@ bool Wisol::setOutputPower(StateManager *state) {
     }
   }
 labelStart:  //  Get the command based on the zone.
-  log2(F(" - Wisol.setOutputPower: zone "), String(zone));
+  // log2(F(" - Wisol.setOutputPower: zone "), String(zone));
   data = "";
   switch(zone) {
     case 1:  //  RCZ1
@@ -354,7 +353,7 @@ bool Wisol::sendMessage(const String &payload, StateManager *state) {
 bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, StateManager *state) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We prefix with AT$SF= and send to the transceiver.  Return response message from Sigfox in the response parameter.
-  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
+  //  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
   //  Compose the Wisol command and send to the transceiver.
   String command = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END;
   //  We are expecting two '\r' markers, e.g. "OK\r RX=...\r".
