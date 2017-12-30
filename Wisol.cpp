@@ -82,7 +82,7 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
   //  For State Machine: Set the state and jump to the specified step.
   if (state) {
     //  For State Machine: We add 1 to expectedMarkerCount to account for the first '\r' at the end of the sent command.
-    //  adjustedMarkerCount++;
+    adjustedMarkerCount++;
     uint8_t step = state->begin(F("sendBuffer"), stepStart);
     if (step == stepStart) {
       //  Clear the saved state at the first step.
@@ -91,8 +91,7 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
       //  Restore the saved state at subsequent steps.
       state->getState(sendIndex, sentTime);
     }
-    Serial.print("sendIndex="); Serial.print(sendIndex);
-    Serial.print(", sentTime="); Serial.println(sentTime);
+    // Serial.print("sendIndex="); Serial.print(sendIndex); Serial.print(", sentTime="); Serial.println(sentTime);
     //  For State Machine: Jump to the specified step and continue.
     switch(step) {
       case stepStart: goto labelStart;
@@ -184,7 +183,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
       if (actualMarkerCount >= adjustedMarkerCount) break;
 
       if (state) {   //  For State Machine: exit now and continue at receive step.
-        log2(F("<< "), response + " / " + actualMarkerCount + " markers");
+        log2(F("<< "), response + " / " + actualMarkerCount + " markers / " + serialPort->isListening());
         return state->suspend();
       }
       continue;  //  Continue to receive next char.

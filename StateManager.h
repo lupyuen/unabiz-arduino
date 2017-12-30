@@ -74,7 +74,7 @@ public:
       currentState = createState(functionName, firstStep, 0);
     } else if (currentState->functionName == functionName) {
       //  Reuse the root state. Do nothing.
-      Serial.print(F("Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
+      // Serial.print(F("Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
     } else {
       FunctionState *childState = currentState->childState;
       if (!childState || childState->functionName != functionName) {
@@ -86,7 +86,7 @@ public:
       } else {
         //  Else switch to the child state.
         currentState = childState;
-        Serial.print(F("Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
+        // Serial.print(F("Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
       }
     }
     //  Return the current step for this function.
@@ -101,7 +101,7 @@ public:
     //  Suspend the current function and continue execution later at that step
     //  after that delay.
     //  Remember the next step and pop the current state.
-    Serial.print(F("Suspend state ")); Serial.println(currentState->functionName + ", step " + currentState->currentStep + ", next step " + nextStep);
+    // Serial.print(F("Suspend state ")); Serial.println(currentState->functionName + ", step " + currentState->currentStep + ", next step " + nextStep);
     popState(currentState->currentStep, nextStep);
     currentState->delay = delay;
     //  Check for transitions if the child has completed.
@@ -138,7 +138,7 @@ public:
 private:
   FunctionState *createState(const String &functionName, uint8_t firstStep, FunctionState *parentState) {
     //  Create a new function state.
-    Serial.print(F("New state ")); Serial.println(functionName);
+    // Serial.print(F("New state ")); Serial.println(functionName);
     FunctionState *state = new FunctionState();
     state->functionName = functionName;
     state->currentStep = firstStep;
@@ -154,7 +154,7 @@ private:
     currentState->nextStep = nextStep0;
     //  If current state has no child, proceed to next step.
     if (nextStep0 && !currentState->childState) {
-      Serial.print(F("Go to next step: ")); Serial.println(nextStep0);
+      // Serial.print(F("Go to next step: ")); Serial.println(nextStep0);
       currentState->currentStep = nextStep0;
       currentState->nextStep = 0;
     }
@@ -183,12 +183,12 @@ private:
 
     if (childState->currentStep == stepFailure) {
       //  If child has failed, mark my state as failed too.  This will propagate to root.
-      Serial.print(F("Child has failed: ")); Serial.println(currentState->functionName);
+      // Serial.print(F("Child has failed: ")); Serial.println(currentState->functionName);
       currentState->currentStep = stepFailure;
     }
     else {
       //  If child has succeeded, proceed to the next step.
-      Serial.print(F("Child has succeeded: ")); Serial.println(currentState->functionName);
+      // Serial.print(F("Child has succeeded: ")); Serial.println(currentState->functionName);
       currentState->currentStep = currentState->nextStep;
       currentState->nextStep = 0;
     }

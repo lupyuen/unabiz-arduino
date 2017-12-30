@@ -261,7 +261,7 @@ void whenTransceiverSending() {
 
   //  If function has not completed, exit now and continue later.
   if (status != stepSuccess && status != stepFailure) {
-    Serial.println(F("Transceiver is still sending"));
+    // Serial.println(F("Transceiver is still sending"));
     return;
   }
   //  Update the message counters and transition to "Sent" state to wait 2.1 seconds.
@@ -343,7 +343,7 @@ void loop() {  //  Will be called repeatedly.
   if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
   if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
 
-  delay(10);  //  Wait 10 milliseconds between loops.  If we wait longer, we may miss incoming transceiver data.
+  // delay(10);  //  Wait 10 milliseconds between loops.  If we wait longer, we may miss incoming transceiver data.
 }
 
 //  End Main Program
