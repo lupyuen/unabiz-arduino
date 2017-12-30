@@ -8,6 +8,10 @@ static const uint8_t stepReceive = 4;
 static const uint8_t stepPower = 5;
 static const uint8_t stepTimeout = 6;
 static const uint8_t stepEnd = 7;
+static const uint8_t stepTest1 = 91;
+static const uint8_t stepTest2 = 92;
+static const uint8_t stepTest3 = 93;
+static const uint8_t stepTest4 = 94;
 
 static const uint8_t stepSuccess = 101;
 static const uint8_t stepFailure = 102;
@@ -20,7 +24,7 @@ struct FunctionState {
   FunctionState *childState = 0;
   uint8_t currentStep = 0;
   uint8_t nextStep = 0;
-  uint32_t delay = 0;
+  unsigned long delayUntil = 0;
   int int1 = 0;
   unsigned long ulong1 = 0;
 };
@@ -59,9 +63,9 @@ public:
 
   uint32_t resetDelay() {
     //  Return the delay requested and reset to 0.
-    uint32_t delay = currentState->delay;
-    currentState->delay = 0;
-    return delay;
+    unsigned long delayUntil = currentState->delayUntil;
+    currentState->delayUntil = 0;
+    return delayUntil;
   }
 
   uint8_t begin(const String &functionName, uint8_t firstStep) {
@@ -103,7 +107,7 @@ public:
     //  Remember the next step and pop the current state.
     // Serial.print(F("Suspend state ")); Serial.println(currentState->functionName + ", step " + currentState->currentStep + ", next step " + nextStep);
     popState(currentState->currentStep, nextStep);
-    currentState->delay = delay;
+    if (delay > 0) currentState->delayUntil = millis() + delay;
     //  Check for transitions if the child has completed.
     transitionState();
     if (currentState->currentStep == stepFailure) return false;
@@ -174,16 +178,16 @@ private:
     FunctionState *childState = currentState->childState;
     if (!childState) return false;
     //  If child requested for delay, propagate to root and wait at the Finite State Machine.
-    if (childState->delay) {
-      currentState->delay = childState->delay;
-      childState->delay = 0;
+    if (childState->delayUntil) {
+      currentState->delayUntil = childState->delayUntil;
+      childState->delayUntil = 0;
     }
     //  Child has not finished yet, return.
     if (childState->currentStep != stepSuccess && childState->currentStep != stepFailure) return false;
 
     if (childState->currentStep == stepFailure) {
       //  If child has failed, mark my state as failed too.  This will propagate to root.
-      // Serial.print(F("Child has failed: ")); Serial.println(currentState->functionName);
+      Serial.print(F("Child has failed: ")); Serial.println(currentState->functionName);
       currentState->currentStep = stepFailure;
     }
     else {

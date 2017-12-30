@@ -25,7 +25,8 @@
 
 const uint8_t WISOL_TX = 4;  //  Transmit port for For UnaBiz / Wisol Dev Kit
 const uint8_t WISOL_RX = 5;  //  Receive port for UnaBiz / Wisol Dev Kit
-const unsigned long WISOL_COMMAND_TIMEOUT = 60000;  //  Wait up to 60 seconds for response from SIGFOX module.  Includes downlink response.
+// const unsigned long WISOL_COMMAND_TIMEOUT = 60000;  //  Wait up to 60 seconds for response from SIGFOX module.  Includes downlink response.
+const unsigned long WISOL_COMMAND_TIMEOUT = 10000;  //  Wait up to 60 seconds for response from SIGFOX module.  Includes downlink response.
 
 class StateManager;
 

@@ -217,7 +217,7 @@ void addTransceiverTransitions() {
   transceiverFsm.add_timed_transition(                               //  Wait 2.1 seconds before next send.  Else the transceiver library
       &transceiverSent,    &transceiverIdle,    2.1 * 1000,          &transceiverSentToIdle);  //  will reject the send.
   transceiverFsm.add_timed_transition(                               //  If nothing has been sent in the past 30 seconds,
-      &transceiverIdle,    &transceiverSending, 30 * 1000,           &transceiverIdleToSending);  //  send the inputs.
+      &transceiverIdle,    &transceiverSending, 5 * 1000,           &transceiverIdleToSending);  //  send the inputs.
 }
 
 static StateManager transceiverState;  //  Function state of the transceiver. Lets us suspend and resume the transceiver functions.
@@ -258,8 +258,7 @@ void whenTransceiverSending() {
   uint8_t status = transceiverState.getStatus();
 
   //  Update the delay if requested by transceiver function.
-  uint32_t delay = transceiverState.resetDelay();
-  if (delay) delayUntil = currentTime + delay;
+  delayUntil = transceiverState.resetDelay();
 
   //  If function has not completed, exit now and continue later.
   if (status != stepSuccess && status != stepFailure) {
@@ -341,9 +340,9 @@ void loop() {  //  Will be called repeatedly.
   //  Execute the sensor and transceiver transitions for the Finite State Machine.
   //  Must start the transceiver before the sensors, or transceiver will lose the first input changed trigger.
   transceiverFsm.run_machine();
-  if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.run_machine();
-  if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
-  if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
+  // if (DIGITAL_INPUT_PIN1 >= 0) input1Fsm.run_machine();
+  // if (DIGITAL_INPUT_PIN2 >= 0) input2Fsm.run_machine();
+  // if (DIGITAL_INPUT_PIN3 >= 0) input3Fsm.run_machine();
 
   // delay(10);  //  Wait 10 milliseconds between loops.  If we wait longer, we may miss incoming transceiver data.
 }
