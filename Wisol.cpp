@@ -179,6 +179,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
   for (;;) {
     //  If receive step has timed out, quit.
     const unsigned long currentTime = millis();
+    Serial.println(String("sentTime: ") + String(sentTime) + ", timeout " + String(timeout)); ////
     if (currentTime - sentTime > timeout) {
       logBuffer(F("<< (Timeout)"), "", 0, 0);
       if (state) return state->suspend(stepTimeout);  //  For State Machine: exit now and continue at timeout step.
@@ -193,7 +194,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
 
     //  Attempt to read the data.
     int receiveChar = serialPort->read();
-    // Serial.println(String("receive: ") + String((char) receiveChar) + " / " + String(toHex((char)receiveChar))); ////
+    Serial.println(String("receive: ") + String((char) receiveChar) + " / " + String(toHex((char)receiveChar))); ////
 
     if (receiveChar == -1) {
       //  No data is available now.  We retry.
@@ -211,7 +212,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
       if (actualMarkerCount >= expectedMarkerCount) break;
 
       if (state) {   //  For State Machine: exit now and continue at receive step.
-        log2(F("<< "), response + " / " + actualMarkerCount + " markers / " + serialPort->isListening());
+        log2(F("new marker: "), response + " / " + actualMarkerCount + " markers / " + serialPort->isListening());
         return state->suspend(stepReceive, delayAfterReceive);
       }
       continue;  //  Continue to receive next char.
@@ -373,7 +374,8 @@ labelEnd:  //  Return the result.
 bool Wisol::sendMessage(const String &payload, StateManager *state) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
   //  We prefix with AT$SF= and send to the transceiver.  Return true if successful.
-  log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
+
+  //  log2(F(" - Wisol.sendMessage: "), device + ',' + payload);
   //  Compose the Wisol command and send to the transceiver.
   String command = String(CMD_SEND_MESSAGE) + payload + CMD_END, response;
   //  We are expecting only one '\r' marker, e.g. "OK\r".
@@ -382,7 +384,11 @@ bool Wisol::sendMessage(const String &payload, StateManager *state) {
 
 bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, StateManager *state) {
   //  Payload contains a string of hex digits, up to 24 digits / 12 bytes.
-  //  We prefix with AT$SF= and send to the transceiver.  Return response message from Sigfox in the response parameter.
+  //  We prefix with AT$SF= and send to the transceiver.  We also append the
+  //  CMD_SEND_MESSAGE_RESPONSE command to indicate that we expect a downlink repsonse.
+  //  The downlink response message from Sigfox will be returned in the response parameter.
+  //  Warning: This may take up to 1 min to run.
+
   //  log2(F(" - Wisol.sendMessageAndGetResponse: "), device + ',' + payload);
   //  Compose the Wisol command and send to the transceiver.
   String command = String(CMD_SEND_MESSAGE) + payload + CMD_SEND_MESSAGE_RESPONSE + CMD_END;
@@ -390,7 +396,8 @@ bool Wisol::sendMessageAndGetResponse(const String &payload, String &response, S
   if (!sendMessageCommand(command, 2, response, state)) {
     return false;  //  In case of error, return false.
   }
-  //  Response contains OK\nRX=01 23 45 67 89 AB CD EF
+  //  Successful response: OK\nRX=01 23 45 67 89 AB CD EF
+  //  Timeout response: ERR_SFX_ERR_SEND_FRAME_WAIT_TIMEOUT
   //  Remove the prefix and spaces.
   response.replace("OK\nRX=", "");
   response.replace(" ", "");
