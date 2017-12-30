@@ -42,6 +42,7 @@
 
 static const uint16_t delayAfterStart = 200;
 static const uint16_t delayAfterSend = 10;
+static const uint16_t delayAfterReceive = 10;
 
 static NullPort nullPort;
 static uint8_t markers = 0;
@@ -77,17 +78,24 @@ bool Wisol::sendBuffer(const String &buffer, unsigned long timeout,
 
   int sendIndex = 0;  //  Index of next char to be sent.
   unsigned long sentTime = 0;  //  Timestamp at which we completed sending.
-  static unsigned long testTimer;
+  actualMarkerCount = 0;
+  response = "";
 
   //  For State Machine: Set the state and jump to the specified step.
   if (state) {
     uint8_t step = state->begin(F("sendBuffer"), stepStart);
     if (step == stepStart) {
-      //  Clear the saved state at the first step.
-      state->setState(sendIndex, sentTime);
+      //  Init the saved state at the first step.
+      state->setState(sendIndex);
+      state->setState(sentTime);
+      state->setState(actualMarkerCount);
+      state->setState(response);
     } else {
       //  Restore the saved state at subsequent steps.
-      state->getState(sendIndex, sentTime);
+      state->getState(sendIndex);
+      state->getState(sentTime);
+      state->getState(actualMarkerCount);
+      state->getState(response);
     }
     // Serial.print("sendIndex="); Serial.print(sendIndex); Serial.print(", sentTime="); Serial.println(sentTime);
     //  For State Machine: Jump to the specified step and continue.
@@ -154,7 +162,7 @@ labelSend:  //  Send the buffer char by char.
     Serial.println(String("send: ") + String((char) sendChar) + " / " + String(toHex((char)sendChar))); ////
 
     if (state) {  //  For State Machine: exit now and continue at send step.
-      state->setState(sendIndex, sentTime);  //  Save the changed state.
+      state->setState(sendIndex);  //  Save the changed state.
       return state->suspend(stepSend, delayAfterSend);
     }
     sleep(delayAfterSend);  //  Need to wait a while because SoftwareSerial has no FIFO and may overflow.
@@ -162,7 +170,7 @@ labelSend:  //  Send the buffer char by char.
   sentTime = millis();  //  Start the timer for detecting receive timeout.
 
   if (state) {  //  For State Machine: exit now and continue at receive step.
-    state->setState(sendIndex, sentTime);  //  Save the changed state.
+    state->setState(sentTime);  //  Save the changed state.
     return state->suspend(stepReceive);
   }
 
@@ -179,7 +187,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
 
     if (serialPort->available() <= 0) {
       //  No data is available in the serial port buffer to receive now.  We retry later.
-      if (state) return state->suspend(stepReceive, delayAfterSend);  //  For State Machine: exit now and continue at receive step.
+      if (state) return state->suspend(stepReceive, delayAfterReceive);  //  For State Machine: exit now and continue at receive step.
       continue;
     }
 
@@ -189,7 +197,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
 
     if (receiveChar == -1) {
       //  No data is available now.  We retry.
-      if (state) return state->suspend(stepReceive, delayAfterSend);  //  For State Machine: exit now and continue at receive step.
+      if (state) return state->suspend(stepReceive, delayAfterReceive);  //  For State Machine: exit now and continue at receive step.
       continue;
     }
 
@@ -197,23 +205,26 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
       //  We see the "\r" marker. Remember the marker location so we can format the debug output.
       if (actualMarkerCount < markerPosMax) markerPos[actualMarkerCount] = response.length();
       actualMarkerCount++;  //  Count the number of end markers.
+      if (state) state -> setState(actualMarkerCount);  //  For State Machine: Update the saved state.
 
       //  We have encountered all the markers we need.  Stop receiving.
       if (actualMarkerCount >= expectedMarkerCount) break;
 
       if (state) {   //  For State Machine: exit now and continue at receive step.
         log2(F("<< "), response + " / " + actualMarkerCount + " markers / " + serialPort->isListening());
-        return state->suspend(stepReceive, delayAfterSend);
+        return state->suspend(stepReceive, delayAfterReceive);
       }
       continue;  //  Continue to receive next char.
     }
 
     //  Else append the received char to the response.
     response.concat(String((char) receiveChar));
+    if (state) state -> setState(response);  //  For State Machine: Update the saved state.
+
     Serial.println(String("response: ") + response); ////
     // log2(F("receiveChar "), receiveChar);
 
-    if (state) return state->suspend();  //  For State Machine: exit now and continue at receive step.
+    if (state) return state->suspend(stepReceive, delayAfterReceive);  //  For State Machine: exit now and continue at receive step.
   }
   if (state) return state->suspend(stepEnd);  //  For State Machine: exit now and continue at end step.
 

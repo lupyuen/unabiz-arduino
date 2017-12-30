@@ -25,8 +25,12 @@ struct FunctionState {
   uint8_t currentStep = 0;
   uint8_t nextStep = 0;
   unsigned long delayUntil = 0;
+
+  //  Store the function variables here so they can be restored.
   int int1 = 0;
+  uint8_t uint1 = 0;
   unsigned long ulong1 = 0;
+  String string1 = "";
 };
 
 class StateManager {
@@ -98,8 +102,15 @@ public:
   }
 
   //  Set and retrieve the suspended values for the function.
-  void setState(int int1, unsigned long ulong1) { currentState->int1 = int1; currentState->ulong1 = ulong1; }
-  void getState(int &int1, unsigned long &ulong1) { int1 = currentState->int1; ulong1 = currentState->ulong1; }
+  void setState(int int1) { currentState->int1 = int1; }
+  void setState(uint8_t uint1) { currentState->uint1 = uint1; }
+  void setState(unsigned long ulong1) { currentState->ulong1 = ulong1; }
+  void setState(const String &string1) { currentState->string1 = string1; }
+
+  void getState(int &int1) { int1 = currentState->int1; }
+  void getState(uint8_t &uint1) { uint1 = currentState->uint1; }
+  void getState(unsigned long &ulong1) { ulong1 = currentState->ulong1; }
+  void getState(String &string1) { string1 = currentState->string1; }
 
   bool suspend(uint8_t nextStep, uint32_t delay = 0) {
     //  Suspend the current function and continue execution later at that step
