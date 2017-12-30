@@ -354,8 +354,7 @@ void loop() {  //  Will be called repeatedly.
 
 /* Expected Output:
 
-receive: B / 42
-receivRunning setup...
+Running setup...
  - Disabling SNEK emulation mode...
  - Wisol.sendBuffer: ATS410=0
 
@@ -381,82 +380,27 @@ receivRunning setup...
  - Set frequency result = OK
  - Getting frequency (expecting 3)...
  - Frequency (expecting 3) = 52
+--> Transceiver idle
 --> Transceiver sending
 
 Transceiver Sending message #0
 Composing sensor message...
- - Message.addField: sw1=1
+ - Message.addField: sw1=10
  - Message.addField: sw2=1
  - Message.addField: sw3=1
- - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+ - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e6400fd4e0a00fe4e0a00,1
 ,2
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
  
-<< 1,5 
- - Wisol.sendBuffer: response: 1,5
- - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
-
-new marker: OK / 1 markers / 1
->> AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
- 
-<< OK0x0d
-RX=01 23 45 67 89 AB CD EF 
- - Wisol.sendBuffer: response: OK
-RX=01 23 45 67 89 AB CD EF
-OK
-RX=01 23 45 67 89 AB CD EF
-Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
---> Transceiver sending
-
-Transceiver Sending message #1
-Composing sensor message...
- - Message.addField: sw1=1
- - Message.addField: sw2=1
- - Message.addField: sw3=1
- - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
-,2
-Warning: Should wait 10 mins before sending the next message
- - Wisol.sendBuffer: AT$GI?
-
->> AT$GI?
- 
-<< 1,5 
- - Wisol.sendBuffer: response: 1,5
- - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
-
-new marker: OK / 1 markers / 1
->> AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
- 
-<< OK0x0d
-RX=01 23 45 67 89 AB CD EF 
- - Wisol.sendBuffer: response: OK
-RX=01 23 45 67 89 AB CD EF
-OK
-RX=01 23 45 67 89 AB CD EF
-Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
---> Transceiver sending
-
-Transceiver Sending message #2
-Composing sensor message...
- - Message.addField: sw1=1
- - Message.addField: sw2=1
- - Message.addField: sw3=1
- - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
-,2
-Warning: Should wait 10 mins before sending the next message
- - Wisol.sendBuffer: AT$GI?
-
->> AT$GI?
- 
-<< 1,5 
- - Wisol.sendBuffer: response: 1,5
- - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+<< 1,6 
+ - Wisol.sendBuffer: response: 1,6
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00,1
 
 new marker: ERR_SFX_ERR_SEND_FRAME_WAIT_TIMEOUT / 1 markers / 1
 << (Timeout)
->> AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+>> AT$SF=fc4e6400fd4e0a00fe4e0a00,1
  
 << ERR_SFX_ERR_SEND_FRAME_WAIT_TIMEOUT
 
@@ -464,26 +408,27 @@ new marker: ERR_SFX_ERR_SEND_FRAME_WAIT_TIMEOUT / 1 markers / 1
 
 ###### STEP FAILED: sendBuffer
 Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+--> Transceiver sent
+--> Transceiver idle
 --> Transceiver sending
 
-Transceiver Sending message #3
+Transceiver Sending message #1
 Composing sensor message...
- - Message.addField: sw1=1
+ - Message.addField: sw1=10
  - Message.addField: sw2=1
  - Message.addField: sw3=1
- - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+ - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e6400fd4e0a00fe4e0a00,1
 ,2
-Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
 
 >> AT$GI?
  
 << 1,6 
  - Wisol.sendBuffer: response: 1,6
- - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00,1
 
 new marker: OK / 1 markers / 1
->> AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+>> AT$SF=fc4e6400fd4e0a00fe4e0a00,1
  
 << OK0x0d
 RX=01 23 45 67 89 AB CD EF 
@@ -492,14 +437,16 @@ RX=01 23 45 67 89 AB CD EF
 OK
 RX=01 23 45 67 89 AB CD EF
 Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+--> Transceiver sent
+--> Transceiver idle
 --> Transceiver sending
 
-Transceiver Sending message #4
+Transceiver Sending message #2
 Composing sensor message...
- - Message.addField: sw1=1
+ - Message.addField: sw1=10
  - Message.addField: sw2=1
  - Message.addField: sw3=1
- - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+ - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e6400fd4e0a00fe4e0a00,1
 ,2
 Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
@@ -508,10 +455,10 @@ Warning: Should wait 10 mins before sending the next message
  
 << 1,5 
  - Wisol.sendBuffer: response: 1,5
- - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00,1
 
 new marker: OK / 1 markers / 1
->> AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+>> AT$SF=fc4e6400fd4e0a00fe4e0a00,1
  
 << OK0x0d
 RX=01 23 45 67 89 AB CD EF 
@@ -520,14 +467,16 @@ RX=01 23 45 67 89 AB CD EF
 OK
 RX=01 23 45 67 89 AB CD EF
 Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
+--> Transceiver sent
+--> Transceiver idle
 --> Transceiver sending
 
-Transceiver Sending message #5
+Transceiver Sending message #3
 Composing sensor message...
- - Message.addField: sw1=1
+ - Message.addField: sw1=10
  - Message.addField: sw2=1
  - Message.addField: sw3=1
- - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+ - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e6400fd4e0a00fe4e0a00,1
 ,2
 Warning: Should wait 10 mins before sending the next message
  - Wisol.sendBuffer: AT$GI?
@@ -536,10 +485,10 @@ Warning: Should wait 10 mins before sending the next message
  
 << 1,5 
  - Wisol.sendBuffer: response: 1,5
- - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+ - Wisol.sendBuffer: AT$SF=fc4e6400fd4e0a00fe4e0a00,1
 
 new marker: OK / 1 markers / 1
->> AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+>> AT$SF=fc4e6400fd4e0a00fe4e0a00,1
  
 << OK0x0d
 RX=01 23 45 67 89 AB CD EF 
@@ -548,22 +497,7 @@ RX=01 23 45 67 89 AB CD EF
 OK
 RX=01 23 45 67 89 AB CD EF
 Transceiver Sending completed, now triggering INPUT_SENT to all inputs and itself and pausing...
---> Transceiver sending
-
-Transceiver Sending message #6
-Composing sensor message...
- - Message.addField: sw1=1
- - Message.addField: sw2=1
- - Message.addField: sw3=1
- - Wisol.sendMessageCommand: 002C30EB,AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
-,2
-Warning: Should wait 10 mins before sending the next message
- - Wisol.sendBuffer: AT$GI?
-
->> AT$GI?
- 
-<< 1,5 
- - Wisol.sendBuffer: response: 1,5
- - Wisol.sendBuffer: AT$SF=fc4e0a00fd4e0a00fe4e0a00,1
+--> Transceiver sent
+--> Transceiver idle
 
  */
