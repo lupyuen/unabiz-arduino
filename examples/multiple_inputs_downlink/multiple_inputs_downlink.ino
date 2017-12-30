@@ -29,7 +29,7 @@
 //  IMPORTANT: Check these settings with UnaBiz to use the Sigfox library correctly.
 static const String device = "";        //  Set this to your device name if you're using Sigfox Emulator.
 static const bool useEmulator = false;  //  Set to true if using Sigfox Emulator.
-static const bool echo = true;          //  Set to true if the Sigfox library should display the executed commands.
+static const bool echo = false;          //  Set to true if the Sigfox library should display the executed commands.
 static const Country country = COUNTRY_SG;  //  Set this to your country to configure the Sigfox transmission frequencies.
 static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assumes you are using UnaBiz UnaShield V2S Dev Kit
 
@@ -69,11 +69,11 @@ void whenTransceiverIdle(); void whenTransceiverSending(); void whenTransceiverC
 void prepareToSend();
 
 //  TODO
-void enterIdle() { Serial.println(F("--> Transceiver idle")); }
-void exitIdle() { Serial.println(F("<-- Transceiver idle")); }
-void exitSending() { Serial.println(F("<-- Transceiver sending")); }
-void enterSent() { Serial.println(F("--> Transceiver sent")); }
-void exitSent() { Serial.println(F("<-- Transceiver sent")); }
+void enterIdle() { /* Serial.println(F("--> Transceiver idle")); */ }
+void exitIdle() { /* Serial.println(F("<-- Transceiver idle")); */ }
+void exitSending() { /* Serial.println(F("<-- Transceiver sending")); */ }
+void enterSent() { /* Serial.println(F("--> Transceiver sent")); */ }
+void exitSent() { /* Serial.println(F("<-- Transceiver sent")); */ }
 
 //  Declare the Finite State Machine States for each input and for the Sigfox transceiver.
 //  Each state has 3 properties:
@@ -166,6 +166,7 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin) {
   //  Compare the new and old values of the input.
   if (inputValue != lastInputValue) {
     //  If changed, trigger a transition.
+    /*
     Serial.print(F("Input #")); Serial.print(inputNum + 1);
     Serial.print(F(" Pin ")); Serial.print(inputPin);
     Serial.print(F(" changed from ")); Serial.print(lastInputValue);
@@ -173,6 +174,7 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin) {
     //  Transition from "Idle" state to "Sending" state, which will temporarily stop checking the input.
     Serial.print(F("Input #")); Serial.print(inputNum + 1);
     Serial.println(F(" triggering INPUT_CHANGED to transceiver and itself"));
+     */
     //  Tell Sigfox transceiver we got something to send from input 1.
     transceiverFsm.trigger(INPUT_CHANGED);
     fsm->trigger(INPUT_CHANGED);
@@ -180,15 +182,15 @@ void checkPin(Fsm *fsm, int inputNum, int inputPin) {
 }
 
 //  Show debug messages to trace the states of the inputs.
-void input1IdleToSending() { Serial.println(F("Input #1 requested to send")); }
-void input2IdleToSending() { Serial.println(F("Input #2 requested to send")); }
-void input3IdleToSending() { Serial.println(F("Input #3 requested to send")); }
-void input1SendingToIdle() { Serial.println(F("Input #1 Idle now")); }
-void input2SendingToIdle() { Serial.println(F("Input #2 Idle now")); }
-void input3SendingToIdle() { Serial.println(F("Input #3 Idle now")); }
-void input1IdleToIdle() { Serial.println(F("Input #1 stays idle")); }
-void input2IdleToIdle() { Serial.println(F("Input #2 stays idle")); }
-void input3IdleToIdle() { Serial.println(F("Input #3 stays idle")); }
+void input1IdleToSending() { /* Serial.println(F("Input #1 requested to send")); */ }
+void input2IdleToSending() { /* Serial.println(F("Input #2 requested to send")); */ }
+void input3IdleToSending() { /* Serial.println(F("Input #3 requested to send")); */ }
+void input1SendingToIdle() { /* Serial.println(F("Input #1 Idle now")); */ }
+void input2SendingToIdle() { /* Serial.println(F("Input #2 Idle now")); */ }
+void input3SendingToIdle() { /* Serial.println(F("Input #3 Idle now")); */ }
+void input1IdleToIdle() { /* Serial.println(F("Input #1 stays idle")); */ }
+void input2IdleToIdle() { /* Serial.println(F("Input #2 stays idle")); */ }
+void input3IdleToIdle() { /* Serial.println(F("Input #3 stays idle")); */ }
 
 //  End Sensor Transitions
 ////////////////////////////////////////////////////////////
@@ -297,20 +299,20 @@ void whenTransceiverCompleted(uint8_t status) {
 void whenTransceiverIdle() {
   //  The transceiver has just finished waiting 2.1 seconds.  If there are pending resend requests, send now.
   if (pendingResend > 0) {
-    Serial.println(F("Transceiver Idle, sending pending requests..."));
+    // Serial.println(F("Transceiver Idle, sending pending requests..."));
     transceiverFsm.trigger(INPUT_CHANGED);
   }
 }
 
 void scheduleResend() {
   //  The transceiver is already sending now, can't resend now.  Wait till idle in 2.1 seconds to resend.
-  Serial.println(F("Transceiver is busy now, will send pending requests later"));
+  // Serial.println(F("Transceiver is busy now, will send pending requests later"));
   pendingResend++;
 }
 
 //  Show the transceiver transitions taking place.
-void transceiverSentToIdle() { Serial.println(F("Transceiver Idle now")); }
-void transceiverIdleToSending() { Serial.println(F("Transceiver Idle is now sending after idle period...")); }
+void transceiverSentToIdle() { /* Serial.println(F("Transceiver Idle now")); */ }
+void transceiverIdleToSending() { /* Serial.println(F("Transceiver Idle is now sending after idle period...")); */ }
 
 //  End Sigfox Transceiver Transitions
 ////////////////////////////////////////////////////////////

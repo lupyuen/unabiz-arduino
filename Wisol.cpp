@@ -159,7 +159,7 @@ labelReceive:  //  Read response.  Loop until timeout or we see the end of respo
     }
 
     if (serialPort->available() <= 0) {
-      //  No data is available to receive now.  We retry.
+      //  No data is available in the serial port buffer to receive now.  We retry later.
       if (state) return state->suspend();  //  For State Machine: exit now and continue at receive step.
       continue;
     }
