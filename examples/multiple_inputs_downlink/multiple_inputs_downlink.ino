@@ -29,7 +29,7 @@
 //  IMPORTANT: Check these settings with UnaBiz to use the Sigfox library correctly.
 static const String device = "";        //  Set this to your device name if you're using Sigfox Emulator.
 static const bool useEmulator = false;  //  Set to true if using Sigfox Emulator.
-static const bool echo = false;          //  Set to true if the Sigfox library should display the executed commands.
+static const bool echo = true;          //  Set to true if the Sigfox library should display the executed commands.
 static const Country country = COUNTRY_SG;  //  Set this to your country to configure the Sigfox transmission frequencies.
 static UnaShieldV2S transceiver(country, useEmulator, device, echo);  //  Assumes you are using UnaBiz UnaShield V2S Dev Kit
 

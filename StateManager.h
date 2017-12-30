@@ -1,6 +1,9 @@
 #ifndef UNABIZ_ARDUINO_STATEMANAGER_H
 #define UNABIZ_ARDUINO_STATEMANAGER_H
 
+// To turn on debug messages:
+// #define DEBUG_STATE
+
 static const uint8_t stepStart = 1;
 static const uint8_t stepListen = 2;
 static const uint8_t stepSend = 3;
@@ -82,7 +85,9 @@ public:
       currentState = createState(functionName, firstStep, 0);
     } else if (currentState->functionName == functionName) {
       //  Reuse the root state. Do nothing.
-      // Serial.print(F("Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
+#ifdef DEBUG_STATE
+      Serial.print(F("## Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
+#endif // DEBUG_STATE
     } else {
       FunctionState *childState = currentState->childState;
       if (!childState || childState->functionName != functionName) {
@@ -94,7 +99,9 @@ public:
       } else {
         //  Else switch to the child state.
         currentState = childState;
-        // Serial.print(F("Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
+#ifdef DEBUG_STATE
+        Serial.print(F("## Resume state ")); Serial.println(functionName + ", step " + currentState->currentStep);
+#endif // DEBUG_STATE
       }
     }
     //  Return the current step for this function.
@@ -116,7 +123,9 @@ public:
     //  Suspend the current function and continue execution later at that step
     //  after that delay.
     //  Remember the next step and pop the current state.
-    // Serial.print(F("Suspend state ")); Serial.println(currentState->functionName + ", step " + currentState->currentStep + ", next step " + nextStep);
+#ifdef DEBUG_STATE
+    Serial.print(F("## Suspend state ")); Serial.println(currentState->functionName + ", step " + currentState->currentStep + ", next step " + nextStep);
+#endif // DEBUG_STATE
     popState(currentState->currentStep, nextStep);
     if (delay > 0) currentState->delayUntil = millis() + delay;
     //  Check for transitions if the child has completed.
@@ -142,18 +151,12 @@ public:
     return status;
   }
 
-  /* bool endWithFailure() {
-    //  Called at the end of a function to terminate the function state
-    //  and return a failure status, which will be propagated to the root
-    //  function state.  Returns false.
-    popState(stepFailure);
-    return false;
-  } */
-
 private:
   FunctionState *createState(const String &functionName, uint8_t firstStep, FunctionState *parentState) {
     //  Create a new function state.
-    // Serial.print(F("New state ")); Serial.println(functionName);
+#ifdef DEBUG_STATE
+    Serial.print(F("## New state ")); Serial.println(functionName);
+#endif // DEBUG_STATE
     FunctionState *state = new FunctionState();
     state->functionName = functionName;
     state->currentStep = firstStep;
@@ -177,7 +180,9 @@ private:
     if (currentState->parentState) {
       currentState = currentState->parentState;
     }
-    // Serial.print(F("After pop state: ")); Serial.println(currentState->functionName);
+#ifdef DEBUG_STATE
+    Serial.print(F("## Pop to parent state: ")); Serial.println(currentState->functionName);
+#endif // DEBUG_STATE
   }
 
   bool transitionState() {
@@ -198,7 +203,7 @@ private:
 
     if (childState->currentStep == stepFailure) {
       //  If child has failed, mark my state as failed too.  This will propagate to root.
-      Serial.print(F("Child has failed: ")); Serial.println(currentState->functionName);
+      Serial.print(F("###### STEP FAILED: ")); Serial.println(childState->functionName);
       currentState->currentStep = stepFailure;
     }
     else {
@@ -208,6 +213,9 @@ private:
       currentState->nextStep = 0;
     }
     //  Delete the child.
+#ifdef DEBUG_STATE
+    Serial.print(F("## Delete state: ")); Serial.println(childState->functionName);
+#endif // DEBUG_STATE
     delete childState;
     currentState->childState = 0;
     return true;
