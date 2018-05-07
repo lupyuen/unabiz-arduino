@@ -1,0 +1,55 @@
+digraph finite_state_machine {
+	compound = true;
+
+	node [style=filled,color=white];
+	style = filled;
+	color = lightgrey;
+
+	// size="80,50"
+	
+	node [shape = doublecircle]; input1Idle input2Idle input3Idle transceiverIdle start;
+	node [shape = ellipse];
+	edge [fontsize = 10];
+
+	subgraph cluster_input1 {
+		label = "Input #1 Finite State Machine";
+		input1Idle -> input1Sending [ label = "INPUT \n CHANGED" ];
+		input1Sending -> input1Idle [ label = "INPUT \n SENT" ];
+		input1Idle -> input1Idle [ label = "INPUT \n SENT" ];
+	}
+
+	subgraph cluster_input2 {
+		label = "Input #2 Finite State Machine";
+		input2Idle -> input2Sending [ label = "INPUT \n CHANGED" ];
+		input2Sending -> input2Idle [ label = "INPUT \n SENT" ];
+		input2Idle -> input2Idle [ label = "INPUT \n SENT" ];
+	}
+
+	subgraph cluster_input3 {
+		label = "Input #3 Finite State Machine";
+		input3Idle -> input3Sending [ label = "INPUT \n CHANGED" ];
+		input3Sending -> input3Idle [ label = "INPUT \n SENT" ];
+		input3Idle -> input3Idle [ label = "INPUT \n SENT" ];
+	}
+
+	subgraph cluster_transceiver {
+		label = "Transceiver Finite State Machine";
+		transceiverIdle -> transceiverSending [ label = "INPUT \n CHANGED" ];
+		transceiverSending -> transceiverSending [ label = "INPUT \n CHANGED / \n scheduleResend" ];
+		transceiverSending -> transceiverSent [ label = "INPUT \n SENT" ];
+		transceiverSent -> transceiverSent [ label = "INPUT \n CHANGED / \n scheduleResend" ];
+		transceiverSent -> transceiverIdle [ label = "After 2.1 \n seconds" ];
+		transceiverIdle -> transceiverSending [ label = "After 30 \n seconds" ];
+	}
+
+	subgraph cluster_wisol {
+		label = "Wisol Finite State Machine";
+		start -> listen;
+		listen -> send;
+		send -> send [label = "More data \n to send" ];
+		send -> receive [label = "Send \n complete" ];
+		receive -> receive [label = "More data \n to receive" ];
+		receive -> timeout [ label = "Timeout after \n 60 seconds" ];
+		receive -> end [label = "Receive \n complete" ];	
+	}
+}
