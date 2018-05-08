@@ -45,8 +45,8 @@ digraph finite_state_machine {
 		label = "Transceiver FSM";
 		transceiverIdle [ label = "transceiver\nIdle" ];
 		transceiverIdle -> transceiverSending [ label = "INPUT \l  CHANGED" ];
-		transceiverSending -> transceiverSending [ weight = 1, label = "INPUT CHANGED / \r scheduleResend \r" ];
-		transceiverSending -> transceiverSent [ weight = 1, label = "INPUT \r SENT \r " ];
+		transceiverSending -> transceiverSending [ label = "INPUT CHANGED / \r scheduleResend \r" ];
+		transceiverSending -> transceiverSent [ label = "INPUT \r SENT \r " ];
 		transceiverSent -> transceiverSent [ label = "INPUT CHANGED / \n scheduleResend \n" ];
 		transceiverSent -> transceiverIdle [ label = "After 2.1 \l seconds\l" ];
 		transceiverIdle -> transceiverSending [ label = "After 30 \l seconds" ];
@@ -60,7 +60,7 @@ digraph finite_state_machine {
 		send -> send [label = "More data \l to send \l (Uplink) \l" ];
 		send -> receive [label = "Send \l complete \l" ];
 		receive -> receive [label = "More data \l to receive \l (Downlink) \l" ];
-		receive -> timeout [ label = "After \l 60 \l seconds \l" ];
+		receive -> timeout [constraint=false, label = "After \l 60 \l seconds \l" ];
 		receive -> end [label = "Receive complete" ];	
 	}
 
