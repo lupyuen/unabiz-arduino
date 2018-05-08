@@ -1,0 +1,39 @@
+digraph finite_state_machine {
+	compound = true;
+	// concentrate=true;
+	rankdir = LR;
+	ranksep="0";
+	nodesep="0.3";
+
+	size = "8,6";
+	ratio = fill;	
+
+	node [shape=box,style="rounded,filled",color=white,fontname="Times-Italic",fontcolor="Grey"];
+	style = filled;
+	color = lightgrey;
+
+	edge [fontsize = 10];
+
+	subgraph cluster_loop {
+		label = "loop() Function";
+        input1Idle [shape=ellipse,fontname="Times",fontcolor="Black"]
+		readSensor1 [label="Read sensor #1 (temperature)"];
+        input1Changed [shape=ellipse,fontname="Times",fontcolor="Black"]
+		readSensor2;
+		readSensor3;
+
+        input1Sending [shape=ellipse,fontname="Times",fontcolor="Black"]
+        sendTransceiverMessage [label="Send transceiver message"];
+        waitForTransceiverDownlink;
+        pause10seconds;
+	}
+
+	subgraph cluster_setup {
+		label = "setup() Function";
+		setupSensor1;
+		setupSensor2;
+		setupSensor3;
+        setupTransceiver;
+	}
+
+}
