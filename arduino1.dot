@@ -1,9 +1,8 @@
 digraph finite_state_machine {
 	compound = true;
-	// concentrate=true;
 	rankdir = LR;
-	ranksep="0";
-	nodesep="0.3";
+	ranksep="1";
+	nodesep="0.1";
 
 	size = "8,6";
 	ratio = fill;	
@@ -14,19 +13,36 @@ digraph finite_state_machine {
 
 	edge [fontsize = 10];
 
+	subgraph cluster_loopend {
+        style = invis;
+        loopEnd [label="Repeat loop"]
+    }
+
 	subgraph cluster_loop {
 		label = "loop() Function";
-        input1Idle [shape=ellipse,fontname="Times",fontcolor="Black"]
 		readSensor1 [label="Read sensor #1 (temperature)"];
+                
+        input1Idle [shape=ellipse,fontname="Times",fontcolor="Black"]
         input1Changed [shape=ellipse,fontname="Times",fontcolor="Black"]
+        input1Sending [shape=ellipse,fontname="Times",fontcolor="Black"]
+
 		readSensor2;
 		readSensor3;
 
-        input1Sending [shape=ellipse,fontname="Times",fontcolor="Black"]
         sendTransceiverMessage [label="Send transceiver message"];
-        waitForTransceiverDownlink;
-        pause10seconds;
-	}
+
+        transceiverIdle [shape=ellipse,fontname="Times",fontcolor="Black"]
+        transceiverSending [shape=ellipse,fontname="Times",fontcolor="Black"]
+        transceiverSent [shape=ellipse,fontname="Times",fontcolor="Black"]
+
+        waitForTransceiverDownlink [label="Wait for transceiver downlink"];
+        pause10seconds [label="Pause 10 seconds"];
+	}    
+
+	subgraph cluster_loopbegin {
+        style = invis;
+        loopBegin [label="Start loop"]
+    }
 
 	subgraph cluster_setup {
 		label = "setup() Function";
@@ -35,5 +51,7 @@ digraph finite_state_machine {
 		setupSensor3;
         setupTransceiver;
 	}
+
+    loopEnd -> loopBegin [constraint=false];
 
 }
